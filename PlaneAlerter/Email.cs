@@ -16,7 +16,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// SMTP client used for sending emails
 		/// </summary>
-		private static SmtpClient mailClient;
+		public static SmtpClient mailClient;
 
 		/// <summary>
 		/// Send alert email
