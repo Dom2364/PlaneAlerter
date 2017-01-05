@@ -4,26 +4,99 @@ using System.Threading;
 using System.IO;
 
 namespace PlaneAlerter {
+	/// <summary>
+	/// Important variables and things
+	/// </summary>
 	public static class Core {
+		/// <summary>
+		/// List of current conditions
+		/// </summary>
 		public static Dictionary<int, Condition> conditions = new Dictionary<int, Condition>();
-		public static List<Core.Aircraft> aircraftlist = new List<Core.Aircraft>();
-		public static List<Core.Reciever> receivers = new List<Core.Reciever>();
+
+		/// <summary>
+		/// List of current aircraft
+		/// </summary>
+		public static List<Aircraft> aircraftlist = new List<Aircraft>();
+
+		/// <summary>
+		/// List of receivers from the last aircraftlist.json response
+		/// </summary>
+		public static List<Reciever> receivers = new List<Reciever>();
+
+		/// <summary>
+		/// VRS property descriptions
+		/// </summary>
 		public static Dictionary<vrsProperty, string[]> vrsPropertyData = new Dictionary<vrsProperty, string[]>();
+
+		/// <summary>
+		/// Types of comparisons usable with triggers
+		/// </summary>
 		public static Dictionary<string, string[]> comparisonTypes = new Dictionary<string, string[]>();
+
+		/// <summary>
+		/// Properties shown when essential properties selected
+		/// </summary>
 		public static List<vrsProperty> essentialProperties = new List<vrsProperty>();
+
+		/// <summary>
+		/// List of current matches
+		/// </summary>
 		public static Dictionary<string, Match> activeMatches = new Dictionary<string, Match>();
+
+		/// <summary>
+		/// Matches waiting to be verified
+		/// </summary>
 		public static List<string[]> waitingMatches = new List<string[]>();
+
+		/// <summary>
+		/// Thread for checking operations
+		/// </summary>
 		public static Thread loopThread;
+
+		/// <summary>
+		/// Thread for updating statistics
+		/// </summary>
 		public static Thread statsThread;
+
+		/// <summary>
+		/// File stream for log file
+		/// </summary>
 		public static FileStream logFile = new FileStream("alerts.log", FileMode.Append, FileAccess.Write);
+
+		/// <summary>
+		/// Log file stream writer
+		/// </summary>
 		public static StreamWriter logFileSW = new StreamWriter(logFile);
+
+		/// <summary>
+		/// Active form
+		/// </summary>
 		public static PlaneAlerter UI;
 
+		/// <summary>
+		/// Class to store aircraft information
+		/// </summary>
 		public class Aircraft {
+			/// <summary>
+			/// List of property values retrieved from last aircraftlist.json
+			/// </summary>
 			private Dictionary<string, string> Properties = new Dictionary<string, string>();
+
+			/// <summary>
+			/// ICAO hex of aircraft
+			/// </summary>
 			public string ICAO;
+
+			/// <summary>
+			/// Position track from last aircraftlist.json
+			/// </summary>
 			public double[] Trail = new double[0];
 
+			/// <summary>
+			/// Get property value from property list
+			/// </summary>
+			/// <param name="key">Property name</param>
+			/// <returns>Value of property</returns>
 			public string GetProperty(string key) {
 				if (Properties.ContainsKey(key))
 					return Properties[key];
@@ -31,30 +104,63 @@ namespace PlaneAlerter {
 					return null;
 			}
 
+			/// <summary>
+			/// Add a property to the list
+			/// </summary>
+			/// <param name="key">Key of property</param>
+			/// <param name="value">Value of property</param>
 			public void AddProperty(string key, string value) {
+				//Add if property is not position trail or stops list
+				//Arrays can't be used for conditions or displaying so theyre just ignored
 				if (key != "Cot" && key != "Stops")
 					Properties.Add(key, value);
 			}
 
+			/// <summary>
+			/// Get list of keys from property list
+			/// </summary>
+			/// <returns>List of property keys</returns>
 			public Dictionary<string, string>.KeyCollection GetPropertyKeys() {
 				return Properties.Keys;
 			}
 
+			/// <summary>
+			/// Aircraft class constructor
+			/// </summary>
+			/// <param name="icao">ICAO of aircraft</param>
 			public Aircraft(string icao) {
 				ICAO = icao;
 			}
 		}
 
+		/// <summary>
+		/// VRS Receiver information
+		/// </summary>
 		public struct Reciever {
+			/// <summary>
+			/// ID of receiver
+			/// </summary>
 			public string Id;
+
+			/// <summary>
+			/// Name or receiver
+			/// </summary>
 			public string Name;
 
+			/// <summary>
+			/// Receiver constructor
+			/// </summary>
+			/// <param name="id">Id of receiver</param>
+			/// <param name="name">Name of receiver</param>
 			public Reciever(string id, string name) {
 				Id = id;
 				Name = name;
 			}
 		}
 
+		/// <summary>
+		/// Alert types
+		/// </summary>
 		public enum AlertType {
 			Disabled,
 			First,
@@ -62,12 +168,18 @@ namespace PlaneAlerter {
 			Both
 		}
 
+		/// <summary>
+		/// Property list types used in email config
+		/// </summary>
 		public enum PropertyListType {
 			Hidden,
 			Essentials,
 			All
 		}
 
+		/// <summary>
+		/// List of VRS properties
+		/// </summary>
 		public enum vrsProperty {
 			Time_Tracked,
 			Receiver,
@@ -112,11 +224,31 @@ namespace PlaneAlerter {
 			Manufacturer
 		}
 
+		/// <summary>
+		/// Trigger information
+		/// </summary>
 		public class Trigger {
+			/// <summary>
+			/// Property to be checked
+			/// </summary>
 			public vrsProperty Property;
+
+			/// <summary>
+			/// Value to be checked against
+			/// </summary>
 			public string Value;
+
+			/// <summary>
+			/// Type of comparison
+			/// </summary>
 			public string ComparisonType;
 
+			/// <summary>
+			/// Trigger constructor
+			/// </summary>
+			/// <param name="property">Property to check</param>
+			/// <param name="value">Value to be checked against</param>
+			/// <param name="comparisonType">Type of comparison</param>
 			public Trigger(vrsProperty property, string value, string comparisonType) {
 				Property = property;
 				Value = value;
@@ -124,32 +256,93 @@ namespace PlaneAlerter {
 			}
 		}
 
+		/// <summary>
+		/// Condition information
+		/// </summary>
 		public class Condition {
+			/// <summary>
+			/// Name of condition
+			/// </summary>
 			public string conditionName;
+
+			/// <summary>
+			/// Ignore following conditions
+			/// </summary>
 			public bool ignoreFollowing;
+
+			/// <summary>
+			/// Emails sent for this condition
+			/// </summary>
 			public int emailsThisSession = 0;
+
+			/// <summary>
+			/// Emails to send alert to
+			/// </summary>
 			public List<string> recieverEmails = new List<string>();
+
+			/// <summary>
+			/// Type of alert
+			/// </summary>
 			public AlertType alertType;
+
+			/// <summary>
+			/// Property to show in alert email
+			/// </summary>
 			public vrsProperty emailProperty;
+
+			/// <summary>
+			/// List of triggers
+			/// </summary>
 			public Dictionary<int, Trigger> triggers = new Dictionary<int, Trigger>();
 
+			/// <summary>
+			/// Increase sent emails counter for condition and total emails sent
+			/// </summary>
 			public void increaseSentEmails() {
 				emailsThisSession++;
 				Stats.totalEmailsSent++;
 			}
 
+			/// <summary>
+			/// Creates a new condition with default condition name
+			/// </summary>
 			public Condition() {
 				conditionName = "New Condition";
 			}
 		}
 
+		/// <summary>
+		/// Match information
+		/// </summary>
 		public class Match {
+			/// <summary>
+			/// ICAO of aircraft matched
+			/// </summary>
 			public string Icao { get; private set; }
+
+			/// <summary>
+			/// Time signal was lost
+			/// </summary>
 			public DateTime SignalLostTime;
+
+			/// <summary>
+			/// Has signal been lost?
+			/// </summary>
 			public bool SignalLost;
+
+			/// <summary>
+			/// Display name of match
+			/// </summary>
 			public string DisplayName { get; private set; }
+
+			/// <summary>
+			/// Conditions matched to
+			/// </summary>
 			public readonly List<MatchedCondition> Conditions;
 
+			/// <summary>
+			/// Create display name for match
+			/// </summary>
 			private void GenerateDisplayName() {
 				DisplayName = "";
 				foreach (MatchedCondition c in Conditions) {
@@ -158,15 +351,29 @@ namespace PlaneAlerter {
 				DisplayName = DisplayName.Substring(0, DisplayName.Length - 2);
 			}
 
-			public void AddCondition(int id, Condition match, Core.Aircraft aircraftInfo) {
+			/// <summary>
+			/// Add a condition to the match
+			/// </summary>
+			/// <param name="id">ID of condition</param>
+			/// <param name="match">Condition</param>
+			/// <param name="aircraftInfo">Aircraft information when matched</param>
+			public void AddCondition(int id, Condition match, Aircraft aircraftInfo) {
 				Conditions.Add(new MatchedCondition(id, match, aircraftInfo));
 				GenerateDisplayName();
 			}
 
+			/// <summary>
+			/// Remove condition from match
+			/// </summary>
+			/// <param name="match"></param>
 			public void RemoveCondition(MatchedCondition match) {
 				Conditions.Remove(match);
 			}
 
+			/// <summary>
+			/// Create match
+			/// </summary>
+			/// <param name="icao">ICAO of aircraft matched</param>
 			public Match(string icao) {
 				Icao = icao;
 				DisplayName = "";
@@ -174,22 +381,47 @@ namespace PlaneAlerter {
 			}
 		}
 
+		/// <summary>
+		/// Matched condition information
+		/// </summary>
 		public class MatchedCondition {
+			//Display name of condition match
 			public string DisplayName { get; private set; }
-			public Condition Match;
-			public int ConditionID;
-			public Core.Aircraft AircraftInfo;
 
-			public MatchedCondition(int conditionID, Condition c, Core.Aircraft aircraftInfo) {
+			/// <summary>
+			/// Condition matched with
+			/// </summary>
+			public Condition Match;
+
+			/// <summary>
+			/// ID of condition matched with
+			/// </summary>
+			public int ConditionID;
+
+			/// <summary>
+			/// Information of aircraft matched with
+			/// </summary>
+			public Aircraft AircraftInfo;
+
+			/// <summary>
+			/// Create condition match
+			/// </summary>
+			/// <param name="conditionID">ID of condition</param>
+			/// <param name="c">Condition matched with</param>
+			/// <param name="aircraftInfo">Aircraft information of matched aircraft</param>
+			public MatchedCondition(int conditionID, Condition c, Aircraft aircraftInfo) {
 				Match = c;
 				AircraftInfo = aircraftInfo;
 				ConditionID = conditionID;
-				string emailpropertyName = Core.vrsPropertyData[c.emailProperty][2];
+				string emailpropertyName = vrsPropertyData[c.emailProperty][2];
 				string emailpropertyText = (aircraftInfo.GetProperty(emailpropertyName) != null) ? " (" + c.emailProperty + ": " + aircraftInfo.GetProperty(emailpropertyName) + ")" : "";
 				DisplayName = "Condition: " + c.conditionName + emailpropertyText;
 			}
 		}
 
+		/// <summary>
+		/// Core static constructor
+		/// </summary>
 		static Core() {
 			//LEGEND
 			//A = Equals/Not Equals
@@ -198,6 +430,7 @@ namespace PlaneAlerter {
 			//D = Starts With + Ends With
 			//E = Contains
 
+			//Add all of the property information
 			vrsPropertyData.Add(vrsProperty.Time_Tracked, new string[] { "Number", "AB", "TSecs", "The number of seconds that the aircraft has been tracked for." });
 			vrsPropertyData.Add(vrsProperty.Receiver, new string[] { "Number", "A", "Rcvr", "The ID of the feed that last supplied information about the aircraft." });
 			vrsPropertyData.Add(vrsProperty.Icao, new string[] { "String", "ADE", "Icao", "The ICAO of the aircraft." });
@@ -240,6 +473,7 @@ namespace PlaneAlerter {
 			vrsPropertyData.Add(vrsProperty.Mlat, new string[] { "Boolean", "C", "Mlat", "True if the aircraft's position was determined using Multilateration." });
 			vrsPropertyData.Add(vrsProperty.Manufacturer, new string[] { "String", "A", "Man", "The manufacturer of the aircraft." });
 
+			//Add essential properties to list
 			essentialProperties.Add(vrsProperty.Receiver);
 			essentialProperties.Add(vrsProperty.Icao);
 			essentialProperties.Add(vrsProperty.Registration);
@@ -258,6 +492,7 @@ namespace PlaneAlerter {
 			essentialProperties.Add(vrsProperty.Transponder_Type);
 			essentialProperties.Add(vrsProperty.Manufacturer);
 
+			//Add comparison types
 			comparisonTypes.Add("A", new string[] { "Equals", "Not Equals" });
 			comparisonTypes.Add("B", new string[] { "Higher Than", "Lower Than" });
 			comparisonTypes.Add("C", new string[] { "Equals", "Not Equals" });
