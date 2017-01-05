@@ -9,10 +9,49 @@ using Newtonsoft.Json.Linq;
 using System.Drawing;
 
 namespace PlaneAlerter {
+	/// <summary>
+	/// Class for email operations
+	/// </summary>
 	static class Email {
-		public static SmtpClient mailClient;
+		/// <summary>
+		/// SMTP client used for sending emails
+		/// </summary>
+		private static SmtpClient mailClient;
 
+		/// <summary>
+		/// Send alert email
+		/// </summary>
+		/// <param name="emailaddress">Email address to send to</param>
+		/// <param name="message">Message to send</param>
+		/// <param name="condition">Condition that triggered alert</param>
+		/// <param name="aircraft">Aircraft information for matched aircraft</param>
+		/// <param name="recieverName">Name of receiver that got the last aircraft information</param>
+		/// <param name="emailPropertyInfo">String for displaying email property value</param>
+		/// <param name="isDetection">Is this a detection, not a removal?</param>
 		public static void sendEmail(string emailaddress, MailMessage message, Core.Condition condition, Core.Aircraft aircraft, string recieverName, string emailPropertyInfo, bool isDetection) {
+			//Array to store position trail
+			Dictionary<int, string[]> pathArray = new Dictionary<int, string[]>();
+			//Google map for position trail's url
+			string googleMapUrl = "";
+			//Transponder type from aircraft info
+			string transponderName = "";
+			//Types of transponders
+			string[] transponderTypes = new string[] { "Unknown", "Mode-S", "ADS-B", "ADS-Bv1", "ADS-Bv2" };
+			//Aircraft image urls
+			string[] imageLinks = new string[2];
+			//Table for displaying aircraft property values
+			string aircraftTable = "<table style='border: 2px solid;border-radius: 10px;border-spacing: 0px;' id='acTable'>";
+			//HTML for aircraft images
+			string imageHTML = "";
+			//Airframes.org url
+			string airframesUrl = "";
+			//Report url
+			string reportUrl = "";
+
+			//Set message type to html
+			message.IsBodyHtml = true;
+
+			//Add email to message receiver list
 			try {
 				message.To.Clear();
 				message.To.Add(emailaddress);
@@ -22,6 +61,7 @@ namespace PlaneAlerter {
 				return;
 			}
 
+			//Set sender email to the one set in settings
 			try {
 				message.From = new MailAddress(Settings.senderEmail, "PlaneAlerter Alerts");
 			}
@@ -29,154 +69,154 @@ namespace PlaneAlerter {
 				Core.UI.writeToConsole("ERROR: Email to send from is invalid (" + Settings.senderEmail + ")", Color.Red);
 				return;
 			}
-			message.IsBodyHtml = true;
-
-			Dictionary<int, string[]> pathArray = new Dictionary<int, string[]>();
-			string googleMapUrl = "";
-			string transponderName = "";
-			string[] transponderTypes = new string[] { "Unknown", "Mode-S", "ADS-B", "ADS-Bv1", "ADS-Bv2" };
-			string[] imageLinks = new string[2];
-			string aircraftTable = "<table style='border: 2px solid;border-radius: 10px;border-spacing: 0px;' id='acTable'>";
-			string imageHTML = "";
-			string airframesText = "";
-
-			if (aircraft.GetProperty("Lat") != null) {
-				if (aircraft.Trail.Count() != 3) {
-					googleMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;path=color:0x000000|";
-				}
-				else {
-					googleMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;zoom=8&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;path=color:0x000000|";
-				}
-			}
-
-			//http://122.151.42.191/VirtualRadar/AirportDataThumbnails.json?icao=7C80BD&numThumbs=2
+			
+			//Create request for aircraft image urls
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Settings.acListUrl.Substring(0, Settings.acListUrl.LastIndexOf("/") + 1) + "AirportDataThumbnails.json?icao=" + aircraft.ICAO + "&numThumbs=" + imageLinks.Length);
 			request.Method = "GET";
-			if (Settings.VRSAuthenticate) {
-				String encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
-				request.Headers.Add("Authorization", "Basic " + encoded);
-			}
 			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			request.Timeout = 5000;
+
+			//If vrs authentication is used, add credentials to request
+			if (Settings.VRSAuthenticate) {
+				string encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
+				request.Headers.Add("Authorization", "Basic " + encoded);
+			}
+
+			//Send request and parse response
 			try {
+				//Get response
 				HttpWebResponse imageResponse = (HttpWebResponse)request.GetResponse();
 				byte[] imageResponseBytes = new byte[32768];
 				imageResponse.GetResponseStream().Read(imageResponseBytes, 0, 32768);
-				string imageResponseText = ASCIIEncoding.ASCII.GetString(imageResponseBytes);
-
+				string imageResponseText = Encoding.ASCII.GetString(imageResponseBytes);
+				
+				//Parse json
 				JObject imageResponseJson = (JObject)JsonConvert.DeserializeObject(imageResponseText);
-				if (imageResponseJson["status"].ToString() != "404") {
-					int curImg = 0;
-					foreach (JObject image in imageResponseJson["data"]) {
-						imageLinks[curImg] = image["image"].ToString();
-						curImg++;
-					}
-				}
+
+				//If status is not 404, add images to image HTML
+				if (imageResponseJson["status"].ToString() != "404")
+					foreach (JObject image in imageResponseJson["data"])
+						imageHTML += "<img style='margin: 5px;border: 2px solid;border-radius: 10px;' src='" + image + "' />";
+				imageHTML += "<br>";
 			}
 			catch (Exception) {
 
 			}
 
+			//If aircraft has a position, generate a google map url
+			if (aircraft.GetProperty("Lat") != null)
+				if (aircraft.Trail.Count() != 3)
+					googleMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;path=color:0x000000|";
+				else
+					googleMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;zoom=8&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;path=color:0x000000|";
+
+			//Process aircraft trail
 			for (int i = 0;i < aircraft.Trail.Count() / 3;i++) {
+				//Get coordinates
 				string[] coord = new string[] {
 					aircraft.Trail[i * 3].ToString(),
 					aircraft.Trail[i * 3 + 1].ToString(),
 					aircraft.Trail[i * 3 + 2].ToString()
 				};
-				pathArray.Add(pathArray.Count, coord);
-			}
-
-			foreach (string[] point in pathArray.Values) {
-				googleMapUrl += point[0] + "," + point[1];
-				if (point[0] != pathArray[pathArray.Count - 1][0]) {
+				//Add coordinates to google map url
+				googleMapUrl += coord[0] + "," + coord[1];
+				//If these are not the last coordinates, add a separator
+				if (i != aircraft.Trail.Count() - 1)
 					googleMapUrl += "|";
-				}
 			}
 
-			foreach (string image in imageLinks) {
-				if (image != null) {
-					imageHTML += "<img style='margin: 5px;border: 2px solid;border-radius: 10px;' src='" + image + "' />";
-				}
-			}
-			imageHTML += "<br>";
+			//Generate airframes.org url
+			if (aircraft.GetProperty("Reg") != null && aircraft.GetProperty("Reg") != "")
+				airframesUrl = "<h3><a style='text-decoration: none;' href='http://www.airframes.org/reg/" + aircraft.GetProperty("Reg").Replace("-", "").ToUpper() + "'>Airframes.org Lookup</a></h3>";
 
-			for (int i = 1;i < transponderTypes.Length;i++) {
-				if (aircraft.GetProperty("Trt") == i.ToString()) {
-					transponderName = transponderTypes[i];
-				}
+			//Generate radar url
+			try {
+				if (Settings.radarUrl[Settings.radarUrl.Length - 1] == "/"[0])
+					reportUrl = Settings.radarUrl + "desktopReport.html?icao-Q=" + aircraft.ICAO;
+				else
+					reportUrl = Settings.radarUrl + "/desktopReport.html?icao-Q=" + aircraft.ICAO;
+			}
+			catch {
+				Core.UI.writeToConsole("ERROR: No radar url specified.", Color.Red);
+				ThreadManager.Restart();
 			}
 
+			//Get name of transponder type
+			//TODO TEST THIS
+			transponderName = transponderTypes[Convert.ToInt32(aircraft.GetProperty("Trt"))];
+
+			//Write to log and UI
 			Core.logFileSW.WriteLine(DateTime.Now.ToLongTimeString() + " | SENDING ALERT: " + Environment.NewLine + aircraft.ToString() + Environment.NewLine + Environment.NewLine);
 			Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);
 
+			//Generate aircraft property value table
 			bool isAlternateStyle = false;
 			foreach (string child in aircraft.GetPropertyKeys()) {
 				//TODO ADD TO VRSPROPERTIES
 				string parameter = "UNKNOWN_PARAMETER";
-				if (child.ToString() == "CNum") {
-					parameter = "Aircraft_Serial";
+				//Set parameter to a readable name if it's not included in vrs property info
+				switch (child.ToString()) {
+					case "CNum":
+						parameter = "Aircraft_Serial";
+						break;
+					case "EngMount":
+						parameter = "Engine_Mount";
+						break;
+					case "FSeen":
+						parameter = "First_Seen";
+						break;
+					case "HasPic":
+						parameter = "Has_Picture";
+						break;
+					case "Id":
+						parameter = "Id";
+						break;
+					case "Lat":
+						parameter = "Latitude";
+						break;
+					case "Long":
+						parameter = "Longitude";
+						break;
+					case "PosTime":
+						parameter = "Position_Time";
+						break;
+					case "ResetTrail":
+						parameter = "Reset_Trail";
+						break;
+					case "Tisb":
+						parameter = "TIS-B";
+						break;
+					case "Trak":
+						parameter = "Track";
+						break;
+					case "TrkH":
+						parameter = "Is_Track_Heading";
+						break;
+					case "Year":
+						parameter = "Year";
+						break;
 				}
-				if (child.ToString() == "EngMount") {
-					parameter = "Engine_Mount";
-				}
-				if (child.ToString() == "FSeen") {
-					parameter = "First_Seen";
-				}
-				if (child.ToString() == "HasPic") {
-					parameter = "Has_Picture";
-				}
-				if (child.ToString() == "Id") {
-					parameter = "Id";
-				}
-				if (child.ToString() == "Lat") {
-					parameter = "Latitude";
-				}
-				if (child.ToString() == "Long") {
-					parameter = "Longitude";
-				}
-				if (child.ToString() == "PosTime") {
-					parameter = "Position_Time";
-				}
-				if (child.ToString() == "ResetTrail") {
-					parameter = "Reset_Trail";
-				}
-				if (child.ToString() == "Tisb") {
-					parameter = "TIS-B";
-				}
-				if (child.ToString() == "Trak") {
-					parameter = "Track";
-				}
-				if (child.ToString() == "TrkH") {
-					parameter = "Is_Track_Heading";
-				}
-				if (child.ToString() == "Year") {
-					parameter = "Year";
-				}
-				if (Settings.EmailContentConfig.PropertyList == Core.PropertyListType.Essentials && parameter != "UNKNOWN_PARAMETER")
+				//If parameter is set (not in vrs property info list) and property list type is set to essentials, skip this property
+				if (parameter != "UNKNOWN_PARAMETER" && Settings.EmailContentConfig.PropertyList == Core.PropertyListType.Essentials)
 					continue;
-				bool non_essential = false;
+				//Get parameter information from vrs property info
 				if (parameter == "UNKNOWN_PARAMETER") {
 					foreach (Core.vrsProperty property in Core.vrsPropertyData.Keys) {
 						if (Core.vrsPropertyData[property][2] == child.ToString()) {
-							if (Settings.EmailContentConfig.PropertyList == Core.PropertyListType.Essentials && !Core.essentialProperties.Contains(property)) {
-								non_essential = true;
+							//If property list type is essentials and this property is not in the list of essentials, leave this property as unknown so it can be skipped
+							if (Settings.EmailContentConfig.PropertyList == Core.PropertyListType.Essentials && !Core.essentialProperties.Contains(property))
 								continue;
-							}
 							parameter = property.ToString();
 						}
 					}
 					if (parameter == "UNKNOWN_PARAMETER")
 						continue;
 				}
-				if (non_essential)
-					continue;
-
-				if (isAlternateStyle) {
+				//Add html for property
+				if (isAlternateStyle)
 					aircraftTable += "<tr style='background-color:#CCC'>";
-				}
-				else {
+				else
 					aircraftTable += "<tr>";
-				}
 				aircraftTable += "<td style='padding: 3px;font-weight:bold;'>" + parameter + "</td>";
 				aircraftTable += "<td style='padding: 3px'>" + aircraft.GetProperty(child) + "</td>";
 				aircraftTable += "</tr>";
@@ -184,30 +224,13 @@ namespace PlaneAlerter {
 			}
 			aircraftTable += "</table>";
 
+			//Create the main html document
 			message.Body =
 				"<!DOCTYPE html PUBLIC ' -W3CDTD XHTML 1.0 TransitionalEN' 'http:www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'><html><body>";
-			if (isDetection) {
+			if (isDetection)
 				message.Body += "<h1>Plane Alert - Last Contact</h1>";
-			}
-			else {
+			else
 				message.Body += "<h1>Plane Alert - First Contact</h1>";
-			}
-			if (aircraft.GetProperty("Reg") != null && aircraft.GetProperty("Reg") != "") {
-				airframesText = "<h3><a style='text-decoration: none;' href='http://www.airframes.org/reg/" + aircraft.GetProperty("Reg").Replace("-", "").ToUpper() + "'>Airframes.org Lookup</a></h3>";
-			}
-			string reportUrl = "";
-			try {
-				if (Settings.radarUrl[Settings.radarUrl.Length - 1] == "/"[0]) {
-					reportUrl = Settings.radarUrl + "desktopReport.html?icao-Q=" + aircraft.ICAO;
-				}
-				else {
-					reportUrl = Settings.radarUrl + "/desktopReport.html?icao-Q=" + aircraft.ICAO;
-				}
-			}
-			catch {
-				Core.UI.writeToConsole("ERROR: No radar url specified.", Color.Red);
-				ThreadManager.Restart();
-			}
 
 			//Condition name + email property
 			message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;margin-left: 10px;'>Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")</h2>";
@@ -225,7 +248,7 @@ namespace PlaneAlerter {
 				message.Body += "<h3><a style='text-decoration: none;' href='" + reportUrl + "'>VRS Report Lookup</a></h3>";
 			//Airframes.org url
 			if (Settings.EmailContentConfig.AfLookup)
-				message.Body += airframesText;
+				message.Body += airframesUrl;
 
 			message.Body += "<table><tr><td>";
 			//Property list
@@ -242,6 +265,7 @@ namespace PlaneAlerter {
 			}
 			message.Body += "</td></tr></table></body></html>";
 
+			//Send the alert
 			try {
 				mailClient.Send(message);
 			}
@@ -262,9 +286,11 @@ namespace PlaneAlerter {
 				return;
 			}
 
+			//Increase sent emails for condition and update stats
 			condition.increaseSentEmails();
 			Stats.updateStats();
 
+			//Log to UI
 			Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);
 		}
 	}
