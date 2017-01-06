@@ -4,9 +4,18 @@ using System.Windows.Forms;
 using System.Diagnostics;
 
 namespace PlaneAlerter {
+	/// <summary>
+	/// Form for changing settings
+	/// </summary>
 	public partial class SettingsForm :Form {
+		/// <summary>
+		/// Constructor
+		/// </summary>
 		public SettingsForm() {
+			//Initialise form elements
 			InitializeComponent();
+
+			//Add smtp host info
 			smtpHostInfo.hostInfo.Clear();
 			smtpHostInfo.hostInfo.Add("smtp.gmail.com", new object[] { 587, true });
 			smtpHostInfo.hostInfo.Add("smtp.live.com", new object[] { 587, true });
@@ -20,9 +29,11 @@ namespace PlaneAlerter {
 			smtpHostInfo.hostInfo.Add("outgoing.verizon.net", new object[] { 465, true });
 			smtpHostInfo.hostInfo.Add("smtp.mail.com", new object[] { 465, true });
 
+			//Add smtp host info to combobox
 			foreach (string smtpHost in smtpHostInfo.hostInfo.Keys)
 				smtpHostComboBox.Items.Add(smtpHost);
 
+			//Set settings from current settings
 			senderEmailTextBox.Text = Settings.senderEmail;
 			aircraftListTextBox.Text = Settings.acListUrl;
 			radarURLTextBox.Text = Settings.radarUrl;
@@ -39,14 +50,26 @@ namespace PlaneAlerter {
 			smtpSSLCheckBox.Checked = Settings.SMTPSSL;
 		}
 
+		/// <summary>
+		/// Smtp combobox value changed
+		/// </summary>
+		/// <param name="sender">Sender</param>
+		/// <param name="e">Event Args</param>
 		private void smtpHostComboBox_SelectedValueChanged(object sender, EventArgs e) {
+			//If exists in smtp host info, set port and ssl values
 			if (smtpHostInfo.hostInfo.ContainsKey(smtpHostComboBox.Text)) {
 				smtpHostPortTextBox.Value = Convert.ToDecimal(smtpHostInfo.hostInfo[smtpHostComboBox.Text][0]);
 				smtpSSLCheckBox.Checked = (bool)smtpHostInfo.hostInfo[smtpHostComboBox.Text][1];
 			}
 		}
 
+		/// <summary>
+		/// Settings form closing
+		/// </summary>
+		/// <param name="sender">Sender</param>
+		/// <param name="e">Event Args</param>
 		private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
+			//Set settings to form element values
 			Settings.senderEmail = senderEmailTextBox.Text;
 			Settings.acListUrl = aircraftListTextBox.Text;
 			Settings.radarUrl = radarURLTextBox.Text;
@@ -63,16 +86,34 @@ namespace PlaneAlerter {
 			Settings.SMTPSSL = smtpSSLCheckBox.Checked;
 		}
 
+		/// <summary>
+		/// Save settings button click
+		/// </summary>
+		/// <param name="sender">Sender</param>
+		/// <param name="e">Event Args</param>
 		private void saveSettingsButton_Click(object sender, EventArgs e) {
+			//Close form
 			Close();
 		}
 
+		/// <summary>
+		/// Gmail link clicked
+		/// </summary>
+		/// <param name="sender">Sender</param>
+		/// <param name="e">Event Args</param>
 		private void gmailLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
+			//Open gmail link
 			Process.Start("https://www.google.com/settings/security/lesssecureapps");
 		}
 	}
 
+	/// <summary>
+	/// Smtp host info
+	/// </summary>
 	public static class smtpHostInfo {
+		/// <summary>
+		/// Smtp host info
+		/// </summary>
 		public static Dictionary<string, object[]> hostInfo = new Dictionary<string, object[]>();
 	}
 }
