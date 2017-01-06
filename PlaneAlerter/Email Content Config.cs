@@ -2,10 +2,18 @@
 using System.Windows.Forms;
 
 namespace PlaneAlerter {
+	/// <summary>
+	/// Form for changing email content config
+	/// </summary>
 	public partial class Email_Content_Config :Form {
+		/// <summary>
+		/// Constructor
+		/// </summary>
 		public Email_Content_Config() {
+			//Initialise form components
 			InitializeComponent();
 
+			//Update form elements with current settings
 			receiverNameCheckBox.Checked = Settings.EmailContentConfig.ReceiverName;
 			transponderTypeCheckBox.Checked = Settings.EmailContentConfig.TransponderType;
 			radarLinkCheckBox.Checked = Settings.EmailContentConfig.RadarLink;
@@ -32,7 +40,13 @@ namespace PlaneAlerter {
 			}
 		}
 
+		/// <summary>
+		/// Save button click
+		/// </summary>
+		/// <param name="sender">Sender</param>
+		/// <param name="e">Event Args</param>
 		private void saveButton_Click(object sender, EventArgs e) {
+			//Save settings to current settings
 			Settings.EmailContentConfig.ReceiverName = receiverNameCheckBox.Checked;
 			Settings.EmailContentConfig.TransponderType = transponderTypeCheckBox.Checked;
 			Settings.EmailContentConfig.RadarLink = radarLinkCheckBox.Checked;
@@ -47,6 +61,7 @@ namespace PlaneAlerter {
 			else
 				Settings.EmailContentConfig.PropertyList = Core.PropertyListType.Hidden;
 
+			//Close form
 			Close();
 		}
 	}
