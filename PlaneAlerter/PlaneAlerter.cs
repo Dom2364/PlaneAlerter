@@ -119,7 +119,7 @@ namespace PlaneAlerter
 		}
 
 		private void startConditionEditorToolStripMenuItem_Click(object sender, EventArgs e) {
-			Form1 editor = new Form1();
+			ConditionEditor editor = new ConditionEditor();
 			editor.Show();
 			editor.FormClosing += delegate { 
 				Checker.LoadConditions();

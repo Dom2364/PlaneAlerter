@@ -1,5 +1,5 @@
 ﻿namespace PlaneAlerter {
-	partial class Form1 {
+	partial class ConditionEditor {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -24,7 +24,7 @@
 		/// </summary>
 		private void InitializeComponent() {
 			System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Conditions");
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConditionEditor));
 			this.conditionEditorTreeView = new System.Windows.Forms.TreeView();
 			this.addConditionButton = new System.Windows.Forms.Button();
 			this.exitButton = new System.Windows.Forms.Button();
