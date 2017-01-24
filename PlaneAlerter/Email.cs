@@ -142,8 +142,7 @@ namespace PlaneAlerter {
 			}
 
 			//Get name of transponder type
-			//TODO TEST THIS
-			transponderName = transponderTypes[Convert.ToInt32(aircraft.GetProperty("Trt"))];
+			transponderName = transponderTypes[Convert.ToInt32(aircraft.GetProperty("Trt"))-1];
 
 			//Write to log and UI
 			Core.logFileSW.WriteLine(DateTime.Now.ToLongTimeString() + " | SENDING ALERT: " + Environment.NewLine + aircraft.ToString() + Environment.NewLine + Environment.NewLine);
