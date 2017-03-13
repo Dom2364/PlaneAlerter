@@ -104,6 +104,7 @@ namespace PlaneAlerter {
 			public static bool AfLookup;
 			public static bool AircraftPhotos;
 			public static bool Map;
+            public static bool TwitterOptimised;
 			public static Core.PropertyListType PropertyList;
 		}
 
@@ -144,7 +145,8 @@ namespace PlaneAlerter {
 			eccDictionary.Add("AfLookup", EmailContentConfig.AfLookup);
 			eccDictionary.Add("AircraftPhotos", EmailContentConfig.AircraftPhotos);
 			eccDictionary.Add("Map", EmailContentConfig.Map);
-			eccDictionary.Add("PropertyList", EmailContentConfig.PropertyList.ToString());
+            eccDictionary.Add("TwitterOptimised", EmailContentConfig.TwitterOptimised);
+            eccDictionary.Add("PropertyList", EmailContentConfig.PropertyList.ToString());
 			return eccDictionary;
 		}
 
@@ -189,16 +191,39 @@ namespace PlaneAlerter {
 				ThreadManager.Restart();
 		}
 
-		//Constructor
-		static Settings() {
+        /// <summary>
+        /// Load default settings
+        /// </summary>
+        static void LoadDefaults() {
+            SMTPPort = 21;
+            File.WriteAllText("settings.json", JsonConvert.SerializeObject(returnSettingsDictionary(), Formatting.Indented));
+        }
+
+        /// <summary>
+        /// Load default ecc settings
+        /// </summary>
+        static void LoadECCDefaults() {
+            EmailContentConfig.AfLookup = true;
+            EmailContentConfig.AircraftPhotos = true;
+            EmailContentConfig.Map = true;
+            EmailContentConfig.PropertyList = Core.PropertyListType.All;
+            EmailContentConfig.RadarLink = true;
+            EmailContentConfig.ReportLink = true;
+            EmailContentConfig.ReceiverName = true;
+            EmailContentConfig.TransponderType = true;
+            EmailContentConfig.TwitterOptimised = false;
+            File.WriteAllText("emailconfig.json", JsonConvert.SerializeObject(returnECCDictionary(), Formatting.Indented));
+        }
+
+        //Constructor
+        static Settings() {
 			//Initialise aircraftlist.json url as empty
 			acListUrl = "";
 
 			//Create settings file if one does not exist
 			if (!File.Exists("settings.json")) {
 				Core.UI.writeToConsole("No settings file! Creating one...", Color.White);
-				SMTPPort = 21;
-				File.WriteAllText("settings.json", JsonConvert.SerializeObject(returnSettingsDictionary(), Formatting.Indented));
+                LoadDefaults();
 			}
 
 			//Deserialise settings file
@@ -256,15 +281,7 @@ namespace PlaneAlerter {
 			//If email content config file does not exist, create one
 			if (!File.Exists("emailconfig.json")) {
 				Core.UI.writeToConsole("No email content config file! Creating one...", Color.White);
-				EmailContentConfig.AfLookup = true;
-				EmailContentConfig.AircraftPhotos = true;
-				EmailContentConfig.Map = true;
-				EmailContentConfig.PropertyList = Core.PropertyListType.All;
-				EmailContentConfig.RadarLink = true;
-				EmailContentConfig.ReportLink = true;
-				EmailContentConfig.ReceiverName = true;
-				EmailContentConfig.TransponderType = true;
-				File.WriteAllText("emailconfig.json", JsonConvert.SerializeObject(returnECCDictionary(), Formatting.Indented));
+                LoadECCDefaults();
 			}
 
 			//Decode ecc json
@@ -274,15 +291,22 @@ namespace PlaneAlerter {
 					using (JsonTextReader jsonreader = new JsonTextReader(reader))
 						eccJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
 
-			//Copy ecc from parsed json
-			EmailContentConfig.ReceiverName = (bool)eccJson["ReceiverName"];
-			EmailContentConfig.TransponderType = (bool)eccJson["TransponderType"];
-			EmailContentConfig.RadarLink = (bool)eccJson["RadarLink"];
-			EmailContentConfig.ReportLink = (bool)eccJson["ReportLink"];
-			EmailContentConfig.AfLookup = (bool)eccJson["AfLookup"];
-			EmailContentConfig.AircraftPhotos = (bool)eccJson["AircraftPhotos"];
-			EmailContentConfig.Map = (bool)eccJson["Map"];
-			EmailContentConfig.PropertyList = (Core.PropertyListType)Enum.Parse(typeof(Core.PropertyListType), eccJson["PropertyList"].ToString());
+            try {
+                //Copy ecc from parsed json
+                EmailContentConfig.ReceiverName = (bool)eccJson["ReceiverName"];
+                EmailContentConfig.TransponderType = (bool)eccJson["TransponderType"];
+                EmailContentConfig.RadarLink = (bool)eccJson["RadarLink"];
+                EmailContentConfig.ReportLink = (bool)eccJson["ReportLink"];
+                EmailContentConfig.AfLookup = (bool)eccJson["AfLookup"];
+                EmailContentConfig.AircraftPhotos = (bool)eccJson["AircraftPhotos"];
+                EmailContentConfig.Map = (bool)eccJson["Map"];
+                EmailContentConfig.TwitterOptimised = (bool)eccJson["TwitterOptimised"];
+                EmailContentConfig.PropertyList = (Core.PropertyListType)Enum.Parse(typeof(Core.PropertyListType), eccJson["PropertyList"].ToString());
+            }
+			catch {
+                File.Delete("emailconfig.json");
+                LoadECCDefaults();
+            }
 
 			//Clear ecc json to hopefully save some memory
 			eccJson.RemoveAll();

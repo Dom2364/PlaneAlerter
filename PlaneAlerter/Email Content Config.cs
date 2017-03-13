@@ -21,7 +21,8 @@ namespace PlaneAlerter {
 			mapCheckBox.Checked = Settings.EmailContentConfig.Map;
 			photosCheckBox.Checked = Settings.EmailContentConfig.AircraftPhotos;
 			reportCheckBox.Checked = Settings.EmailContentConfig.ReportLink;
-			switch (Settings.EmailContentConfig.PropertyList) {
+            twitterCheckBox.Checked = Settings.EmailContentConfig.TwitterOptimised;
+            switch (Settings.EmailContentConfig.PropertyList) {
 				case Core.PropertyListType.All:
 					plAll.Checked = true;
 					plEssentials.Checked = false;
@@ -54,7 +55,8 @@ namespace PlaneAlerter {
 			Settings.EmailContentConfig.AircraftPhotos = photosCheckBox.Checked;
 			Settings.EmailContentConfig.Map = mapCheckBox.Checked;
 			Settings.EmailContentConfig.ReportLink = reportCheckBox.Checked;
-			if (plAll.Checked)
+            Settings.EmailContentConfig.TwitterOptimised = twitterCheckBox.Checked;
+            if (plAll.Checked)
 				Settings.EmailContentConfig.PropertyList = Core.PropertyListType.All;
 			else if (plEssentials.Checked)
 				Settings.EmailContentConfig.PropertyList = Core.PropertyListType.Essentials;
@@ -64,5 +66,13 @@ namespace PlaneAlerter {
 			//Close form
 			Close();
 		}
-	}
+
+        /// <summary>
+        /// Twitter check box click
+        /// </summary>
+        private void twitterCheckBox_CheckedChanged(object sender, EventArgs e) {
+            checkBoxesPanel.Enabled = !twitterCheckBox.Checked;
+            propertyListGroupBox.Enabled = !twitterCheckBox.Checked;
+        }
+    }
 }
