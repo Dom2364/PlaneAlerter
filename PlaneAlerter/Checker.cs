@@ -295,7 +295,7 @@ namespace PlaneAlerter {
 							aircraft.Trail[i] = 0;
 					//Parse aircraft properties
 					List<JProperty> properties = a.Properties().ToList();
-					for (int i = 0;i < properties.Count() - 1;i++)
+					for (int i = 0;i < properties.Count();i++)
 						aircraft.AddProperty(properties[i].Name, properties[i].Value.ToString());
 					properties = null;
 					//Add aircraft to list
