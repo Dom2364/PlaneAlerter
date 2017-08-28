@@ -138,16 +138,16 @@ namespace PlaneAlerter {
 
                 //Process aircraft trail
                 for (int i = 0; i < aircraft.Trail.Count() / 3; i++) {
-                    //Get coordinates
+                    //Get coordinate
                     string[] coord = new string[] {
-                    aircraft.Trail[i * 3].ToString(),
-                    aircraft.Trail[i * 3 + 1].ToString(),
-                    aircraft.Trail[i * 3 + 2].ToString()
-                };
-                    //Add coordinates to google map url
+						aircraft.Trail[i * 3].ToString(),
+						aircraft.Trail[i * 3 + 1].ToString(),
+						aircraft.Trail[i * 3 + 2].ToString()
+					};
+                    //Add coordinate to google map url
                     googleMapUrl += coord[0] + "," + coord[1];
-                    //If these are not the last coordinates, add a separator
-                    if (i != aircraft.Trail.Count() - 1)
+                    //If this is not the last coordinate, add a separator
+                    if (i != (aircraft.Trail.Count() / 3) - 1)
                         googleMapUrl += "|";
                 }
 
@@ -157,7 +157,7 @@ namespace PlaneAlerter {
 
                 //Generate radar url
                 try {
-                    if (Settings.radarUrl[Settings.radarUrl.Length - 1] == "/"[0])
+                    if (Settings.radarUrl[Settings.radarUrl.Length - 1] == '/')
                         reportUrl = Settings.radarUrl + "desktopReport.html?icao-Q=" + aircraft.ICAO;
                     else
                         reportUrl = Settings.radarUrl + "/desktopReport.html?icao-Q=" + aircraft.ICAO;
