@@ -50,6 +50,7 @@
 			this.label10 = new System.Windows.Forms.Label();
 			this.latLabel = new System.Windows.Forms.Label();
 			this.longLabel = new System.Windows.Forms.Label();
+			this.label11 = new System.Windows.Forms.Label();
 			this.saveSettingsButton = new System.Windows.Forms.Button();
 			this.emailGroupBox = new System.Windows.Forms.GroupBox();
 			this.gmailLink = new System.Windows.Forms.LinkLabel();
@@ -58,6 +59,7 @@
 			this.latTextBox = new System.Windows.Forms.NumericUpDown();
 			this.radarURLTextBox = new System.Windows.Forms.TextBox();
 			this.programGroupBox = new System.Windows.Forms.GroupBox();
+			this.timeoutTextBox = new System.Windows.Forms.NumericUpDown();
 			this.refreshTextBox = new System.Windows.Forms.NumericUpDown();
 			((System.ComponentModel.ISupportInitialize)(this.removalTimeoutTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.smtpHostPortTextBox)).BeginInit();
@@ -66,6 +68,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.longTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.latTextBox)).BeginInit();
 			this.programGroupBox.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.timeoutTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.refreshTextBox)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -311,6 +314,16 @@
 			this.longLabel.Text = "Longitude";
 			this.toolTip.SetToolTip(this.longLabel, "Leave blank for unpassworded servers");
 			// 
+			// label11
+			// 
+			this.label11.AutoSize = true;
+			this.label11.Location = new System.Drawing.Point(135, 77);
+			this.label11.Name = "label11";
+			this.label11.Size = new System.Drawing.Size(76, 13);
+			this.label11.TabIndex = 25;
+			this.label11.Text = "Timeout (secs)";
+			this.toolTip.SetToolTip(this.label11, "Request timeout for aircraftlist.json");
+			// 
 			// saveSettingsButton
 			// 
 			this.saveSettingsButton.Location = new System.Drawing.Point(12, 468);
@@ -419,6 +432,8 @@
 			// 
 			// programGroupBox
 			// 
+			this.programGroupBox.Controls.Add(this.label11);
+			this.programGroupBox.Controls.Add(this.timeoutTextBox);
 			this.programGroupBox.Controls.Add(this.refreshLabel);
 			this.programGroupBox.Controls.Add(this.refreshTextBox);
 			this.programGroupBox.Controls.Add(this.label5);
@@ -430,6 +445,18 @@
 			this.programGroupBox.TabIndex = 24;
 			this.programGroupBox.TabStop = false;
 			this.programGroupBox.Text = "Program";
+			// 
+			// timeoutTextBox
+			// 
+			this.timeoutTextBox.Location = new System.Drawing.Point(217, 75);
+			this.timeoutTextBox.Maximum = new decimal(new int[] {
+            600,
+            0,
+            0,
+            0});
+			this.timeoutTextBox.Name = "timeoutTextBox";
+			this.timeoutTextBox.Size = new System.Drawing.Size(103, 20);
+			this.timeoutTextBox.TabIndex = 24;
 			// 
 			// refreshTextBox
 			// 
@@ -468,6 +495,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.latTextBox)).EndInit();
 			this.programGroupBox.ResumeLayout(false);
 			this.programGroupBox.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.timeoutTextBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.refreshTextBox)).EndInit();
 			this.ResumeLayout(false);
 
@@ -509,5 +537,7 @@
 		private System.Windows.Forms.Label latLabel;
 		private System.Windows.Forms.NumericUpDown longTextBox;
 		private System.Windows.Forms.Label longLabel;
+		private System.Windows.Forms.Label label11;
+		private System.Windows.Forms.NumericUpDown timeoutTextBox;
 	}
 }

@@ -56,12 +56,17 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Removal timeout
 		/// </summary>
-		public static int timeoutLength;
+		public static int removalTimeout;
 
 		/// <summary>
 		/// Checker refresh rate
 		/// </summary>
 		public static int refreshRate;
+
+		/// <summary>
+		/// Checker request timeout
+		/// </summary>
+		public static int timeout;
 
 		/// <summary>
 		/// SMTP Host
@@ -122,8 +127,9 @@ namespace PlaneAlerter {
 			settingsDictionary.Add("VRSPwd", VRSPwd);
 			settingsDictionary.Add("Lat", Lat);
 			settingsDictionary.Add("Long", Long);
-			settingsDictionary.Add("timeoutLength", timeoutLength);
+			settingsDictionary.Add("timeoutLength", removalTimeout);
 			settingsDictionary.Add("refreshRate", refreshRate);
+			settingsDictionary.Add("timeout", timeout);
 			settingsDictionary.Add("SMTPHost", SMTPHost);
 			settingsDictionary.Add("SMTPPort", SMTPPort);
 			settingsDictionary.Add("SMTPUsr", SMTPUsr);
@@ -184,7 +190,7 @@ namespace PlaneAlerter {
 			}
 			else
 				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " + VRSAuthenticate);
-			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Removal Timeout: " + timeoutLength + " secs");
+			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Removal Timeout: " + removalTimeout + " secs");
 
 			//If its an update, restart threads
 			if (update)
@@ -240,19 +246,20 @@ namespace PlaneAlerter {
 			}
 			else {
 				//Copy settings from parsed json
-				senderEmail = settingsJson["senderEmail"].ToString();
-				acListUrl = settingsJson["acListUrl"].ToString();
+				if (settingsJson["senderEmail"] != null) senderEmail = settingsJson["senderEmail"].ToString();
+				if (settingsJson["acListUrl"] != null) acListUrl = settingsJson["acListUrl"].ToString();
 				if (acListUrl.ToString() != "" && acListUrl.ToString().Length > 3 && acListUrl.Substring(0, 4) != "http")
 					acListUrl = "http://" + acListUrl;
-				VRSUsr = settingsJson["VRSUsr"].ToString();
-				VRSPwd = settingsJson["VRSPwd"].ToString();
-				Lat = Convert.ToDecimal(settingsJson["Lat"]);
-				Long = Convert.ToDecimal(settingsJson["Long"]);
+				if (settingsJson["VRSUsr"] != null) VRSUsr = settingsJson["VRSUsr"].ToString();
+				if (settingsJson["VRSPwd"] != null) VRSPwd = settingsJson["VRSPwd"].ToString();
+				if (settingsJson["Lat"] != null) Lat = Convert.ToDecimal(settingsJson["Lat"]);
+				if (settingsJson["Long"] != null) Long = Convert.ToDecimal(settingsJson["Long"]);
 				VRSAuthenticate = (VRSUsr != "");
-				timeoutLength = Convert.ToInt32(settingsJson["timeoutLength"]);
-				refreshRate = Convert.ToInt32(settingsJson["refreshRate"]);
-				radarUrl = settingsJson["radarURL"].ToString();
-				SMTPHost = settingsJson["SMTPHost"].ToString();
+				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
+				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 30;
+				if (settingsJson["timeout"] != null) timeout = Convert.ToInt32(settingsJson["timeout"]); else timeout = 30;
+				if (settingsJson["radarURL"] != null) radarUrl = settingsJson["radarURL"].ToString();
+				if (settingsJson["SMTPHost"] != null) SMTPHost = settingsJson["SMTPHost"].ToString();
 				try {
 					SMTPPort = Convert.ToInt32(settingsJson["SMTPPort"]);
 					if (SMTPPort == 0) SMTPPort = 21;
@@ -260,9 +267,9 @@ namespace PlaneAlerter {
 				catch {
 					SMTPPort = 21;
 				}
-				SMTPUsr = settingsJson["SMTPUsr"].ToString();
-				SMTPPwd = settingsJson["SMTPPwd"].ToString();
-				SMTPSSL = (settingsJson["SMTPSSL"].ToString().ToLower() == "true");
+				if (settingsJson["SMTPUsr"] != null) SMTPUsr = settingsJson["SMTPUsr"].ToString();
+				if (settingsJson["SMTPPwd"] != null) SMTPPwd = settingsJson["SMTPPwd"].ToString();
+				if (settingsJson["SMTPSSL"] != null) SMTPSSL = (settingsJson["SMTPSSL"].ToString().ToLower() == "true");
 			}
 
 			//Set mailclient info

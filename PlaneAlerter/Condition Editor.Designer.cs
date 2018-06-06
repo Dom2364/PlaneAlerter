@@ -31,34 +31,38 @@
 			this.removeConditionButton = new System.Windows.Forms.Button();
 			this.moveUpButton = new System.Windows.Forms.Button();
 			this.moveDownButton = new System.Windows.Forms.Button();
+			this.editButton = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// conditionEditorTreeView
 			// 
-			this.conditionEditorTreeView.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.conditionEditorTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.conditionEditorTreeView.Location = new System.Drawing.Point(0, 43);
 			this.conditionEditorTreeView.Name = "conditionEditorTreeView";
 			treeNode1.Name = "conditionsNode";
 			treeNode1.Text = "Conditions";
 			this.conditionEditorTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
             treeNode1});
-			this.conditionEditorTreeView.Size = new System.Drawing.Size(451, 249);
+			this.conditionEditorTreeView.Size = new System.Drawing.Size(479, 198);
 			this.conditionEditorTreeView.TabIndex = 0;
-			this.conditionEditorTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.ConditionTreeViewNodeMouseDoubleClick);
+			this.conditionEditorTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.conditionEditorTreeView_NodeMouseClick);
 			// 
 			// addConditionButton
 			// 
 			this.addConditionButton.Location = new System.Drawing.Point(13, 11);
 			this.addConditionButton.Name = "addConditionButton";
-			this.addConditionButton.Size = new System.Drawing.Size(82, 23);
+			this.addConditionButton.Size = new System.Drawing.Size(53, 23);
 			this.addConditionButton.TabIndex = 1;
-			this.addConditionButton.Text = "Add Condition";
+			this.addConditionButton.Text = "Add";
 			this.addConditionButton.UseVisualStyleBackColor = true;
 			this.addConditionButton.Click += new System.EventHandler(this.addConditionButton_Click);
 			// 
 			// exitButton
 			// 
-			this.exitButton.Location = new System.Drawing.Point(353, 11);
+			this.exitButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.exitButton.Location = new System.Drawing.Point(381, 11);
 			this.exitButton.Margin = new System.Windows.Forms.Padding(2);
 			this.exitButton.Name = "exitButton";
 			this.exitButton.Size = new System.Drawing.Size(85, 23);
@@ -69,12 +73,12 @@
 			// 
 			// removeConditionButton
 			// 
-			this.removeConditionButton.Location = new System.Drawing.Point(100, 11);
+			this.removeConditionButton.Location = new System.Drawing.Point(71, 11);
 			this.removeConditionButton.Margin = new System.Windows.Forms.Padding(2);
 			this.removeConditionButton.Name = "removeConditionButton";
-			this.removeConditionButton.Size = new System.Drawing.Size(104, 23);
+			this.removeConditionButton.Size = new System.Drawing.Size(68, 23);
 			this.removeConditionButton.TabIndex = 3;
-			this.removeConditionButton.Text = "Remove Condition";
+			this.removeConditionButton.Text = "Remove";
 			this.removeConditionButton.UseVisualStyleBackColor = true;
 			this.removeConditionButton.Click += new System.EventHandler(this.RemoveConditionButtonClick);
 			// 
@@ -100,21 +104,32 @@
 			this.moveDownButton.UseVisualStyleBackColor = true;
 			this.moveDownButton.Click += new System.EventHandler(this.moveDownButton_Click);
 			// 
-			// Form1
+			// editButton
+			// 
+			this.editButton.Location = new System.Drawing.Point(144, 11);
+			this.editButton.Name = "editButton";
+			this.editButton.Size = new System.Drawing.Size(59, 23);
+			this.editButton.TabIndex = 6;
+			this.editButton.Text = "Edit";
+			this.editButton.UseVisualStyleBackColor = true;
+			this.editButton.Click += new System.EventHandler(this.editButton_Click);
+			// 
+			// ConditionEditor
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(451, 292);
+			this.ClientSize = new System.Drawing.Size(475, 242);
+			this.Controls.Add(this.editButton);
 			this.Controls.Add(this.moveDownButton);
 			this.Controls.Add(this.moveUpButton);
 			this.Controls.Add(this.removeConditionButton);
 			this.Controls.Add(this.exitButton);
 			this.Controls.Add(this.addConditionButton);
 			this.Controls.Add(this.conditionEditorTreeView);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
-			this.Name = "Form1";
+			this.MinimumSize = new System.Drawing.Size(464, 153);
+			this.Name = "ConditionEditor";
 			this.Text = "PlaneAlerter Condition Editor";
 			this.ResumeLayout(false);
 
@@ -128,6 +143,7 @@
 		private System.Windows.Forms.Button addConditionButton;
 		private System.Windows.Forms.Button moveUpButton;
 		private System.Windows.Forms.Button moveDownButton;
+		private System.Windows.Forms.Button editButton;
 	}
 }
 

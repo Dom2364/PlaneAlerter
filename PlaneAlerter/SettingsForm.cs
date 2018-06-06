@@ -41,13 +41,14 @@ namespace PlaneAlerter {
 			VRSPwdTextBox.Text = Settings.VRSPwd;
 			latTextBox.Value = Settings.Lat;
 			longTextBox.Value = Settings.Long;
-			removalTimeoutTextBox.Value = Settings.timeoutLength;
+			removalTimeoutTextBox.Value = Settings.removalTimeout;
 			refreshTextBox.Value = Settings.refreshRate;
 			smtpHostComboBox.Text = Settings.SMTPHost;
 			smtpHostPortTextBox.Value = Settings.SMTPPort;
 			smtpUsrTextBox.Text = Settings.SMTPUsr;
 			smtpPwdTextBox.Text = Settings.SMTPPwd;
 			smtpSSLCheckBox.Checked = Settings.SMTPSSL;
+			timeoutTextBox.Value = Settings.timeout;
 		}
 
 		/// <summary>
@@ -77,13 +78,14 @@ namespace PlaneAlerter {
 			Settings.VRSPwd = VRSPwdTextBox.Text;
 			Settings.Lat = latTextBox.Value;
 			Settings.Long = longTextBox.Value;
-			Settings.timeoutLength = Convert.ToInt32(removalTimeoutTextBox.Value);
+			Settings.removalTimeout = Convert.ToInt32(removalTimeoutTextBox.Value);
 			Settings.refreshRate = Convert.ToInt32(refreshTextBox.Value);
 			Settings.SMTPHost = smtpHostComboBox.Text;
 			Settings.SMTPPort = Convert.ToInt32(smtpHostPortTextBox.Value);
 			Settings.SMTPUsr = smtpUsrTextBox.Text;
 			Settings.SMTPPwd = smtpPwdTextBox.Text;
 			Settings.SMTPSSL = smtpSSLCheckBox.Checked;
+			Settings.timeout = Convert.ToInt32(timeoutTextBox.Value);
 		}
 
 		/// <summary>

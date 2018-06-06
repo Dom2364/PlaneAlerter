@@ -59,171 +59,174 @@ namespace PlaneAlerter {
 				//Get latest aircraft information
 				GetAircraft();
 
-				//Aircraft number to be shown on UI
-				int aircraftCount = 1;
-				//Current condition being checked
-				Core.Condition condition;
-				foreach (Core.Aircraft aircraft in Core.aircraftlist.ToList()) {
-					//Update UI with aircraft being checked
-					Core.UI.updateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " + Core.aircraftlist.Count());
-					aircraftCount++;
+				//Check if there are aircraft to check
+				if (Core.aircraftlist.Count != 0) {
+					//Aircraft number to be shown on UI
+					int aircraftCount = 1;
+					//Current condition being checked
+					Core.Condition condition;
+					foreach (Core.Aircraft aircraft in Core.aircraftlist.ToList()) {
+						//Update UI with aircraft being checked
+						Core.UI.updateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " + Core.aircraftlist.Count());
+						aircraftCount++;
 
-					//Iterate conditions
-					foreach (int conditionid in Core.conditions.Keys.ToList()) {
-						condition = Core.conditions[conditionid];
-						//Skip if condition is disabled or condition is already matched
-						if (condition.alertType == Core.AlertType.Disabled || (Core.activeMatches.ContainsKey(aircraft.ICAO) && Core.activeMatches[aircraft.ICAO].Conditions.Exists(x => x.ConditionID == conditionid)))
-							continue;
-
-						triggersMatching = 0;
-						//Iterate triggers for condition
-						foreach (Core.Trigger trigger in condition.triggers.Values) {
-							//LEGEND
-							//A = Equals/Not Equals
-							//B = Higher Than + Lower Than
-							//C = True/False Boolean
-							//D = Starts With + Ends With
-							//E = Contains
-
-							//Get internal name for property to compare
-							propertyInternalName = Core.vrsPropertyData[trigger.Property][2].ToString();
-
-							//If aircraft properties do not contain property, skip
-							if (aircraft.GetProperty(propertyInternalName) == null)
+						//Iterate conditions
+						foreach (int conditionid in Core.conditions.Keys.ToList()) {
+							condition = Core.conditions[conditionid];
+							//Skip if condition is disabled or condition is already matched
+							if (condition.alertType == Core.AlertType.Disabled || (Core.activeMatches.ContainsKey(aircraft.ICAO) && Core.activeMatches[aircraft.ICAO].Conditions.Exists(x => x.ConditionID == conditionid)))
 								continue;
-							//Check property against value
-							if (trigger.ComparisonType == "Equals" && aircraft.GetProperty(propertyInternalName) == trigger.Value)
-								triggersMatching++;
-							if (trigger.ComparisonType == "Not Equals" && aircraft.GetProperty(propertyInternalName) != trigger.Value)
-								triggersMatching++;
-							if (trigger.ComparisonType == "Contains" && aircraft.GetProperty(propertyInternalName).Contains(trigger.Value))
-								triggersMatching++;
-							if (trigger.ComparisonType == "Higher Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) > Convert.ToDouble(trigger.Value))
-								triggersMatching++;
-							if (trigger.ComparisonType == "Lower Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) < Convert.ToDouble(trigger.Value))
-								triggersMatching++;
-							if (trigger.ComparisonType == "Starts With" && (aircraft.GetProperty(propertyInternalName).Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(0, trigger.Value.Length) == trigger.Value))
-								triggersMatching++;
-							if (trigger.ComparisonType == "Ends With" && (aircraft.GetProperty(propertyInternalName).ToString().Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(aircraft.GetProperty(propertyInternalName).Length - trigger.Value.Length) == trigger.Value))
-								triggersMatching++;
-						}
 
-						//Get position in waiting matches
-						wmIcaoIndex = -1;
-						for (int i = 0;i < Core.waitingMatches.Count;i++) {
-							if (Core.waitingMatches[i][0] == aircraft.ICAO && Core.waitingMatches[i][1] == conditionid.ToString()) {
-								wmIcaoIndex = i;
-								break;
-							}
-						}
-						//If condition doesn't exist in waiting matches and all triggers match, add to waiting matches
-						if (wmIcaoIndex == -1 && triggersMatching == condition.triggers.Count) {
-							Core.waitingMatches.Add(new string[] { aircraft.ICAO, conditionid.ToString() });
-							//If ignore following is true, skip the following conditions
-							if (condition.ignoreFollowing)
-								break;
-							else
-								continue;
-						}
-						//If condition exists in waiting matches with this condition id, remove from waiting matches and send alert
-						if (wmIcaoIndex != -1 && Core.waitingMatches[wmIcaoIndex][1] == conditionid.ToString()) {
-							Core.waitingMatches.RemoveAt(wmIcaoIndex);
+							triggersMatching = 0;
+							//Iterate triggers for condition
+							foreach (Core.Trigger trigger in condition.triggers.Values) {
+								//LEGEND
+								//A = Equals/Not Equals
+								//B = Higher Than + Lower Than
+								//C = True/False Boolean
+								//D = Starts With + Ends With
+								//E = Contains
 
-							//Get receiver name
-							foreach (Core.Reciever reciever in Core.receivers)
-								if (reciever.Id == aircraft.GetProperty("Rcvr"))
-									recieverName = reciever.Name;
+								//Get internal name for property to compare
+								propertyInternalName = Core.vrsPropertyData[trigger.Property][2].ToString();
 
-							//Create email message
-							message = new MailMessage();
-							//Set subject and email property info
-							if (aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString()) == null) {
-								message.Subject = "First Contact Alert! " + condition.conditionName;
-								emailPropertyInfo = condition.emailProperty.ToString() + ": No Value";
-							}
-							else {
-								message.Subject = "First Contact Alert! " + condition.conditionName + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
-								emailPropertyInfo = condition.emailProperty.ToString() + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
-							}
-							//If active matches contains aircraft, add condition to the match
-							if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
-								Core.activeMatches[aircraft.ICAO].AddCondition(conditionid, condition, aircraft);
-							}
-							//Else add to active matches
-							else {
-								Core.Match m = new Core.Match(aircraft.ICAO);
-								m.AddCondition(conditionid, condition, aircraft);
-								Core.activeMatches.Add(aircraft.ICAO, m);
+								//If aircraft properties do not contain property, skip
+								if (aircraft.GetProperty(propertyInternalName) == null)
+									continue;
+								//Check property against value
+								if (trigger.ComparisonType == "Equals" && aircraft.GetProperty(propertyInternalName) == trigger.Value)
+									triggersMatching++;
+								if (trigger.ComparisonType == "Not Equals" && aircraft.GetProperty(propertyInternalName) != trigger.Value)
+									triggersMatching++;
+								if (trigger.ComparisonType == "Contains" && aircraft.GetProperty(propertyInternalName).Contains(trigger.Value))
+									triggersMatching++;
+								if (trigger.ComparisonType == "Higher Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) > Convert.ToDouble(trigger.Value))
+									triggersMatching++;
+								if (trigger.ComparisonType == "Lower Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) < Convert.ToDouble(trigger.Value))
+									triggersMatching++;
+								if (trigger.ComparisonType == "Starts With" && (aircraft.GetProperty(propertyInternalName).Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(0, trigger.Value.Length) == trigger.Value))
+									triggersMatching++;
+								if (trigger.ComparisonType == "Ends With" && (aircraft.GetProperty(propertyInternalName).ToString().Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(aircraft.GetProperty(propertyInternalName).Length - trigger.Value.Length) == trigger.Value))
+									triggersMatching++;
 							}
 
-							//Update stats and log to console
-							Stats.updateStats();
-							Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightGreen);
+							//Get position in waiting matches
+							wmIcaoIndex = -1;
+							for (int i = 0; i < Core.waitingMatches.Count; i++) {
+								if (Core.waitingMatches[i][0] == aircraft.ICAO && Core.waitingMatches[i][1] == conditionid.ToString()) {
+									wmIcaoIndex = i;
+									break;
+								}
+							}
+							//If condition doesn't exist in waiting matches and all triggers match, add to waiting matches
+							if (wmIcaoIndex == -1 && triggersMatching == condition.triggers.Count) {
+								Core.waitingMatches.Add(new string[] { aircraft.ICAO, conditionid.ToString() });
+								//If ignore following is true, skip the following conditions
+								if (condition.ignoreFollowing)
+									break;
+								else
+									continue;
+							}
+							//If condition exists in waiting matches with this condition id, remove from waiting matches and send alert
+							if (wmIcaoIndex != -1 && Core.waitingMatches[wmIcaoIndex][1] == conditionid.ToString()) {
+								Core.waitingMatches.RemoveAt(wmIcaoIndex);
 
-							//Send alert to emails in condition
-							if (condition.alertType == Core.AlertType.Both || condition.alertType == Core.AlertType.First)
-								foreach (string email in condition.recieverEmails)
-									Email.sendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, true);
-						}
-					}
-					//If active matches contains this aircraft, update aircraft info
-					if (Core.activeMatches.ContainsKey(aircraft.ICAO))
-						foreach (Core.MatchedCondition c in Core.activeMatches[aircraft.ICAO].Conditions)
-							c.AircraftInfo = aircraft;
-				}
-				//Check if aircraft have lost signal and remove aircraft that have timed out
-				Core.UI.updateStatusLabel("Checking aircraft are still on radar...");
-				//Iterate active matches
-				foreach (Core.Match match in Core.activeMatches.Values.ToList()) {
-					//Iterate match conditions
-					foreach (Core.MatchedCondition c in match.Conditions) {
-						//Check if signal has been lost for more than the removal timeout
-						if (match.SignalLostTime != DateTime.MinValue && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.timeoutLength - (Settings.timeoutLength * 2)))) < 0) {
-							//Log to UI
-							Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.DisplayName, Color.Orange);
-							//Remove from active matches
-							Core.activeMatches.Remove(match.Icao);
-							//Update aircraft info
-							Core.Aircraft aircraft = c.AircraftInfo;
-							//Alert if alert type is both or last
-							if (c.Match.alertType == Core.AlertType.Both || c.Match.alertType == Core.AlertType.Last) {
-								condition = c.Match;
+								//Get receiver name
+								foreach (Core.Reciever reciever in Core.receivers)
+									if (reciever.Id == aircraft.GetProperty("Rcvr"))
+										recieverName = reciever.Name;
 
-								//Create new email message
+								//Create email message
 								message = new MailMessage();
-
-								//Set email subject and email property info
+								//Set subject and email property info
 								if (aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString()) == null) {
-									message.Subject = "Last Contact Alert!  " + condition.conditionName;
+									message.Subject = "First Contact Alert! " + condition.conditionName;
 									emailPropertyInfo = condition.emailProperty.ToString() + ": No Value";
 								}
 								else {
-									message.Subject = "Last Contact Alert!  " + condition.conditionName + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
+									message.Subject = "First Contact Alert! " + condition.conditionName + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
 									emailPropertyInfo = condition.emailProperty.ToString() + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
 								}
-								//Make a ding noise or something
-								SystemSounds.Exclamation.Play();
-								//Show notification
-								Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", "Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")\nRegistration: " + aircraft.GetProperty("Reg"), ToolTipIcon.Info);
-								//Send alerts to all the emails
-								foreach (string email in condition.recieverEmails)
-									Email.sendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, false);
+								//If active matches contains aircraft, add condition to the match
+								if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
+									Core.activeMatches[aircraft.ICAO].AddCondition(conditionid, condition, aircraft);
+								}
+								//Else add to active matches
+								else {
+									Core.Match m = new Core.Match(aircraft.ICAO);
+									m.AddCondition(conditionid, condition, aircraft);
+									Core.activeMatches.Add(aircraft.ICAO, m);
+								}
+
+								//Update stats and log to console
+								Stats.updateStats();
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightGreen);
+
+								//Send alert to emails in condition
+								if (condition.alertType == Core.AlertType.Both || condition.alertType == Core.AlertType.First)
+									foreach (string email in condition.recieverEmails)
+										Email.sendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, true);
 							}
-							break;
 						}
-						//Check if signal has been lost/returned
-						bool stillActive = false;
-						foreach (Core.Aircraft aircraft in Core.aircraftlist)
-							if (aircraft.ICAO == match.Icao)
-								stillActive = true;
-						if (!stillActive && match.SignalLost == false) {
-							Core.activeMatches[match.Icao].SignalLostTime = DateTime.Now;
-							Core.activeMatches[match.Icao].SignalLost = true;
-							Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.DisplayName, Color.LightGoldenrodYellow);
-						}
-						if (stillActive && match.SignalLost == true) {
-							Core.activeMatches[match.Icao].SignalLost = false;
-							Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.DisplayName, Color.LightGoldenrodYellow);
+						//If active matches contains this aircraft, update aircraft info
+						if (Core.activeMatches.ContainsKey(aircraft.ICAO))
+							foreach (Core.MatchedCondition c in Core.activeMatches[aircraft.ICAO].Conditions)
+								c.AircraftInfo = aircraft;
+					}
+					//Check if aircraft have lost signal and remove aircraft that have timed out
+					Core.UI.updateStatusLabel("Checking aircraft are still on radar...");
+					//Iterate active matches
+					foreach (Core.Match match in Core.activeMatches.Values.ToList()) {
+						//Iterate match conditions
+						foreach (Core.MatchedCondition c in match.Conditions) {
+							//Check if signal has been lost for more than the removal timeout
+							if (match.SignalLostTime != DateTime.MinValue && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.removalTimeout - (Settings.removalTimeout * 2)))) < 0) {
+								//Log to UI
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.DisplayName, Color.Orange);
+								//Remove from active matches
+								Core.activeMatches.Remove(match.Icao);
+								//Update aircraft info
+								Core.Aircraft aircraft = c.AircraftInfo;
+								//Alert if alert type is both or last
+								if (c.Match.alertType == Core.AlertType.Both || c.Match.alertType == Core.AlertType.Last) {
+									condition = c.Match;
+
+									//Create new email message
+									message = new MailMessage();
+
+									//Set email subject and email property info
+									if (aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString()) == null) {
+										message.Subject = "Last Contact Alert!  " + condition.conditionName;
+										emailPropertyInfo = condition.emailProperty.ToString() + ": No Value";
+									}
+									else {
+										message.Subject = "Last Contact Alert!  " + condition.conditionName + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
+										emailPropertyInfo = condition.emailProperty.ToString() + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
+									}
+									//Make a ding noise or something
+									SystemSounds.Exclamation.Play();
+									//Show notification
+									Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", "Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")\nRegistration: " + aircraft.GetProperty("Reg"), ToolTipIcon.Info);
+									//Send alerts to all the emails
+									foreach (string email in condition.recieverEmails)
+										Email.sendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, false);
+								}
+								break;
+							}
+							//Check if signal has been lost/returned
+							bool stillActive = false;
+							foreach (Core.Aircraft aircraft in Core.aircraftlist)
+								if (aircraft.ICAO == match.Icao)
+									stillActive = true;
+							if (!stillActive && match.SignalLost == false) {
+								Core.activeMatches[match.Icao].SignalLostTime = DateTime.Now;
+								Core.activeMatches[match.Icao].SignalLost = true;
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.DisplayName, Color.LightGoldenrodYellow);
+							}
+							if (stillActive && match.SignalLost == true) {
+								Core.activeMatches[match.Icao].SignalLost = false;
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.DisplayName, Color.LightGoldenrodYellow);
+							}
 						}
 					}
 				}
@@ -257,7 +260,7 @@ namespace PlaneAlerter {
 				request = (HttpWebRequest)WebRequest.Create(url);
 				request.Method = "GET";
 				request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-				request.Timeout = 30000;
+				request.Timeout = Settings.timeout * 1000;
 				//Add credentials if they are provided
 				if (Settings.VRSAuthenticate) {
 					string encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));

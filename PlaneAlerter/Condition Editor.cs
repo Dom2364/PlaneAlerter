@@ -74,21 +74,6 @@ namespace PlaneAlerter {
 		}
 		
 		/// <summary>
-		/// Condition tree view double click
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		void ConditionTreeViewNodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
-		{
-			//Cancel if node is invalid
-			if (e.Node.Tag == null || e.Node.Tag.ToString() == "")
-				return;
-			Condition_Editor editor = new Condition_Editor(Convert.ToInt32(e.Node.Tag));
-			editor.ShowDialog();
-			updateConditionList();
-		}
-		
-		/// <summary>
 		/// Exit button click
 		/// </summary>
 		/// <param name="sender">Sender</param>
@@ -165,6 +150,29 @@ namespace PlaneAlerter {
 			EditorConditionsList.conditions.Add(conditionid + 1, c1);
 			EditorConditionsList.conditions.Add(conditionid, c2);
 			updateConditionList();
+		}
+
+		/// <summary>
+		/// Edit button click
+		/// </summary>
+		private void editButton_Click(object sender, EventArgs e) {
+			TreeNode node = conditionEditorTreeView.SelectedNode;
+			//Check if node is valid
+			if (node != null && node.Tag != null && node.Tag.ToString() != "") {
+				//Open editor, update list once closed
+				Condition_Editor editor = new Condition_Editor(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
+				editor.ShowDialog();
+				updateConditionList();
+			}
+		}
+
+		/// <summary>
+		/// Node mouse click
+		/// </summary>
+		private void conditionEditorTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e) {
+			//If node is valid, enable edit button
+			TreeNode node = e.Node;
+			editButton.Enabled = (node != null && node.Tag != null && node.Tag.ToString() != "");
 		}
 	}
 
