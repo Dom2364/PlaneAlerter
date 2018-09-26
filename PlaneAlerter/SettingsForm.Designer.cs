@@ -317,12 +317,13 @@
 			// label11
 			// 
 			this.label11.AutoSize = true;
-			this.label11.Location = new System.Drawing.Point(135, 77);
+			this.label11.Location = new System.Drawing.Point(123, 76);
 			this.label11.Name = "label11";
-			this.label11.Size = new System.Drawing.Size(76, 13);
+			this.label11.Size = new System.Drawing.Size(128, 13);
 			this.label11.TabIndex = 25;
-			this.label11.Text = "Timeout (secs)";
-			this.toolTip.SetToolTip(this.label11, "Request timeout for aircraftlist.json");
+			this.label11.Text = "AircraftList Timeout (secs)";
+			this.toolTip.SetToolTip(this.label11, "Request timeout for aircraftlist.json. Increasing this allows longer aircraft lis" +
+        "ts to not time out");
 			// 
 			// saveSettingsButton
 			// 
@@ -448,15 +449,25 @@
 			// 
 			// timeoutTextBox
 			// 
-			this.timeoutTextBox.Location = new System.Drawing.Point(217, 75);
+			this.timeoutTextBox.Location = new System.Drawing.Point(257, 74);
 			this.timeoutTextBox.Maximum = new decimal(new int[] {
             600,
             0,
             0,
             0});
+			this.timeoutTextBox.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
 			this.timeoutTextBox.Name = "timeoutTextBox";
-			this.timeoutTextBox.Size = new System.Drawing.Size(103, 20);
+			this.timeoutTextBox.Size = new System.Drawing.Size(63, 20);
 			this.timeoutTextBox.TabIndex = 24;
+			this.timeoutTextBox.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
 			// 
 			// refreshTextBox
 			// 

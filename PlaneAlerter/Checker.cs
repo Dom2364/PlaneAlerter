@@ -165,7 +165,7 @@ namespace PlaneAlerter {
 								//Send alert to emails in condition
 								if (condition.alertType == Core.AlertType.Both || condition.alertType == Core.AlertType.First)
 									foreach (string email in condition.recieverEmails)
-										Email.sendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, true);
+										Email.SendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, true);
 							}
 						}
 						//If active matches contains this aircraft, update aircraft info
@@ -209,7 +209,7 @@ namespace PlaneAlerter {
 									Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", "Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")\nRegistration: " + aircraft.GetProperty("Reg"), ToolTipIcon.Info);
 									//Send alerts to all the emails
 									foreach (string email in condition.recieverEmails)
-										Email.sendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, false);
+										Email.SendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, false);
 								}
 								break;
 							}
@@ -341,15 +341,17 @@ namespace PlaneAlerter {
 					using (StreamReader reader = new StreamReader(filestream))
 						using (JsonTextReader jsonreader = new JsonTextReader(reader))
 							conditionJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
+				if (conditionJson == null) return;
 				//Iterate parsed conditions
 				for (int conditionid = 0;conditionid < conditionJson.Count;conditionid++) {
 					JToken condition = conditionJson[conditionid.ToString()];
 					//Create condition and copy values
-					Core.Condition newCondition = new Core.Condition();
-					newCondition.conditionName = condition["conditionName"].ToString();
-					newCondition.emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString());
-					newCondition.alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString());
-					newCondition.ignoreFollowing = (bool)condition["ignoreFollowing"];
+					Core.Condition newCondition = new Core.Condition {
+						conditionName = condition["conditionName"].ToString(),
+						emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString()),
+						alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
+						ignoreFollowing = (bool)condition["ignoreFollowing"]
+					};
 					List<string> emailsArray = new List<string>();
 					foreach (JToken email in condition["recieverEmails"])
 						emailsArray.Add(email.ToString());

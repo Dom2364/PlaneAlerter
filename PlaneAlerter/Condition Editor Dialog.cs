@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -28,7 +29,7 @@ namespace PlaneAlerter {
 			isUpdating = true;
 			conditionToUpdate = _conditionToUpdate;
 			//Initialise form options
-			initialise();
+			Initialise();
 			//Set form element values from condition info
 			Core.Condition c = EditorConditionsList.conditions[conditionToUpdate];
 			conditionNameTextBox.Text = c.conditionName;
@@ -52,13 +53,13 @@ namespace PlaneAlerter {
 		/// </summary>
 		public Condition_Editor() {
 			//Initialise form options
-			initialise();
+			Initialise();
 		}
 		
 		/// <summary>
 		/// Initialise form options
 		/// </summary>
-		public void initialise() {
+		public void Initialise() {
 			//Initialise form elements
 			InitializeComponent();
 
@@ -170,8 +171,8 @@ namespace PlaneAlerter {
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		void SaveButtonClick(object sender, EventArgs e)
-		{
+		void SaveButtonClick(object sender, EventArgs e) {
+
 			//Check if values are empty/invalid
 			bool cancelSave = false;
 			if (conditionNameTextBox.Text == "") {
@@ -209,6 +210,17 @@ namespace PlaneAlerter {
 			else {
 				triggerDataGridView.BackgroundColor = SystemColors.AppWorkspace;
 			}
+			//Check if emails are valid
+			foreach (string line in recieverEmailTextBox.Lines) {
+				try {
+					new System.Net.Mail.MailAddress(line);
+				}
+				catch (FormatException) {
+					emailToSendToLabel.ForeColor = Color.Red;
+					cancelSave = true;
+					break;
+				}
+			}
 			//Cancel if values are invalid
 			if (cancelSave) {
 				return;
@@ -227,12 +239,13 @@ namespace PlaneAlerter {
 			EditorConditionsList.conditions = sortedConditions;
 
 			//Create new condition
-			Core.Condition newCondition = new Core.Condition();
-			newCondition.conditionName = conditionNameTextBox.Text;
-			newCondition.emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), emailPropertyComboBox.Text);
-			newCondition.recieverEmails = recieverEmailTextBox.Text.Split(new string[] {Environment.NewLine}, StringSplitOptions.None).ToList();
-			newCondition.alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text);
-			newCondition.ignoreFollowing = ignoreFollowingCheckbox.Checked;
+			Core.Condition newCondition = new Core.Condition {
+				conditionName = conditionNameTextBox.Text,
+				emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), emailPropertyComboBox.Text),
+				recieverEmails = recieverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
+				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text),
+				ignoreFollowing = ignoreFollowingCheckbox.Checked
+			};
 			if (triggerDataGridView.Rows.Count != 0)
 				foreach (DataGridViewRow row in triggerDataGridView.Rows)
 					if (row.Index != triggerDataGridView.Rows.Count - 1)

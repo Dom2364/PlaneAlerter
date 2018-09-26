@@ -81,7 +81,7 @@
 			this.emailPropertyComboBox.Location = new System.Drawing.Point(103, 98);
 			this.emailPropertyComboBox.Name = "emailPropertyComboBox";
 			this.emailPropertyComboBox.Size = new System.Drawing.Size(390, 21);
-			this.emailPropertyComboBox.TabIndex = 3;
+			this.emailPropertyComboBox.TabIndex = 2;
 			// 
 			// triggerDataGridView
 			// 
@@ -98,7 +98,7 @@
 			this.triggerDataGridView.RowHeadersVisible = false;
 			this.triggerDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.triggerDataGridView.Size = new System.Drawing.Size(505, 156);
-			this.triggerDataGridView.TabIndex = 4;
+			this.triggerDataGridView.TabIndex = 7;
 			this.triggerDataGridView.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.triggerDataGridView_CellValueChanged);
 			this.triggerDataGridView.UserAddedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.TriggerDataGridViewUserAddedRow);
 			// 
@@ -138,7 +138,7 @@
 			this.saveButton.Margin = new System.Windows.Forms.Padding(2);
 			this.saveButton.Name = "saveButton";
 			this.saveButton.Size = new System.Drawing.Size(121, 21);
-			this.saveButton.TabIndex = 6;
+			this.saveButton.TabIndex = 5;
 			this.saveButton.Text = "Save Condition";
 			this.saveButton.UseVisualStyleBackColor = true;
 			this.saveButton.Click += new System.EventHandler(this.SaveButtonClick);
@@ -151,7 +151,7 @@
 			this.alertTypeComboBox.Location = new System.Drawing.Point(103, 124);
 			this.alertTypeComboBox.Name = "alertTypeComboBox";
 			this.alertTypeComboBox.Size = new System.Drawing.Size(140, 21);
-			this.alertTypeComboBox.TabIndex = 7;
+			this.alertTypeComboBox.TabIndex = 3;
 			// 
 			// emailToSendToLabel
 			// 
@@ -170,7 +170,7 @@
 			this.recieverEmailTextBox.Multiline = true;
 			this.recieverEmailTextBox.Name = "recieverEmailTextBox";
 			this.recieverEmailTextBox.Size = new System.Drawing.Size(390, 54);
-			this.recieverEmailTextBox.TabIndex = 8;
+			this.recieverEmailTextBox.TabIndex = 1;
 			// 
 			// propertyInfoButton
 			// 
@@ -179,7 +179,7 @@
 			this.propertyInfoButton.Margin = new System.Windows.Forms.Padding(2);
 			this.propertyInfoButton.Name = "propertyInfoButton";
 			this.propertyInfoButton.Size = new System.Drawing.Size(121, 21);
-			this.propertyInfoButton.TabIndex = 10;
+			this.propertyInfoButton.TabIndex = 4;
 			this.propertyInfoButton.Text = "Property Info";
 			this.propertyInfoButton.UseVisualStyleBackColor = true;
 			this.propertyInfoButton.Click += new System.EventHandler(this.propertyInfoButton_Click);
@@ -210,7 +210,7 @@
 			this.ignoreFollowingCheckbox.Location = new System.Drawing.Point(342, 152);
 			this.ignoreFollowingCheckbox.Name = "ignoreFollowingCheckbox";
 			this.ignoreFollowingCheckbox.Size = new System.Drawing.Size(151, 17);
-			this.ignoreFollowingCheckbox.TabIndex = 12;
+			this.ignoreFollowingCheckbox.TabIndex = 6;
 			this.ignoreFollowingCheckbox.Text = "Ignore following conditions";
 			this.ignoreFollowingCheckbox.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.ignoreFollowingCheckbox.UseVisualStyleBackColor = true;

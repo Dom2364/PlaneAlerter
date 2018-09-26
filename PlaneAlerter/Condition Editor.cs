@@ -20,23 +20,25 @@ namespace PlaneAlerter {
 				//Parse json
 				string conditionsJsonText = File.ReadAllText("conditions.json");
 				JObject conditionJson = (JObject)JsonConvert.DeserializeObject(conditionsJsonText);
-				//Iterate parsed conditions
-				for (int conditionid = 0;conditionid<conditionJson.Count;conditionid++) {
-					JToken condition = conditionJson[conditionid.ToString()];
-					//Create condition from parsed json
-					Core.Condition newCondition = new Core.Condition();
-					newCondition.conditionName = condition["conditionName"].ToString();
-					newCondition.emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString());
-					newCondition.alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString());
-					newCondition.ignoreFollowing = (bool)condition["ignoreFollowing"];
-					List<string> emailsArray = new List<string>();
-					foreach(JToken email in condition["recieverEmails"])
-						emailsArray.Add(email.ToString());
-					newCondition.recieverEmails = emailsArray;
-					foreach(JToken trigger in condition["triggers"].Values())
-						newCondition.triggers.Add(newCondition.triggers.Count, new Core.Trigger((Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
-					//Add condition to list
-					EditorConditionsList.conditions.Add(conditionid, newCondition);
+				if (conditionJson != null) {
+					//Iterate parsed conditions
+					for (int conditionid = 0; conditionid < conditionJson.Count; conditionid++) {
+						JToken condition = conditionJson[conditionid.ToString()];
+						//Create condition from parsed json
+						Core.Condition newCondition = new Core.Condition();
+						newCondition.conditionName = condition["conditionName"].ToString();
+						newCondition.emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString());
+						newCondition.alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString());
+						newCondition.ignoreFollowing = (bool)condition["ignoreFollowing"];
+						List<string> emailsArray = new List<string>();
+						foreach (JToken email in condition["recieverEmails"])
+							emailsArray.Add(email.ToString());
+						newCondition.recieverEmails = emailsArray;
+						foreach (JToken trigger in condition["triggers"].Values())
+							newCondition.triggers.Add(newCondition.triggers.Count, new Core.Trigger((Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
+						//Add condition to list
+						EditorConditionsList.conditions.Add(conditionid, newCondition);
+					}
 				}
 			}
 			updateConditionList();

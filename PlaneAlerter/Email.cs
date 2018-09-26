@@ -28,11 +28,13 @@ namespace PlaneAlerter {
 		/// <param name="recieverName">Name of receiver that got the last aircraft information</param>
 		/// <param name="emailPropertyInfo">String for displaying email property value</param>
 		/// <param name="isDetection">Is this a detection, not a removal?</param>
-		public static void sendEmail(string emailaddress, MailMessage message, Core.Condition condition, Core.Aircraft aircraft, string recieverName, string emailPropertyInfo, bool isDetection) {
+		public static void SendEmail(string emailaddress, MailMessage message, Core.Condition condition, Core.Aircraft aircraft, string recieverName, string emailPropertyInfo, bool isDetection) {
 			//Array to store position trail
 			Dictionary<int, string[]> pathArray = new Dictionary<int, string[]>();
-			//Google map for position trail's url
-			string googleMapUrl = "";
+			//Google status map for position trail's url
+			string staticMapUrl = "";
+			//Google maps url
+			string googleMapsUrl = "";
 			//Transponder type from aircraft info
 			string transponderName = "";
 			//Types of transponders
@@ -56,7 +58,7 @@ namespace PlaneAlerter {
 				message.To.Clear();
 				message.To.Add(emailaddress);
 			}
-			catch (FormatException) {
+			catch {
 				Core.UI.writeToConsole("ERROR: Email to send to is invalid (" + emailaddress + ")", Color.Red);
 				return;
 			}
@@ -65,7 +67,7 @@ namespace PlaneAlerter {
 			try {
 				message.From = new MailAddress(Settings.senderEmail, "PlaneAlerter Alerts");
 			}
-			catch (FormatException) {
+			catch {
 				Core.UI.writeToConsole("ERROR: Email to send from is invalid (" + Settings.senderEmail + ")", Color.Red);
 				return;
 			}
@@ -132,9 +134,9 @@ namespace PlaneAlerter {
                 //If aircraft has a position, generate a google map url
                 if (aircraft.GetProperty("Lat") != null)
                     if (aircraft.Trail.Count() != 3)
-                        googleMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;path=color:0x000000|";
+                        staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&amp;path=color:0x000000|";
                     else
-                        googleMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;zoom=8&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;path=color:0x000000|";
+                        staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;zoom=8&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&amp;path=color:0x000000|";
 
                 //Process aircraft trail
                 for (int i = 0; i < aircraft.Trail.Count() / 3; i++) {
@@ -145,14 +147,17 @@ namespace PlaneAlerter {
 						aircraft.Trail[i * 3 + 2].ToString()
 					};
                     //Add coordinate to google map url
-                    googleMapUrl += coord[0] + "," + coord[1];
+                    staticMapUrl += coord[0] + "," + coord[1];
                     //If this is not the last coordinate, add a separator
                     if (i != (aircraft.Trail.Count() / 3) - 1)
-                        googleMapUrl += "|";
+                        staticMapUrl += "|";
                 }
 
-                //Generate airframes.org url
-                if (aircraft.GetProperty("Reg") != null && aircraft.GetProperty("Reg") != "")
+				//Generate google maps url
+				googleMapsUrl = "https://www.google.com.au/maps/search/" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long");
+
+				//Generate airframes.org url
+				if (aircraft.GetProperty("Reg") != null && aircraft.GetProperty("Reg") != "")
                     airframesUrl = "<h3><a style='text-decoration: none;' href='http://www.airframes.org/reg/" + aircraft.GetProperty("Reg").Replace("-", "").ToUpper() + "'>Airframes.org Lookup</a></h3>";
 
                 //Generate radar url
@@ -285,8 +290,8 @@ namespace PlaneAlerter {
                     message.Body += imageHTML;
                 //Map
                 if (Settings.EmailContentConfig.Map && aircraft.GetProperty("Lat") != null) {
-                    message.Body += "<h3 style='margin: 0px'><a style='text-decoration: none' href=" + googleMapUrl + ">Open map</a></h3><br />" +
-                    "<img style='border: 2px solid;border-radius: 10px;' alt='Loading Map...' src='" + googleMapUrl + "' />";
+                    message.Body += "<h3 style='margin: 0px'><a style='text-decoration: none' href=" + googleMapsUrl + ">Open in Google Maps</a></h3><br />" +
+                    "<img style='border: 2px solid;border-radius: 10px;' alt='Loading Map...' src='" + staticMapUrl + "' />";
                 }
                 message.Body += "</td></tr></table></body></html>";
             }
