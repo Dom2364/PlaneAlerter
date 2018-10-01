@@ -65,9 +65,7 @@ namespace PlaneAlerter
 			Shown += delegate {
 				while (!Settings.SettingsLoaded || !Checker.ConditionsLoaded)
 					Thread.Sleep(100);
-				ThreadManager.StartLoopThread(false);
-				writeToConsole("PlaneAlerter Started!", Color.White);
-				writeToConsole("", Color.White);
+				ThreadManager.StartOrRestart();
 			};
 		}
 
@@ -145,7 +143,7 @@ namespace PlaneAlerter
 		void ReloadConditionsToolStripMenuItemClick(object sender, EventArgs e) {
 			//Disable button then restart threads
 			reloadConditionsToolStripMenuItem.Enabled = false;
-			ThreadManager.Restart();
+			ThreadManager.StartOrRestart();
 		}
 		
 		/// <summary>
@@ -159,12 +157,8 @@ namespace PlaneAlerter
 				Core.statsThread.Abort();
 			if (Core.loopThread != null)
 				Core.loopThread.Abort();
-			
-			//Serialise and save settings and email config
-			string serialisedSettings = JsonConvert.SerializeObject(Settings.returnSettingsDictionary(), Formatting.Indented);
-			File.WriteAllText("settings.json", serialisedSettings);
-			string serialisedEcc = JsonConvert.SerializeObject(Settings.returnECCDictionary(), Formatting.Indented);
-			File.WriteAllText("emailconfig.json", serialisedEcc);
+
+			Settings.Save();
 		}
 		
 		/// <summary>

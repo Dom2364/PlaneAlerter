@@ -169,7 +169,7 @@ namespace PlaneAlerter {
                 }
                 catch {
                     Core.UI.writeToConsole("ERROR: No radar url specified.", Color.Red);
-                    ThreadManager.Restart();
+                    ThreadManager.StartOrRestart();
                 }
 
                 //Get name of transponder type

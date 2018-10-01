@@ -86,6 +86,7 @@ namespace PlaneAlerter {
 			Settings.SMTPPwd = smtpPwdTextBox.Text;
 			Settings.SMTPSSL = smtpSSLCheckBox.Checked;
 			Settings.timeout = Convert.ToInt32(timeoutTextBox.Value);
+			Settings.Save();
 		}
 
 		/// <summary>

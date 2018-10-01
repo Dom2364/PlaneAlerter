@@ -163,9 +163,9 @@ namespace PlaneAlerter {
 		/// </summary>
 		public enum AlertType {
 			Disabled,
-			First,
-			Last,
-			Both
+			First_Contact,
+			Last_Contact,
+			First_and_Last_Contact
 		}
 
 		/// <summary>

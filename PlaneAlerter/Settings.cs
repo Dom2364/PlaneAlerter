@@ -179,14 +179,12 @@ namespace PlaneAlerter {
 			Core.UI.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP Host: " + SMTPHost + ":" + SMTPPort);
 			Core.UI.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP SSL: " + SMTPSSL);
 			Core.UI.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP Username: " + SMTPUsr);
-			Core.UI.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP Password: *Censored*");
 
 			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("AircraftList.json Url: " + acListUrl);
 			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Radar Url: " + radarUrl);
 			if (VRSAuthenticate) {
 				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " + VRSAuthenticate);
 				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Username: " + VRSUsr);
-				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Password: *Censored*");
 			}
 			else
 				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " + VRSAuthenticate);
@@ -194,7 +192,7 @@ namespace PlaneAlerter {
 
 			//If its an update, restart threads
 			if (update)
-				ThreadManager.Restart();
+				ThreadManager.StartOrRestart();
 		}
 
         /// <summary>
@@ -202,6 +200,7 @@ namespace PlaneAlerter {
         /// </summary>
         static void LoadDefaults() {
             SMTPPort = 21;
+			timeout = 5;
             File.WriteAllText("settings.json", JsonConvert.SerializeObject(returnSettingsDictionary(), Formatting.Indented));
         }
 
@@ -220,6 +219,17 @@ namespace PlaneAlerter {
             EmailContentConfig.TwitterOptimised = false;
             File.WriteAllText("emailconfig.json", JsonConvert.SerializeObject(returnECCDictionary(), Formatting.Indented));
         }
+
+		/// <summary>
+		/// Save Settings
+		/// </summary>
+		public static void Save() {
+			//Serialise and save settings and email config
+			string serialisedSettings = JsonConvert.SerializeObject(Settings.returnSettingsDictionary(), Formatting.Indented);
+			File.WriteAllText("settings.json", serialisedSettings);
+			string serialisedEcc = JsonConvert.SerializeObject(Settings.returnECCDictionary(), Formatting.Indented);
+			File.WriteAllText("emailconfig.json", serialisedEcc);
+		}
 
         //Constructor
         static Settings() {
@@ -257,7 +267,7 @@ namespace PlaneAlerter {
 				VRSAuthenticate = (VRSUsr != "");
 				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
 				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 30;
-				if (settingsJson["timeout"] != null) timeout = Convert.ToInt32(settingsJson["timeout"]); else timeout = 30;
+				if (settingsJson["timeout"] != null && Convert.ToInt32(settingsJson["timeout"]) >= 5) timeout = Convert.ToInt32(settingsJson["timeout"]); else timeout = 30;
 				if (settingsJson["radarURL"] != null) radarUrl = settingsJson["radarURL"].ToString();
 				if (settingsJson["SMTPHost"] != null) SMTPHost = settingsJson["SMTPHost"].ToString();
 				try {

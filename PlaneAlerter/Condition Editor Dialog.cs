@@ -35,7 +35,7 @@ namespace PlaneAlerter {
 			conditionNameTextBox.Text = c.conditionName;
 			emailPropertyComboBox.Text = c.emailProperty.ToString();
 			recieverEmailTextBox.Text = string.Join(Environment.NewLine, c.recieverEmails.ToArray());
-			alertTypeComboBox.Text = c.alertType.ToString();
+			alertTypeComboBox.Text = c.alertType.ToString().Replace('_', ' ');
 			foreach (Core.Trigger trigger in c.triggers.Values) {
 				triggerDataGridView.Rows.Add();
 				DataGridViewRow newRow = triggerDataGridView.Rows[triggerDataGridView.Rows.Count - 2];
@@ -76,7 +76,7 @@ namespace PlaneAlerter {
 				emailPropertyComboBox.Items.Add(property.ToString());
 			//Add alert types to combobox
 			foreach(Core.AlertType property in Enum.GetValues(typeof(Core.AlertType)))
-				alertTypeComboBox.Items.Add(property.ToString());
+				alertTypeComboBox.Items.Add(property.ToString().Replace('_', ' '));
 		}
 		
 		/// <summary>
@@ -243,7 +243,7 @@ namespace PlaneAlerter {
 				conditionName = conditionNameTextBox.Text,
 				emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), emailPropertyComboBox.Text),
 				recieverEmails = recieverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
-				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text),
+				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
 				ignoreFollowing = ignoreFollowingCheckbox.Checked
 			};
 			if (triggerDataGridView.Rows.Count != 0)

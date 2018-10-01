@@ -96,17 +96,17 @@ namespace PlaneAlerter {
 								//Check property against value
 								if (trigger.ComparisonType == "Equals" && aircraft.GetProperty(propertyInternalName) == trigger.Value)
 									triggersMatching++;
-								if (trigger.ComparisonType == "Not Equals" && aircraft.GetProperty(propertyInternalName) != trigger.Value)
+								else if (trigger.ComparisonType == "Not Equals" && aircraft.GetProperty(propertyInternalName) != trigger.Value)
 									triggersMatching++;
-								if (trigger.ComparisonType == "Contains" && aircraft.GetProperty(propertyInternalName).Contains(trigger.Value))
+								else if (trigger.ComparisonType == "Contains" && aircraft.GetProperty(propertyInternalName).Contains(trigger.Value))
 									triggersMatching++;
-								if (trigger.ComparisonType == "Higher Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) > Convert.ToDouble(trigger.Value))
+								else if (trigger.ComparisonType == "Higher Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) > Convert.ToDouble(trigger.Value))
 									triggersMatching++;
-								if (trigger.ComparisonType == "Lower Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) < Convert.ToDouble(trigger.Value))
+								else if (trigger.ComparisonType == "Lower Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) < Convert.ToDouble(trigger.Value))
 									triggersMatching++;
-								if (trigger.ComparisonType == "Starts With" && (aircraft.GetProperty(propertyInternalName).Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(0, trigger.Value.Length) == trigger.Value))
+								else if (trigger.ComparisonType == "Starts With" && (aircraft.GetProperty(propertyInternalName).Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(0, trigger.Value.Length) == trigger.Value))
 									triggersMatching++;
-								if (trigger.ComparisonType == "Ends With" && (aircraft.GetProperty(propertyInternalName).ToString().Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(aircraft.GetProperty(propertyInternalName).Length - trigger.Value.Length) == trigger.Value))
+								else if (trigger.ComparisonType == "Ends With" && (aircraft.GetProperty(propertyInternalName).ToString().Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(aircraft.GetProperty(propertyInternalName).Length - trigger.Value.Length) == trigger.Value))
 									triggersMatching++;
 							}
 
@@ -163,7 +163,7 @@ namespace PlaneAlerter {
 								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightGreen);
 
 								//Send alert to emails in condition
-								if (condition.alertType == Core.AlertType.Both || condition.alertType == Core.AlertType.First)
+								if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
 									foreach (string email in condition.recieverEmails)
 										Email.SendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, true);
 							}
@@ -188,7 +188,7 @@ namespace PlaneAlerter {
 								//Update aircraft info
 								Core.Aircraft aircraft = c.AircraftInfo;
 								//Alert if alert type is both or last
-								if (c.Match.alertType == Core.AlertType.Both || c.Match.alertType == Core.AlertType.Last) {
+								if (c.Match.alertType == Core.AlertType.First_and_Last_Contact || c.Match.alertType == Core.AlertType.Last_Contact) {
 									condition = c.Match;
 
 									//Create new email message
@@ -371,9 +371,10 @@ namespace PlaneAlerter {
 				Core.UI.conditionTreeView.Nodes[0].Expand();
 				//Log to UI
 				Core.UI.writeToConsole("Conditions Loaded", Color.White);
-				//Restart threads if they are not stopping/stopped
-				if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Waiting || ThreadManager.threadStatus == ThreadManager.CheckerStatus.Running)
-					ThreadManager.Restart();
+				//Restart threads
+				if (ThreadManager.threadStatus != ThreadManager.CheckerStatus.WaitingForLoad) 
+					ThreadManager.StartOrRestart();
+
 			}
 			catch (Exception e) {
 				MessageBox.Show(e.Message + "\n\n" + e.StackTrace);
