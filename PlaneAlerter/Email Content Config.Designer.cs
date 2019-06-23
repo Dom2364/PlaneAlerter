@@ -59,7 +59,7 @@
             this.transponderTypeCheckBox.Name = "transponderTypeCheckBox";
             this.transponderTypeCheckBox.Size = new System.Drawing.Size(110, 17);
             this.transponderTypeCheckBox.TabIndex = 1;
-            this.transponderTypeCheckBox.Text = "Tansponder Type";
+            this.transponderTypeCheckBox.Text = "Transponder Type";
             this.transponderTypeCheckBox.UseVisualStyleBackColor = true;
             // 
             // plHidden
