@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 using Tweetinvi;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
@@ -10,18 +11,19 @@ namespace PlaneAlerter {
 	/// Class for twitter related stuff
 	/// </summary>
 	static class Twitter {
-		public static IConsumerCredentials AppCredentials { get; set; }
+		public static IConsumerCredentials AppCredentials;
+		public static Dictionary<string, ITwitterCredentials> UserCredentials;
 
 		/// <summary>
 		/// Posts a tweet
 		/// </summary>
-		public static void Tweet(string accessToken, string accessTokenSecret, string content) {
-			Auth.SetUserCredentials(AppCredentials.ConsumerKey, AppCredentials.ConsumerSecret, accessToken, accessTokenSecret);
+		public static void Tweet(ITwitterCredentials credentials, string content) {
+			Auth.SetCredentials(credentials);
 			Tweetinvi.Tweet.PublishTweet(content);
 		}
 
 		/// <summary>
-		/// Add an account to the list of accounts to pick from
+		/// Authenticate account and add to accounts list
 		/// </summary>
 		public static void AddAccount() {
 			IAuthenticationContext authenticationContext = AuthFlow.InitAuthentication(AppCredentials);
@@ -32,7 +34,8 @@ namespace PlaneAlerter {
 			
 			ITwitterCredentials userCredentials = AuthFlow.CreateCredentialsFromVerifierCode(pinCode, authenticationContext);
 
-			//Store credentials
+			UserCredentials.Add(User.GetAuthenticatedUser().ScreenName, userCredentials);
+			SecureConfig.SaveConfig();
 		}
 	}
 }
