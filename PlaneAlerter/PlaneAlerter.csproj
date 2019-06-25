@@ -237,6 +237,7 @@
     </Compile>
     <Compile Include="Stats.cs" />
     <Compile Include="ThreadManager.cs" />
+    <Compile Include="Twitter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
