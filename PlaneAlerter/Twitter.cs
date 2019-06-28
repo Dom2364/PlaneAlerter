@@ -11,8 +11,11 @@ namespace PlaneAlerter {
 	/// Class for twitter related stuff
 	/// </summary>
 	static class Twitter {
-		public static IConsumerCredentials AppCredentials;
-		public static Dictionary<string, ITwitterCredentials> UserCredentials;
+		//Don't even think about it
+		private const string Key = "ZGdJYmh6R1hCdldqRUNJUlF2d2p3aVFaQg==";
+		private const string SecretKey = "alRlNVh2bk8zS0IzWlNuSnVmalU5NUdqenN6ZUs3SUtiVlBsM1NBZHp1Yjc5eVh1NlY=";
+		private static IConsumerCredentials AppCredentials = new ConsumerCredentials(Key, SecretKey);
+		public static Dictionary<string, ITwitterCredentials> UserCredentials = new Dictionary<string, ITwitterCredentials>();
 
 		/// <summary>
 		/// Posts a tweet
@@ -35,7 +38,6 @@ namespace PlaneAlerter {
 			ITwitterCredentials userCredentials = AuthFlow.CreateCredentialsFromVerifierCode(pinCode, authenticationContext);
 
 			UserCredentials.Add(User.GetAuthenticatedUser().ScreenName, userCredentials);
-			SecureConfig.SaveConfig();
 		}
 	}
 }

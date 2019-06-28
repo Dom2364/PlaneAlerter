@@ -229,7 +229,6 @@
     <Compile Include="PropertyInfoForm.Designer.cs">
       <DependentUpon>PropertyInfoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SecureConfig.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
