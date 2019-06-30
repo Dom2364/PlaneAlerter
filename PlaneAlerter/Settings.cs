@@ -7,6 +7,7 @@ using System.Net.Mail;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Tweetinvi.Models;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -99,6 +100,11 @@ namespace PlaneAlerter {
 		public static bool SettingsLoaded = false;
 
 		/// <summary>
+		/// List of Twitter user credentials
+		/// </summary>
+		public static Dictionary<string, string[]> TwitterUsers = new Dictionary<string, string[]>();
+
+		/// <summary>
 		/// Email content config
 		/// </summary>
 		public static class EmailContentConfig {
@@ -135,6 +141,7 @@ namespace PlaneAlerter {
 			settingsDictionary.Add("SMTPUsr", SMTPUsr);
 			settingsDictionary.Add("SMTPPwd", SMTPPwd);
 			settingsDictionary.Add("SMTPSSL", SMTPSSL);
+			settingsDictionary.Add("TwitterUsers", TwitterUsers);
 			return settingsDictionary;
 		}
 
@@ -280,6 +287,7 @@ namespace PlaneAlerter {
 				if (settingsJson["SMTPUsr"] != null) SMTPUsr = settingsJson["SMTPUsr"].ToString();
 				if (settingsJson["SMTPPwd"] != null) SMTPPwd = settingsJson["SMTPPwd"].ToString();
 				if (settingsJson["SMTPSSL"] != null) SMTPSSL = (settingsJson["SMTPSSL"].ToString().ToLower() == "true");
+				if (settingsJson["TwitterUsers"] != null) TwitterUsers = settingsJson["TwitterUsers"].ToObject<Dictionary<string, string[]>>();
 			}
 
 			//Set mailclient info

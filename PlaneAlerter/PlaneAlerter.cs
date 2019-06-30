@@ -234,5 +234,9 @@ namespace PlaneAlerter
 			//Open donate link
 			Process.Start(@"http://donate.dom2364.com");
 		}
+
+		private void addAccountToolStripMenuItem_Click(object sender, EventArgs e) {
+			Twitter.AddAccount();
+		}
 	}
 }

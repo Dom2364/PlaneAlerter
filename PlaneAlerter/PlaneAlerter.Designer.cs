@@ -62,6 +62,9 @@
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.activeMatchesList = new System.Windows.Forms.ListBox();
 			this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+			this.twitterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.addAccountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.showAuthenticatedUsersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip1.SuspendLayout();
 			this.statusStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -130,9 +133,10 @@
 			// optionsToolStripMenuItem
 			// 
 			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.settingsToolStripMenuItem,
-            this.emailContentConfigToolStripMenuItem,
             this.startConditionEditorToolStripMenuItem,
+            this.settingsToolStripMenuItem,
+            this.twitterToolStripMenuItem,
+            this.emailContentConfigToolStripMenuItem,
             this.openLogFileToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
@@ -233,6 +237,28 @@
 			this.notifyIcon.Visible = true;
 			this.notifyIcon.BalloonTipClicked += new System.EventHandler(this.notifyIcon_BalloonTipClicked);
 			// 
+			// twitterToolStripMenuItem
+			// 
+			this.twitterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showAuthenticatedUsersToolStripMenuItem,
+            this.addAccountToolStripMenuItem});
+			this.twitterToolStripMenuItem.Name = "twitterToolStripMenuItem";
+			this.twitterToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.twitterToolStripMenuItem.Text = "Twitter";
+			// 
+			// addAccountToolStripMenuItem
+			// 
+			this.addAccountToolStripMenuItem.Name = "addAccountToolStripMenuItem";
+			this.addAccountToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+			this.addAccountToolStripMenuItem.Text = "Add Account";
+			this.addAccountToolStripMenuItem.Click += new System.EventHandler(this.addAccountToolStripMenuItem_Click);
+			// 
+			// showAuthenticatedUsersToolStripMenuItem
+			// 
+			this.showAuthenticatedUsersToolStripMenuItem.Name = "showAuthenticatedUsersToolStripMenuItem";
+			this.showAuthenticatedUsersToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+			this.showAuthenticatedUsersToolStripMenuItem.Text = "Show Authenticated Users";
+			// 
 			// PlaneAlerter
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -274,5 +300,8 @@
 		public System.Windows.Forms.ToolStripStatusLabel statusLabel;
 		public System.Windows.Forms.NotifyIcon notifyIcon;
 		public System.Windows.Forms.ToolStripMenuItem reloadConditionsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem twitterToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem showAuthenticatedUsersToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem addAccountToolStripMenuItem;
 	}
 }

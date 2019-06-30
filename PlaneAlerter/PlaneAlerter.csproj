@@ -222,6 +222,12 @@
       <DependentUpon>PlaneAlerter.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="PinPromptDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PinPromptDialog.Designer.cs">
+      <DependentUpon>PinPromptDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyInfoForm.cs">
       <SubType>Form</SubType>
@@ -256,6 +262,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PlaneAlerter.resx">
       <DependentUpon>PlaneAlerter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PinPromptDialog.resx">
+      <DependentUpon>PinPromptDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PropertyInfoForm.resx">
       <DependentUpon>PropertyInfoForm.cs</DependentUpon>
