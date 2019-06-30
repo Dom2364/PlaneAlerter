@@ -25,11 +25,16 @@ namespace PlaneAlerter {
 					for (int conditionid = 0; conditionid < conditionJson.Count; conditionid++) {
 						JToken condition = conditionJson[conditionid.ToString()];
 						//Create condition from parsed json
-						Core.Condition newCondition = new Core.Condition();
-						newCondition.conditionName = condition["conditionName"].ToString();
-						newCondition.emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString());
-						newCondition.alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString());
-						newCondition.ignoreFollowing = (bool)condition["ignoreFollowing"];
+						Core.Condition newCondition = new Core.Condition {
+							conditionName = condition["conditionName"].ToString(),
+							alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
+							ignoreFollowing = (bool)condition["ignoreFollowing"],
+							emailEnabled = (bool)condition["emailEnabled"],
+							twitterEnabled = (bool)condition["twitterEnabled"],
+							twitterAccount = condition["twitterAccount"].ToString(),
+							tweetFormat = condition["tweetFormat"].ToString(),
+							emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString())
+						};
 						List<string> emailsArray = new List<string>();
 						foreach (JToken email in condition["recieverEmails"])
 							emailsArray.Add(email.ToString());
@@ -54,9 +59,11 @@ namespace PlaneAlerter {
 				TreeNode conditionNode = conditionEditorTreeView.Nodes.Add(conditionid + ": " + condition.conditionName);
 				conditionNode.Tag = conditionid;
 				conditionNode.Nodes.Add("Id: " + conditionid);
-				conditionNode.Nodes.Add("Email Parameter: " + condition.emailProperty.ToString());
-				conditionNode.Nodes.Add("Reciever Emails: " + string.Join(", ", condition.recieverEmails.ToArray()));
 				conditionNode.Nodes.Add("Alert Type: " + condition.alertType);
+				conditionNode.Nodes.Add("Email Enabled: " + condition.emailEnabled);
+				conditionNode.Nodes.Add("Twitter Enabled: " + condition.twitterEnabled);
+				conditionNode.Nodes.Add("Reciever Emails: " + string.Join(", ", condition.recieverEmails.ToArray()));
+				conditionNode.Nodes.Add("Twitter Account: " + condition.twitterAccount);
 				TreeNode triggersNode = conditionNode.Nodes.Add("Condition Triggers");
 				foreach (Core.Trigger trigger in condition.triggers.Values)
 					triggersNode.Nodes.Add(trigger.Property.ToString() + " " + trigger.ComparisonType + " " + trigger.Value);

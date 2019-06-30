@@ -33,8 +33,12 @@ namespace PlaneAlerter {
 			//Set form element values from condition info
 			Core.Condition c = EditorConditionsList.conditions[conditionToUpdate];
 			conditionNameTextBox.Text = c.conditionName;
+			emailCheckBox.Checked = c.emailEnabled;
 			emailPropertyComboBox.Text = c.emailProperty.ToString();
 			recieverEmailTextBox.Text = string.Join(Environment.NewLine, c.recieverEmails.ToArray());
+			twitterCheckBox.Checked = c.twitterEnabled;
+			twitterAccountComboBox.Text = c.twitterAccount;
+			twitterContentTextBox.Text = c.tweetFormat;
 			alertTypeComboBox.Text = c.alertType.ToString().Replace('_', ' ');
 			foreach (Core.Trigger trigger in c.triggers.Values) {
 				triggerDataGridView.Rows.Add();
@@ -46,6 +50,11 @@ namespace PlaneAlerter {
 				newRow.Cells[1].Value = trigger.ComparisonType;
 				newRow.Cells[2].Value = trigger.Value;
 			}
+
+			emailPropertyComboBox.Enabled = emailCheckBox.Checked;
+			recieverEmailTextBox.Enabled = emailCheckBox.Checked;
+			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
+			twitterContentTextBox.Enabled = twitterCheckBox.Checked;
 		}
 		
 		/// <summary>
@@ -221,6 +230,11 @@ namespace PlaneAlerter {
 					break;
 				}
 			}
+			//Cancel if both email and twitter are disabled
+			if (!emailCheckBox.Checked && !twitterCheckBox.Checked) {
+				cancelSave = true;
+				MessageBox.Show("Please enable either email or twitter alerts. Click on the tabs to configure email and twitter alerts.", "Please enable one type of alert");
+			}
 			//Cancel if values are invalid
 			if (cancelSave) {
 				return;
@@ -241,10 +255,14 @@ namespace PlaneAlerter {
 			//Create new condition
 			Core.Condition newCondition = new Core.Condition {
 				conditionName = conditionNameTextBox.Text,
+				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
+				ignoreFollowing = ignoreFollowingCheckbox.Checked,
+				emailEnabled = emailCheckBox.Checked,
 				emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), emailPropertyComboBox.Text),
 				recieverEmails = recieverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
-				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
-				ignoreFollowing = ignoreFollowingCheckbox.Checked
+				twitterEnabled = twitterCheckBox.Checked,
+				twitterAccount = twitterAccountComboBox.Text,
+				tweetFormat = twitterContentTextBox.Text
 			};
 			if (triggerDataGridView.Rows.Count != 0)
 				foreach (DataGridViewRow row in triggerDataGridView.Rows)
@@ -266,12 +284,26 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Property info button click
 		/// </summary>
-		/// <param name="sender">Sender</param>
-		/// <param name="e">Event Args</param>
 		private void propertyInfoButton_Click(object sender, EventArgs e) {
 			//Show property info form
 			PropertyInfoForm propertyInfoForm = new PropertyInfoForm();
 			propertyInfoForm.Show();
+		}
+
+		/// <summary>
+		/// Update controls when email checkbox is toggled
+		/// </summary>
+		private void emailCheckBox_CheckedChanged(object sender, EventArgs e) {
+			emailPropertyComboBox.Enabled = emailCheckBox.Checked;
+			recieverEmailTextBox.Enabled = emailCheckBox.Checked;
+		}
+
+		/// <summary>
+		/// Update controls when twitter checkbox is toggled
+		/// </summary>
+		private void twitterCheckBox_CheckedChanged(object sender, EventArgs e) {
+			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
+			twitterContentTextBox.Enabled = twitterCheckBox.Checked;
 		}
 	}
 }

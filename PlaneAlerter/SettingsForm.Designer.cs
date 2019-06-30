@@ -288,9 +288,9 @@
 			this.label10.AutoSize = true;
 			this.label10.Location = new System.Drawing.Point(6, 51);
 			this.label10.Name = "label10";
-			this.label10.Size = new System.Drawing.Size(108, 13);
+			this.label10.Size = new System.Drawing.Size(61, 13);
 			this.label10.TabIndex = 16;
-			this.label10.Text = "Radar URL for emails";
+			this.label10.Text = "Radar URL";
 			this.toolTip.SetToolTip(this.label10, "This should be http://*domain/ip*/VirtualRadar/\r\nThis URL is used for the radar l" +
         "ink in the alert emails");
 			// 

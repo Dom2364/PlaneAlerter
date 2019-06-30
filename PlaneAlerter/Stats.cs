@@ -62,7 +62,7 @@ namespace PlaneAlerter {
 
 					foreach (TreeNode conditionNode in Core.UI.conditionTreeView.Nodes[0].Nodes) {
 						int conditionId = Convert.ToInt32(conditionNode.Nodes[0].Text.ToString().Substring(4));
-						conditionNode.Nodes[4].Text = "Emails Sent: " + Core.conditions[conditionId].emailsThisSession.ToString();
+						conditionNode.Nodes[4].Text = "Emails Sent: " + Core.conditions[conditionId].alertsThisSession.ToString();
 					}
 
 					Core.UI.activeMatchesList.Items.Clear();

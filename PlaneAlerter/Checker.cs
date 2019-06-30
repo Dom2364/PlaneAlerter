@@ -44,10 +44,6 @@ namespace PlaneAlerter {
 			string propertyInternalName;
 			//Index of match in waiting matches
 			int wmIcaoIndex;
-			//Alert message to send
-			MailMessage message;
-			//Text to display email property value
-			string emailPropertyInfo;
 
 			while (ThreadManager.threadStatus != ThreadManager.CheckerStatus.Stopping) {
 				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Running;
@@ -136,17 +132,7 @@ namespace PlaneAlerter {
 									if (reciever.Id == aircraft.GetProperty("Rcvr"))
 										recieverName = reciever.Name;
 
-								//Create email message
-								message = new MailMessage();
-								//Set subject and email property info
-								if (aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString()) == null) {
-									message.Subject = "First Contact Alert! " + condition.conditionName;
-									emailPropertyInfo = condition.emailProperty.ToString() + ": No Value";
-								}
-								else {
-									message.Subject = "First Contact Alert! " + condition.conditionName + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
-									emailPropertyInfo = condition.emailProperty.ToString() + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
-								}
+								
 								//If active matches contains aircraft, add condition to the match
 								if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
 									Core.activeMatches[aircraft.ICAO].AddCondition(conditionid, condition, aircraft);
@@ -160,12 +146,11 @@ namespace PlaneAlerter {
 
 								//Update stats and log to console
 								Stats.updateStats();
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightGreen);
-
-								//Send alert to emails in condition
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | Condition: " + condition.conditionName, Color.LightGreen);
+								
+								//Send Alert
 								if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
-									foreach (string email in condition.recieverEmails)
-										Email.SendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, true);
+									SendAlert(condition, aircraft, recieverName, true);
 							}
 						}
 						//If active matches contains this aircraft, update aircraft info
@@ -182,34 +167,23 @@ namespace PlaneAlerter {
 							//Check if signal has been lost for more than the removal timeout
 							if (match.SignalLostTime != DateTime.MinValue && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.removalTimeout - (Settings.removalTimeout * 2)))) < 0) {
 								//Log to UI
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.DisplayName, Color.Orange);
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.conditionName, Color.Orange);
 								//Remove from active matches
 								Core.activeMatches.Remove(match.Icao);
 								//Update aircraft info
 								Core.Aircraft aircraft = c.AircraftInfo;
+
 								//Alert if alert type is both or last
-								if (c.Match.alertType == Core.AlertType.First_and_Last_Contact || c.Match.alertType == Core.AlertType.Last_Contact) {
-									condition = c.Match;
+								if (c.Condition.alertType == Core.AlertType.First_and_Last_Contact || c.Condition.alertType == Core.AlertType.Last_Contact) {
+									condition = c.Condition;
 
-									//Create new email message
-									message = new MailMessage();
+									//Get receiver name
+									foreach (Core.Reciever reciever in Core.receivers)
+										if (reciever.Id == aircraft.GetProperty("Rcvr"))
+											recieverName = reciever.Name;
 
-									//Set email subject and email property info
-									if (aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString()) == null) {
-										message.Subject = "Last Contact Alert!  " + condition.conditionName;
-										emailPropertyInfo = condition.emailProperty.ToString() + ": No Value";
-									}
-									else {
-										message.Subject = "Last Contact Alert!  " + condition.conditionName + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
-										emailPropertyInfo = condition.emailProperty.ToString() + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
-									}
-									//Make a ding noise or something
-									SystemSounds.Exclamation.Play();
-									//Show notification
-									Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", "Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")\nRegistration: " + aircraft.GetProperty("Reg"), ToolTipIcon.Info);
-									//Send alerts to all the emails
-									foreach (string email in condition.recieverEmails)
-										Email.SendEmail(email, message, condition, aircraft, recieverName, emailPropertyInfo, false);
+									//Send Alert
+									SendAlert(condition, aircraft, recieverName, false);
 								}
 								break;
 							}
@@ -241,6 +215,39 @@ namespace PlaneAlerter {
 					if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Stopping) return;
 					Thread.Sleep(1000);
 				}
+			}
+		}
+
+		public static void SendAlert(Core.Condition condition, Core.Aircraft aircraft, string receiver, bool isFirst) {
+			//Show notification
+			Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", "Condition: " + condition.conditionName + "\nRegistration: " + aircraft.GetProperty("Reg"), ToolTipIcon.Info);
+
+			//Make a ding noise or something
+			SystemSounds.Exclamation.Play();
+
+			if (condition.emailEnabled) {
+				//Create email message
+				MailMessage message = new MailMessage();
+				string firstlast = isFirst ? "First" : "Last";
+
+				//Set subject and email property info
+				string emailPropertyInfo;
+				if (aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString()) == null) {
+					message.Subject = firstlast + " Contact Alert! " + condition.conditionName;
+					emailPropertyInfo = condition.emailProperty.ToString() + ": No Value";
+				}
+				else {
+					message.Subject = firstlast + " Contact Alert! " + condition.conditionName + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
+					emailPropertyInfo = condition.emailProperty.ToString() + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
+				}
+
+				//Send emails
+				foreach (string email in condition.recieverEmails)
+					Email.SendEmail(email, message, condition, aircraft, receiver, emailPropertyInfo, isFirst);
+			}
+			
+			if (condition.twitterEnabled) {
+
 			}
 		}
 
@@ -348,9 +355,13 @@ namespace PlaneAlerter {
 					//Create condition and copy values
 					Core.Condition newCondition = new Core.Condition {
 						conditionName = condition["conditionName"].ToString(),
-						emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString()),
 						alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
-						ignoreFollowing = (bool)condition["ignoreFollowing"]
+						ignoreFollowing = (bool)condition["ignoreFollowing"],
+						emailEnabled = (bool)condition["emailEnabled"],
+						twitterEnabled = (bool)condition["twitterEnabled"],
+						twitterAccount = condition["twitterAccount"].ToString(),
+						tweetFormat = condition["tweetFormat"].ToString(),
+						emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString())
 					};
 					List<string> emailsArray = new List<string>();
 					foreach (JToken email in condition["recieverEmails"])

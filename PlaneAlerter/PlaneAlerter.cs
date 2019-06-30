@@ -98,7 +98,7 @@ namespace PlaneAlerter
 				conditionNode.Nodes.Add("Email Parameter: " + c.emailProperty.ToString());
 				conditionNode.Nodes.Add("Reciever Email: " + string.Join(", ", c.recieverEmails.ToArray()));
 				conditionNode.Nodes.Add("Alert Type: " + c.alertType);
-				conditionNode.Nodes.Add("Emails Sent: " + c.emailsThisSession.ToString());
+				conditionNode.Nodes.Add("Emails Sent: " + c.alertsThisSession.ToString());
 				TreeNode triggersNode = conditionNode.Nodes.Add("Condition Triggers");
 				foreach(Core.Trigger trigger in c.triggers.Values)
 					triggersNode.Nodes.Add(trigger.Property.ToString() + " " + trigger.ComparisonType + " " + trigger.Value);

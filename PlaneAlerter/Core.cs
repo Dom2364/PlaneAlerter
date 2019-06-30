@@ -271,14 +271,34 @@ namespace PlaneAlerter {
 			public bool ignoreFollowing;
 
 			/// <summary>
-			/// Emails sent for this condition
+			/// Alerts sent for this condition
 			/// </summary>
-			public int emailsThisSession = 0;
+			public int alertsThisSession = 0;
+
+			/// <summary>
+			/// Send emails?
+			/// </summary>
+			public bool emailEnabled;
 
 			/// <summary>
 			/// Emails to send alert to
 			/// </summary>
 			public List<string> recieverEmails = new List<string>();
+
+			/// <summary>
+			/// Send tweets?
+			/// </summary>
+			public bool twitterEnabled;
+
+			/// <summary>
+			/// Twitter account to send from
+			/// </summary>
+			public string twitterAccount;
+
+			/// <summary>
+			/// Tweet format
+			/// </summary>
+			public string tweetFormat;
 
 			/// <summary>
 			/// Type of alert
@@ -299,7 +319,7 @@ namespace PlaneAlerter {
 			/// Increase sent emails counter for condition and total emails sent
 			/// </summary>
 			public void increaseSentEmails() {
-				emailsThisSession++;
+				alertsThisSession++;
 				Stats.totalEmailsSent++;
 			}
 
@@ -308,6 +328,9 @@ namespace PlaneAlerter {
 			/// </summary>
 			public Condition() {
 				conditionName = "New Condition";
+				tweetFormat = "";
+				emailEnabled = false;
+				twitterEnabled = false;
 			}
 		}
 
@@ -341,17 +364,6 @@ namespace PlaneAlerter {
 			public readonly List<MatchedCondition> Conditions;
 
 			/// <summary>
-			/// Create display name for match
-			/// </summary>
-			private void GenerateDisplayName() {
-				DisplayName = "";
-				foreach (MatchedCondition c in Conditions) {
-					DisplayName += c.DisplayName + ", ";
-				}
-				DisplayName = DisplayName.Substring(0, DisplayName.Length - 2);
-			}
-
-			/// <summary>
 			/// Add a condition to the match
 			/// </summary>
 			/// <param name="id">ID of condition</param>
@@ -359,7 +371,6 @@ namespace PlaneAlerter {
 			/// <param name="aircraftInfo">Aircraft information when matched</param>
 			public void AddCondition(int id, Condition match, Aircraft aircraftInfo) {
 				Conditions.Add(new MatchedCondition(id, match, aircraftInfo));
-				GenerateDisplayName();
 			}
 
 			/// <summary>
@@ -385,13 +396,10 @@ namespace PlaneAlerter {
 		/// Matched condition information
 		/// </summary>
 		public class MatchedCondition {
-			//Display name of condition match
-			public string DisplayName { get; private set; }
-
 			/// <summary>
 			/// Condition matched with
 			/// </summary>
-			public Condition Match;
+			public Condition Condition;
 
 			/// <summary>
 			/// ID of condition matched with
@@ -410,12 +418,9 @@ namespace PlaneAlerter {
 			/// <param name="c">Condition matched with</param>
 			/// <param name="aircraftInfo">Aircraft information of matched aircraft</param>
 			public MatchedCondition(int conditionID, Condition c, Aircraft aircraftInfo) {
-				Match = c;
+				Condition = c;
 				AircraftInfo = aircraftInfo;
 				ConditionID = conditionID;
-				string emailpropertyName = vrsPropertyData[c.emailProperty][2];
-				string emailpropertyText = (aircraftInfo.GetProperty(emailpropertyName) != null) ? " (" + c.emailProperty + ": " + aircraftInfo.GetProperty(emailpropertyName) + ")" : "";
-				DisplayName = "Condition: " + c.conditionName + emailpropertyText;
 			}
 		}
 
