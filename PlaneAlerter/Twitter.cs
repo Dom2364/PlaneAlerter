@@ -24,9 +24,11 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Posts a tweet
 		/// </summary>
-		public static void Tweet(string token, string tokensecret, string content) {
+		public static bool Tweet(string token, string tokensecret, string content) {
 			Auth.SetUserCredentials(AppCredentials.ConsumerKey, AppCredentials.ConsumerSecret, token, tokensecret);
-			Tweetinvi.Tweet.PublishTweet(content);
+			ITweet tweet = Tweetinvi.Tweet.PublishTweet(content);
+			if (tweet == null) return false;
+			return tweet.IsTweetPublished;
 		}
 
 		/// <summary>

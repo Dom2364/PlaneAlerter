@@ -47,12 +47,14 @@
 			this.emailTabPage = new System.Windows.Forms.TabPage();
 			this.emailCheckBox = new System.Windows.Forms.CheckBox();
 			this.twitterTabPage = new System.Windows.Forms.TabPage();
-			this.twitterContentTextBox = new System.Windows.Forms.RichTextBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.twitterAccountComboBox = new System.Windows.Forms.ComboBox();
-			this.label1 = new System.Windows.Forms.Label();
-			this.twitterCheckBox = new System.Windows.Forms.CheckBox();
+			this.twitterLinkLabel = new System.Windows.Forms.Label();
+			this.tweetLinkComboBox = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
+			this.twitterContentTextBox = new System.Windows.Forms.RichTextBox();
+			this.tweetContentLabel = new System.Windows.Forms.Label();
+			this.twitterAccountComboBox = new System.Windows.Forms.ComboBox();
+			this.twitterAccountLabel = new System.Windows.Forms.Label();
+			this.twitterCheckBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.triggerDataGridView)).BeginInit();
 			this.tabControl.SuspendLayout();
 			this.triggersTabPage.SuspendLayout();
@@ -283,11 +285,13 @@
 			// 
 			// twitterTabPage
 			// 
+			this.twitterTabPage.Controls.Add(this.twitterLinkLabel);
+			this.twitterTabPage.Controls.Add(this.tweetLinkComboBox);
 			this.twitterTabPage.Controls.Add(this.label3);
 			this.twitterTabPage.Controls.Add(this.twitterContentTextBox);
-			this.twitterTabPage.Controls.Add(this.label2);
+			this.twitterTabPage.Controls.Add(this.tweetContentLabel);
 			this.twitterTabPage.Controls.Add(this.twitterAccountComboBox);
-			this.twitterTabPage.Controls.Add(this.label1);
+			this.twitterTabPage.Controls.Add(this.twitterAccountLabel);
 			this.twitterTabPage.Controls.Add(this.twitterCheckBox);
 			this.twitterTabPage.Location = new System.Drawing.Point(4, 22);
 			this.twitterTabPage.Name = "twitterTabPage";
@@ -296,40 +300,66 @@
 			this.twitterTabPage.Text = "Twitter";
 			this.twitterTabPage.UseVisualStyleBackColor = true;
 			// 
+			// twitterLinkLabel
+			// 
+			this.twitterLinkLabel.AutoSize = true;
+			this.twitterLinkLabel.Location = new System.Drawing.Point(255, 31);
+			this.twitterLinkLabel.Name = "twitterLinkLabel";
+			this.twitterLinkLabel.Size = new System.Drawing.Size(76, 13);
+			this.twitterLinkLabel.TabIndex = 20;
+			this.twitterLinkLabel.Text = "Attached Link:";
+			// 
+			// tweetLinkComboBox
+			// 
+			this.tweetLinkComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.tweetLinkComboBox.FormattingEnabled = true;
+			this.tweetLinkComboBox.Location = new System.Drawing.Point(337, 28);
+			this.tweetLinkComboBox.Name = "tweetLinkComboBox";
+			this.tweetLinkComboBox.Size = new System.Drawing.Size(152, 21);
+			this.tweetLinkComboBox.TabIndex = 19;
+			// 
+			// label3
+			// 
+			this.label3.Location = new System.Drawing.Point(4, 157);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(483, 43);
+			this.label3.TabIndex = 18;
+			this.label3.Text = resources.GetString("label3.Text");
+			// 
 			// twitterContentTextBox
 			// 
-			this.twitterContentTextBox.Location = new System.Drawing.Point(6, 54);
+			this.twitterContentTextBox.Location = new System.Drawing.Point(6, 77);
 			this.twitterContentTextBox.Name = "twitterContentTextBox";
 			this.twitterContentTextBox.Size = new System.Drawing.Size(484, 76);
 			this.twitterContentTextBox.TabIndex = 17;
 			this.twitterContentTextBox.Text = "";
 			// 
-			// label2
+			// tweetContentLabel
 			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(4, 35);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(80, 13);
-			this.label2.TabIndex = 16;
-			this.label2.Text = "Tweet Content:";
+			this.tweetContentLabel.AutoSize = true;
+			this.tweetContentLabel.Location = new System.Drawing.Point(4, 60);
+			this.tweetContentLabel.Name = "tweetContentLabel";
+			this.tweetContentLabel.Size = new System.Drawing.Size(80, 13);
+			this.tweetContentLabel.TabIndex = 16;
+			this.tweetContentLabel.Text = "Tweet Content:";
 			// 
 			// twitterAccountComboBox
 			// 
 			this.twitterAccountComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.twitterAccountComboBox.FormattingEnabled = true;
-			this.twitterAccountComboBox.Location = new System.Drawing.Point(337, 32);
+			this.twitterAccountComboBox.Location = new System.Drawing.Point(337, 55);
 			this.twitterAccountComboBox.Name = "twitterAccountComboBox";
 			this.twitterAccountComboBox.Size = new System.Drawing.Size(152, 21);
 			this.twitterAccountComboBox.TabIndex = 14;
 			// 
-			// label1
+			// twitterAccountLabel
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(281, 35);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(50, 13);
-			this.label1.TabIndex = 13;
-			this.label1.Text = "Account:";
+			this.twitterAccountLabel.AutoSize = true;
+			this.twitterAccountLabel.Location = new System.Drawing.Point(281, 58);
+			this.twitterAccountLabel.Name = "twitterAccountLabel";
+			this.twitterAccountLabel.Size = new System.Drawing.Size(50, 13);
+			this.twitterAccountLabel.TabIndex = 13;
+			this.twitterAccountLabel.Text = "Account:";
 			// 
 			// twitterCheckBox
 			// 
@@ -341,14 +371,6 @@
 			this.twitterCheckBox.Text = "Twitter Alerts Enabled";
 			this.twitterCheckBox.UseVisualStyleBackColor = true;
 			this.twitterCheckBox.CheckedChanged += new System.EventHandler(this.twitterCheckBox_CheckedChanged);
-			// 
-			// label3
-			// 
-			this.label3.Location = new System.Drawing.Point(6, 135);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(483, 55);
-			this.label3.TabIndex = 18;
-			this.label3.Text = resources.GetString("label3.Text");
 			// 
 			// Condition_Editor
 			// 
@@ -408,9 +430,11 @@
 		private System.Windows.Forms.CheckBox emailCheckBox;
 		private System.Windows.Forms.CheckBox twitterCheckBox;
 		private System.Windows.Forms.RichTextBox twitterContentTextBox;
-		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label tweetContentLabel;
 		private System.Windows.Forms.ComboBox twitterAccountComboBox;
-		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label twitterAccountLabel;
 		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Label twitterLinkLabel;
+		private System.Windows.Forms.ComboBox tweetLinkComboBox;
 	}
 }

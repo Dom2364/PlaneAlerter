@@ -39,6 +39,7 @@ namespace PlaneAlerter {
 			twitterCheckBox.Checked = c.twitterEnabled;
 			twitterAccountComboBox.Text = c.twitterAccount;
 			twitterContentTextBox.Text = c.tweetFormat;
+			tweetLinkComboBox.Text = c.tweetLink.ToString().Replace('_', ' ');
 			alertTypeComboBox.Text = c.alertType.ToString().Replace('_', ' ');
 			foreach (Core.Trigger trigger in c.triggers.Values) {
 				triggerDataGridView.Rows.Add();
@@ -63,6 +64,15 @@ namespace PlaneAlerter {
 		public Condition_Editor() {
 			//Initialise form options
 			Initialise();
+			//Set Defaults
+			conditionNameTextBox.Text = "New Condition";
+			twitterContentTextBox.Text = "";
+			emailCheckBox.Checked = false;
+			emailPropertyComboBox.Text = "Registration";
+			twitterCheckBox.Checked = false;
+			tweetLinkComboBox.SelectedIndex = 0;
+			twitterContentTextBox.Text = "Alert! Registration: [Reg], Callsign: [Call]";
+			alertTypeComboBox.SelectedIndex = 1;
 		}
 		
 		/// <summary>
@@ -86,6 +96,11 @@ namespace PlaneAlerter {
 			//Add alert types to combobox
 			foreach(Core.AlertType property in Enum.GetValues(typeof(Core.AlertType)))
 				alertTypeComboBox.Items.Add(property.ToString().Replace('_', ' '));
+			//Add tweet link types
+			foreach (Core.TweetLink linktype in Enum.GetValues(typeof(Core.TweetLink)))
+				tweetLinkComboBox.Items.Add(linktype.ToString().Replace('_', ' '));
+			//Add twitter accounts to combobox
+			twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
 		}
 		
 		/// <summary>
@@ -191,19 +206,37 @@ namespace PlaneAlerter {
 			else {
 				conditionNameLabel.ForeColor = SystemColors.ControlText;
 			}
-			if(emailPropertyComboBox.Text == "") {
+			if (emailPropertyComboBox.Text == "") {
 				emailPropertyLabel.ForeColor = Color.Red;
 				cancelSave = true;
 			}
 			else {
 				emailPropertyLabel.ForeColor = SystemColors.ControlText;
 			}
-			if(recieverEmailTextBox.Text == "") {
-				emailToSendToLabel.ForeColor = Color.Red;
-				cancelSave = true;
+			if (emailCheckBox.Checked) {
+				if (recieverEmailTextBox.Text == "") {
+					emailToSendToLabel.ForeColor = Color.Red;
+					cancelSave = true;
+				}
+				else {
+					emailToSendToLabel.ForeColor = SystemColors.ControlText;
+				}
 			}
-			else {
-				emailToSendToLabel.ForeColor = SystemColors.ControlText;
+			if (twitterCheckBox.Checked) {
+				if (twitterAccountComboBox.Text == "") {
+					twitterAccountLabel.ForeColor = Color.Red;
+					cancelSave = true;
+				}
+				else {
+					twitterAccountLabel.ForeColor = SystemColors.ControlText;
+				}
+				if (twitterContentTextBox.Text == "") {
+					tweetContentLabel.ForeColor = Color.Red;
+					cancelSave = true;
+				}
+				else {
+					tweetContentLabel.ForeColor = SystemColors.ControlText;
+				}
 			}
 			if(alertTypeComboBox.Text == "") {
 				alertTypeLabel.ForeColor = Color.Red;
@@ -262,7 +295,8 @@ namespace PlaneAlerter {
 				recieverEmails = recieverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
 				twitterEnabled = twitterCheckBox.Checked,
 				twitterAccount = twitterAccountComboBox.Text,
-				tweetFormat = twitterContentTextBox.Text
+				tweetFormat = twitterContentTextBox.Text,
+				tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), tweetLinkComboBox.Text.Replace(' ', '_'))
 			};
 			if (triggerDataGridView.Rows.Count != 0)
 				foreach (DataGridViewRow row in triggerDataGridView.Rows)

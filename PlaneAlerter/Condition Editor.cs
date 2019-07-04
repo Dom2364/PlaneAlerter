@@ -33,6 +33,7 @@ namespace PlaneAlerter {
 							twitterEnabled = (bool)condition["twitterEnabled"],
 							twitterAccount = condition["twitterAccount"].ToString(),
 							tweetFormat = condition["tweetFormat"].ToString(),
+							tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), condition["tweetLink"].ToString()),
 							emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString())
 						};
 						List<string> emailsArray = new List<string>();

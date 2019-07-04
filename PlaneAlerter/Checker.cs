@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -246,8 +247,60 @@ namespace PlaneAlerter {
 					Email.SendEmail(email, message, condition, aircraft, receiver, emailPropertyInfo, isFirst);
 			}
 			
-			if (condition.twitterEnabled) {
+			if (condition.twitterEnabled && isFirst) {
+				string content = condition.tweetFormat;
 
+				//Check if selected account is valid
+				if (string.IsNullOrWhiteSpace(condition.twitterAccount)) {
+					Core.UI.writeToConsole("ERROR: Please select Twitter account in condition editor", Color.Red);
+					return;
+				}
+				if (!Settings.TwitterUsers.ContainsKey(condition.twitterAccount)) {
+					Core.UI.writeToConsole("ERROR: Selected Twitter account (" + condition.twitterAccount + ") has not been authenticated", Color.Red);
+					return;
+				}
+				if (string.IsNullOrEmpty(content)) {
+					Core.UI.writeToConsole("ERROR: Tweet content can't be empty. Tweet content can be configured in the condition editor.", Color.Red);
+					return;
+				}
+
+				//Get credentials
+				string[] creds = Settings.TwitterUsers[condition.twitterAccount];
+
+				//Replace keywords in content
+				foreach(string[] info in Core.vrsPropertyData.Values) {
+					//Check if content contains keyword
+					if (content.ToLower().Contains(@"[" + info[2].ToLower() + @"]")) {
+						//Replace keyword with value
+						string value = aircraft.GetProperty(info[2]);
+						if (string.IsNullOrEmpty(value)) value = "Unknown";
+						content = Regex.Replace(content, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);
+					}
+				}
+
+				//Add link to tweet
+				switch (condition.tweetLink) {
+					case Core.TweetLink.None:
+						break;
+					case Core.TweetLink.Radar_link:
+						content += " " + Settings.radarUrl;
+						break;
+					case Core.TweetLink.Radar_link_with_aircraft_selected:
+						content += " " + Settings.radarUrl + "?icao=" + aircraft.ICAO;
+						break;
+					case Core.TweetLink.Report_link:
+						content += " " + Core.GenerateReportURL(aircraft.ICAO); ;
+						break;
+				}
+
+				//Send tweet
+				bool success = Twitter.Tweet(creds[0], creds[1], content);
+				if (success) {
+					Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.ICAO + " | Condition: " + condition.conditionName, Color.LightBlue);
+				}
+				else {
+					Core.UI.writeToConsole("ERROR: Unknown error sending tweet", Color.Red);
+				}
 			}
 		}
 
@@ -357,11 +410,12 @@ namespace PlaneAlerter {
 						conditionName = condition["conditionName"].ToString(),
 						alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
 						ignoreFollowing = (bool)condition["ignoreFollowing"],
-						emailEnabled = (bool)condition["emailEnabled"],
-						twitterEnabled = (bool)condition["twitterEnabled"],
-						twitterAccount = condition["twitterAccount"].ToString(),
-						tweetFormat = condition["tweetFormat"].ToString(),
-						emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString())
+						emailEnabled = (bool)(condition["emailEnabled"]??false),
+						twitterEnabled = (bool)(condition["twitterEnabled"]??false),
+						twitterAccount = (condition["twitterAccount"]??"").ToString(),
+						tweetFormat = (condition["tweetFormat"]??"").ToString(),
+						tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), (condition["tweetLink"]??Core.TweetLink.None.ToString()).ToString()),
+						emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"]??Core.vrsProperty.Registration.ToString()).ToString())
 					};
 					List<string> emailsArray = new List<string>();
 					foreach (JToken email in condition["recieverEmails"])
@@ -375,6 +429,9 @@ namespace PlaneAlerter {
 				//Try to clean up json parsing
 				conditionJson.RemoveAll();
 				conditionJson = null;
+				//Save to file again in case some defaults were set
+				string conditionsJson = JsonConvert.SerializeObject(Core.conditions, Formatting.Indented);
+				File.WriteAllText("conditions.json", conditionsJson);
 				//Update condition list
 				Core.UI.Invoke((MethodInvoker)(() => {
 					Core.UI.updateConditionList();

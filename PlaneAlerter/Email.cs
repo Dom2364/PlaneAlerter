@@ -47,8 +47,6 @@ namespace PlaneAlerter {
 			string imageHTML = "";
 			//Airframes.org url
 			string airframesUrl = "";
-			//Report url
-			string reportUrl = "";
 
 			//Set message type to html
 			message.IsBodyHtml = true;
@@ -160,18 +158,6 @@ namespace PlaneAlerter {
 				if (aircraft.GetProperty("Reg") != null && aircraft.GetProperty("Reg") != "")
                     airframesUrl = "<h3><a style='text-decoration: none;' href='http://www.airframes.org/reg/" + aircraft.GetProperty("Reg").Replace("-", "").ToUpper() + "'>Airframes.org Lookup</a></h3>";
 
-                //Generate radar url
-                try {
-                    if (Settings.radarUrl[Settings.radarUrl.Length - 1] == '/')
-                        reportUrl = Settings.radarUrl + "desktopReport.html?icao-Q=" + aircraft.ICAO;
-                    else
-                        reportUrl = Settings.radarUrl + "/desktopReport.html?icao-Q=" + aircraft.ICAO;
-                }
-                catch {
-                    Core.UI.writeToConsole("ERROR: No radar url specified.", Color.Red);
-                    ThreadManager.StartOrRestart();
-                }
-
                 //Get name of transponder type
                 transponderName = transponderTypes[Convert.ToInt32(aircraft.GetProperty("Trt")) - 1];
 
@@ -275,7 +261,7 @@ namespace PlaneAlerter {
                     message.Body += "<h3><a style='text-decoration: none;' href='" + Settings.radarUrl + "'>Goto Radar</a></h3>";
                 //Report url
                 if (Settings.EmailContentConfig.ReportLink)
-                    message.Body += "<h3><a style='text-decoration: none;' href='" + reportUrl + "'>VRS Report Lookup</a></h3>";
+                    message.Body += "<h3><a style='text-decoration: none;' href='" + Core.GenerateReportURL(aircraft.ICAO) + "'>VRS Report Lookup</a></h3>";
                 //Airframes.org url
                 if (Settings.EmailContentConfig.AfLookup)
                     message.Body += airframesUrl;

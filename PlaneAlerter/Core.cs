@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.IO;
+using System.Drawing;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -169,6 +170,16 @@ namespace PlaneAlerter {
 		}
 
 		/// <summary>
+		/// Tweet Link Types
+		/// </summary>
+		public enum TweetLink {
+			None,
+			Radar_link,
+			Radar_link_with_aircraft_selected,
+			Report_link
+		}
+
+		/// <summary>
 		/// Property list types used in email config
 		/// </summary>
 		public enum PropertyListType {
@@ -301,6 +312,11 @@ namespace PlaneAlerter {
 			public string tweetFormat;
 
 			/// <summary>
+			/// Link to be attached in tweets
+			/// </summary>
+			public TweetLink tweetLink;
+
+			/// <summary>
 			/// Type of alert
 			/// </summary>
 			public AlertType alertType;
@@ -324,13 +340,10 @@ namespace PlaneAlerter {
 			}
 
 			/// <summary>
-			/// Creates a new condition with default condition name
+			/// Creates a new condition
 			/// </summary>
 			public Condition() {
-				conditionName = "New Condition";
-				tweetFormat = "";
-				emailEnabled = false;
-				twitterEnabled = false;
+				
 			}
 		}
 
@@ -503,6 +516,26 @@ namespace PlaneAlerter {
 			comparisonTypes.Add("C", new string[] { "Equals", "Not Equals" });
 			comparisonTypes.Add("D", new string[] { "Starts With", "Ends With" });
 			comparisonTypes.Add("E", new string[] { "Contains" });
+		}
+
+		/// <summary>
+		/// Generate the report url for a specific icao
+		/// </summary>
+		public static string GenerateReportURL(string ICAO) {
+			string reportUrl = "";
+			if (string.IsNullOrWhiteSpace(Settings.radarUrl)) {
+				UI.writeToConsole("ERROR: Please enter radar URL in settings", Color.Red);
+				return "";
+			}
+			if (!Settings.radarUrl.Contains("VirtualRadar")) {
+				UI.writeToConsole("WARNING: Radar URL must end with /VirtualRadar/ for report links to work", Color.Orange);
+			}
+
+			if (Settings.radarUrl[Settings.radarUrl.Length - 1] == '/')
+				reportUrl = Settings.radarUrl + "desktopReport.html?icao-Q=" + ICAO;
+			else
+				reportUrl = Settings.radarUrl + "/desktopReport.html?icao-Q=" + ICAO;
+			return reportUrl;
 		}
 	}
 }
