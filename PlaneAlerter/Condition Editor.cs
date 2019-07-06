@@ -32,7 +32,9 @@ namespace PlaneAlerter {
 							emailEnabled = (bool)condition["emailEnabled"],
 							twitterEnabled = (bool)condition["twitterEnabled"],
 							twitterAccount = condition["twitterAccount"].ToString(),
-							tweetFormat = condition["tweetFormat"].ToString(),
+							tweetFirstFormat = condition["tweetFirstFormat"].ToString(),
+							tweetLastFormat = condition["tweetLastFormat"].ToString(),
+							tweetMap = (bool)(condition["tweetMap"] ?? true),
 							tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), condition["tweetLink"].ToString()),
 							emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString())
 						};
@@ -63,7 +65,6 @@ namespace PlaneAlerter {
 				conditionNode.Nodes.Add("Alert Type: " + condition.alertType);
 				conditionNode.Nodes.Add("Email Enabled: " + condition.emailEnabled);
 				conditionNode.Nodes.Add("Twitter Enabled: " + condition.twitterEnabled);
-				conditionNode.Nodes.Add("Reciever Emails: " + string.Join(", ", condition.recieverEmails.ToArray()));
 				conditionNode.Nodes.Add("Twitter Account: " + condition.twitterAccount);
 				TreeNode triggersNode = conditionNode.Nodes.Add("Condition Triggers");
 				foreach (Core.Trigger trigger in condition.triggers.Values)

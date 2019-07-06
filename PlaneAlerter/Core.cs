@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.IO;
 using System.Drawing;
+using System.Linq;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -307,14 +308,24 @@ namespace PlaneAlerter {
 			public string twitterAccount;
 
 			/// <summary>
-			/// Tweet format
+			/// Tweet first contact alert format
 			/// </summary>
-			public string tweetFormat;
+			public string tweetFirstFormat;
+
+			/// <summary>
+			/// Tweet last contact alert format
+			/// </summary>
+			public string tweetLastFormat;
 
 			/// <summary>
 			/// Link to be attached in tweets
 			/// </summary>
 			public TweetLink tweetLink;
+
+			/// <summary>
+			/// Attach map?
+			/// </summary>
+			public bool tweetMap;
 
 			/// <summary>
 			/// Type of alert
@@ -332,11 +343,11 @@ namespace PlaneAlerter {
 			public Dictionary<int, Trigger> triggers = new Dictionary<int, Trigger>();
 
 			/// <summary>
-			/// Increase sent emails counter for condition and total emails sent
+			/// Increase sent emails counter for condition and total alerts sent
 			/// </summary>
-			public void increaseSentEmails() {
+			public void increaseSentAlerts() {
 				alertsThisSession++;
-				Stats.totalEmailsSent++;
+				Stats.totalAlertsSent++;
 			}
 
 			/// <summary>
@@ -367,9 +378,9 @@ namespace PlaneAlerter {
 			public bool SignalLost;
 
 			/// <summary>
-			/// Display name of match
+			/// Ignore if any other alerts match for this aircraft
 			/// </summary>
-			public string DisplayName { get; private set; }
+			public bool IgnoreFollowing;
 
 			/// <summary>
 			/// Conditions matched to
@@ -384,6 +395,7 @@ namespace PlaneAlerter {
 			/// <param name="aircraftInfo">Aircraft information when matched</param>
 			public void AddCondition(int id, Condition match, Aircraft aircraftInfo) {
 				Conditions.Add(new MatchedCondition(id, match, aircraftInfo));
+				IgnoreFollowing = match.ignoreFollowing;
 			}
 
 			/// <summary>
@@ -400,7 +412,6 @@ namespace PlaneAlerter {
 			/// <param name="icao">ICAO of aircraft matched</param>
 			public Match(string icao) {
 				Icao = icao;
-				DisplayName = "";
 				Conditions = new List<MatchedCondition>();
 			}
 		}
@@ -536,6 +547,35 @@ namespace PlaneAlerter {
 			else
 				reportUrl = Settings.radarUrl + "/desktopReport.html?icao-Q=" + ICAO;
 			return reportUrl;
+		}
+
+		/// <summary>
+		/// Generate a map
+		/// </summary>
+		public static string GenerateMapURL(Aircraft aircraft) {
+			string staticMapUrl = "";
+			//If aircraft has a position, generate a google map url
+			if (aircraft.GetProperty("Lat") != null)
+				if (aircraft.Trail.Count() != 3)
+					staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
+				else
+					staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&zoom=8&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
+
+			//Process aircraft trail
+			for (int i = 0; i < aircraft.Trail.Count() / 3; i++) {
+				//Get coordinate
+				string[] coord = new string[] {
+						aircraft.Trail[i * 3].ToString(),
+						aircraft.Trail[i * 3 + 1].ToString(),
+						aircraft.Trail[i * 3 + 2].ToString()
+					};
+				//Add coordinate to google map url
+				staticMapUrl += coord[0] + "," + coord[1];
+				//If this is not the last coordinate, add a separator
+				if (i != (aircraft.Trail.Count() / 3) - 1)
+					staticMapUrl += "|";
+			}
+			return staticMapUrl;
 		}
 	}
 }

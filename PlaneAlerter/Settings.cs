@@ -342,6 +342,10 @@ namespace PlaneAlerter {
 
 			//Update settings
 			updateSettings(false);
+
+			//Update twitter accounts list
+			Core.UI.updateTwitterAccounts();
+
 			SettingsLoaded = true;
 		}
 	}

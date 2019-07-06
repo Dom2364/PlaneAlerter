@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using Tweetinvi;
 using Tweetinvi.Models;
@@ -24,9 +24,17 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Posts a tweet
 		/// </summary>
-		public static bool Tweet(string token, string tokensecret, string content) {
+		public static bool Tweet(string token, string tokensecret, string content, string mediaURL) {
 			Auth.SetUserCredentials(AppCredentials.ConsumerKey, AppCredentials.ConsumerSecret, token, tokensecret);
-			ITweet tweet = Tweetinvi.Tweet.PublishTweet(content);
+			PublishTweetOptionalParameters options = new PublishTweetOptionalParameters();
+			if (mediaURL != "") {
+				using (var webClient = new WebClient()) {
+					byte[] imageBytes = webClient.DownloadData(mediaURL);
+					IMedia media = Upload.UploadBinary(imageBytes);
+					options.Medias.Add(media);
+				}
+			}
+			ITweet tweet = Tweetinvi.Tweet.PublishTweet(content, options);
 			if (tweet == null) return false;
 			return tweet.IsTweetPublished;
 		}
@@ -69,7 +77,24 @@ namespace PlaneAlerter {
 				//Add user
 				Settings.TwitterUsers.Add(screenname, new string[] { userCredentials.AccessToken, userCredentials.AccessTokenSecret });
 				MessageBox.Show("Twitter user '" + screenname + "' authorized!", "User Authorized");
+				Core.UI.updateTwitterAccounts();
 			}
+		}
+
+		/// <summary>
+		/// Remove a specific account
+		/// </summary>
+		public static void RemoveAccount(string screenname) {
+			//Check if users list contains user
+			if (!Settings.TwitterUsers.ContainsKey(screenname)) {
+				MessageBox.Show("User '" + screenname + "' does not exist", "User doesn't exist");
+				return;
+			}
+
+			//Remove user
+			Settings.TwitterUsers.Remove(screenname);
+			MessageBox.Show("Twitter user '" + screenname + "' removed!", "User Removed");
+			Core.UI.updateTwitterAccounts();
 		}
 	}
 }

@@ -9,8 +9,6 @@
 using System;
 using System.Windows.Forms;
 using System.Threading;
-using System.IO;
-using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -49,8 +47,7 @@ namespace PlaneAlerter
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public PlaneAlerter()
-		{
+		public PlaneAlerter() {
 			//Stop the annoying cross-thread problems
 			//This is probably not a good thing but I'm too lazy
 			CheckForIllegalCrossThreadCalls = false;
@@ -95,13 +92,29 @@ namespace PlaneAlerter
 				Core.Condition c = Core.conditions[conditionid];
 				conditionNode = conditionTreeView.Nodes[0].Nodes.Add("Name: " + c.conditionName); 
 				conditionNode.Nodes.Add("Id: " + conditionid);
-				conditionNode.Nodes.Add("Email Parameter: " + c.emailProperty.ToString());
-				conditionNode.Nodes.Add("Reciever Email: " + string.Join(", ", c.recieverEmails.ToArray()));
-				conditionNode.Nodes.Add("Alert Type: " + c.alertType);
-				conditionNode.Nodes.Add("Emails Sent: " + c.alertsThisSession.ToString());
+				conditionNode.Nodes.Add("Alert Type: " + c.alertType.ToString().Replace("_", " "));
+				conditionNode.Nodes.Add("Email Enabled: " + c.emailEnabled);
+				conditionNode.Nodes.Add("Twitter Enabled: " + c.twitterEnabled);
+				conditionNode.Nodes.Add("Twitter Account: " + c.twitterAccount);
+				conditionNode.Nodes.Add("Alerts Sent: " + c.alertsThisSession.ToString());
 				TreeNode triggersNode = conditionNode.Nodes.Add("Condition Triggers");
 				foreach(Core.Trigger trigger in c.triggers.Values)
 					triggersNode.Nodes.Add(trigger.Property.ToString() + " " + trigger.ComparisonType + " " + trigger.Value);
+			}
+		}
+
+		/// <summary>
+		/// Update the remove twitter account menu options
+		/// </summary>
+		public void updateTwitterAccounts() {
+			removeAccountToolStripMenuItem.DropDownItems.Clear();
+			removeAccountToolStripMenuItem.Enabled = Settings.TwitterUsers.Count > 0;
+			foreach (string screenname in Settings.TwitterUsers.Keys) {
+				ToolStripItem item = removeAccountToolStripMenuItem.DropDownItems.Add(screenname);
+				item.Click += (object sender, EventArgs args) => {
+					ToolStripItem clickeditem = (ToolStripItem)sender;
+					Twitter.RemoveAccount(clickeditem.Text);
+				};
 			}
 		}
 

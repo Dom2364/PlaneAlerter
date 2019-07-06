@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Net.Mail;
 using System.Net;
@@ -31,8 +30,6 @@ namespace PlaneAlerter {
 		public static void SendEmail(string emailaddress, MailMessage message, Core.Condition condition, Core.Aircraft aircraft, string recieverName, string emailPropertyInfo, bool isDetection) {
 			//Array to store position trail
 			Dictionary<int, string[]> pathArray = new Dictionary<int, string[]>();
-			//Google status map for position trail's url
-			string staticMapUrl = "";
 			//Google maps url
 			string googleMapsUrl = "";
 			//Transponder type from aircraft info
@@ -128,29 +125,7 @@ namespace PlaneAlerter {
                 catch (Exception) {
 
                 }
-
-                //If aircraft has a position, generate a google map url
-                if (aircraft.GetProperty("Lat") != null)
-                    if (aircraft.Trail.Count() != 3)
-                        staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&amp;path=color:0x000000|";
-                    else
-                        staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;size=800x800&amp;zoom=8&amp;markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&amp;key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&amp;path=color:0x000000|";
-
-                //Process aircraft trail
-                for (int i = 0; i < aircraft.Trail.Count() / 3; i++) {
-                    //Get coordinate
-                    string[] coord = new string[] {
-						aircraft.Trail[i * 3].ToString(),
-						aircraft.Trail[i * 3 + 1].ToString(),
-						aircraft.Trail[i * 3 + 2].ToString()
-					};
-                    //Add coordinate to google map url
-                    staticMapUrl += coord[0] + "," + coord[1];
-                    //If this is not the last coordinate, add a separator
-                    if (i != (aircraft.Trail.Count() / 3) - 1)
-                        staticMapUrl += "|";
-                }
-
+				
 				//Generate google maps url
 				googleMapsUrl = "https://www.google.com.au/maps/search/" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long");
 
@@ -277,7 +252,7 @@ namespace PlaneAlerter {
                 //Map
                 if (Settings.EmailContentConfig.Map && aircraft.GetProperty("Lat") != null) {
                     message.Body += "<h3 style='margin: 0px'><a style='text-decoration: none' href=" + googleMapsUrl + ">Open in Google Maps</a></h3><br />" +
-                    "<img style='border: 2px solid;border-radius: 10px;' alt='Loading Map...' src='" + staticMapUrl + "' />";
+                    "<img style='border: 2px solid;border-radius: 10px;' alt='Loading Map...' src='" + Core.GenerateMapURL(aircraft).Replace("&", "&amp;") + "' />";
                 }
                 message.Body += "</td></tr></table></body></html>";
             }
@@ -302,10 +277,6 @@ namespace PlaneAlerter {
 				Core.UI.writeToConsole("SMTP ERROR: " + e.Message, Color.Red);
 				return;
 			}
-
-			//Increase sent emails for condition and update stats
-			condition.increaseSentEmails();
-			Stats.updateStats();
 
 			//Log to UI
 			Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);

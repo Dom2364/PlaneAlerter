@@ -8,9 +8,9 @@ namespace PlaneAlerter {
 	/// </summary>
 	static class Stats {
 		/// <summary>
-		/// Counter for total emails sent
+		/// Counter for total alerts sent
 		/// </summary>
-		public static int totalEmailsSent = 0;
+		public static int totalAlertsSent = 0;
 
 		/// <summary>
 		/// Time planealerter started
@@ -55,19 +55,19 @@ namespace PlaneAlerter {
 				return;
 			Core.UI.conditionTreeView.Invoke((MethodInvoker)delegate {
 				try {
-					Core.UI.conditionTreeView.Nodes[2].Nodes[0].Text = "Total Emails Sent: " + totalEmailsSent.ToString();
+					Core.UI.conditionTreeView.Nodes[2].Nodes[0].Text = "Total Emails Sent: " + totalAlertsSent.ToString();
 					Core.UI.conditionTreeView.Nodes[2].Nodes[1].Text = "Total Conditions: " + numOfConditions.ToString();
 					Core.UI.conditionTreeView.Nodes[2].Nodes[2].Text = "Time Started: " + timeStarted.ToString();
 					Core.UI.conditionTreeView.Nodes[2].Nodes[3].Text = "Uptime: " + uptime.ToString();
 
 					foreach (TreeNode conditionNode in Core.UI.conditionTreeView.Nodes[0].Nodes) {
 						int conditionId = Convert.ToInt32(conditionNode.Nodes[0].Text.ToString().Substring(4));
-						conditionNode.Nodes[4].Text = "Emails Sent: " + Core.conditions[conditionId].alertsThisSession.ToString();
+						conditionNode.Nodes[5].Text = "Alerts Sent: " + Core.conditions[conditionId].alertsThisSession.ToString();
 					}
 
 					Core.UI.activeMatchesList.Items.Clear();
 					foreach (Core.Match match in Core.activeMatches.Values)
-						Core.UI.activeMatchesList.Items.Add(match.Icao + " | " + match.DisplayName);
+						Core.UI.activeMatchesList.Items.Add(match.Icao + " | " + match.Conditions[0].Condition.conditionName);
 
 					Core.UI.activeMatchesLabel.Text = "Active Matches: " + Core.activeMatches.Count;
 				}

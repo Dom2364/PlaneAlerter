@@ -27,31 +27,34 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Windows.Forms.TreeNode treeNode11 = new System.Windows.Forms.TreeNode("Conditions");
-			System.Windows.Forms.TreeNode treeNode12 = new System.Windows.Forms.TreeNode("Email");
-			System.Windows.Forms.TreeNode treeNode13 = new System.Windows.Forms.TreeNode("Radar");
-			System.Windows.Forms.TreeNode treeNode14 = new System.Windows.Forms.TreeNode("Program");
-			System.Windows.Forms.TreeNode treeNode15 = new System.Windows.Forms.TreeNode("Settings", new System.Windows.Forms.TreeNode[] {
-            treeNode12,
-            treeNode13,
-            treeNode14});
-			System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode("Node0");
-			System.Windows.Forms.TreeNode treeNode17 = new System.Windows.Forms.TreeNode("Node1");
-			System.Windows.Forms.TreeNode treeNode18 = new System.Windows.Forms.TreeNode("Node2");
-			System.Windows.Forms.TreeNode treeNode19 = new System.Windows.Forms.TreeNode("Node3");
-			System.Windows.Forms.TreeNode treeNode20 = new System.Windows.Forms.TreeNode("Statistics", new System.Windows.Forms.TreeNode[] {
-            treeNode16,
-            treeNode17,
-            treeNode18,
-            treeNode19});
+			System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Conditions");
+			System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Email");
+			System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Radar");
+			System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Program");
+			System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Settings", new System.Windows.Forms.TreeNode[] {
+            treeNode2,
+            treeNode3,
+            treeNode4});
+			System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Node0");
+			System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("Node1");
+			System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode("Node2");
+			System.Windows.Forms.TreeNode treeNode9 = new System.Windows.Forms.TreeNode("Node3");
+			System.Windows.Forms.TreeNode treeNode10 = new System.Windows.Forms.TreeNode("Statistics", new System.Windows.Forms.TreeNode[] {
+            treeNode6,
+            treeNode7,
+            treeNode8,
+            treeNode9});
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PlaneAlerter));
 			this.console = new System.Windows.Forms.RichTextBox();
 			this.conditionTreeView = new System.Windows.Forms.TreeView();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.emailContentConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.startConditionEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.twitterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.removeAccountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.addAccountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.emailContentConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.openLogFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.reloadConditionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.clearConsoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -62,9 +65,6 @@
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.activeMatchesList = new System.Windows.Forms.ListBox();
 			this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-			this.twitterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.addAccountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.showAuthenticatedUsersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip1.SuspendLayout();
 			this.statusStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -89,30 +89,30 @@
             | System.Windows.Forms.AnchorStyles.Left)));
 			this.conditionTreeView.Location = new System.Drawing.Point(12, 43);
 			this.conditionTreeView.Name = "conditionTreeView";
-			treeNode11.Name = "conditionsNode";
-			treeNode11.Text = "Conditions";
-			treeNode12.Name = "emailSettingsNode";
-			treeNode12.Text = "Email";
-			treeNode13.Name = "radarSettingsNode";
-			treeNode13.Text = "Radar";
-			treeNode14.Name = "programSettingsNode";
-			treeNode14.Text = "Program";
-			treeNode15.Name = "settingsNode";
-			treeNode15.Text = "Settings";
-			treeNode16.Name = "Node0";
-			treeNode16.Text = "Node0";
-			treeNode17.Name = "Node1";
-			treeNode17.Text = "Node1";
-			treeNode18.Name = "Node2";
-			treeNode18.Text = "Node2";
-			treeNode19.Name = "Node3";
-			treeNode19.Text = "Node3";
-			treeNode20.Name = "statsNode";
-			treeNode20.Text = "Statistics";
+			treeNode1.Name = "conditionsNode";
+			treeNode1.Text = "Conditions";
+			treeNode2.Name = "emailSettingsNode";
+			treeNode2.Text = "Email";
+			treeNode3.Name = "radarSettingsNode";
+			treeNode3.Text = "Radar";
+			treeNode4.Name = "programSettingsNode";
+			treeNode4.Text = "Program";
+			treeNode5.Name = "settingsNode";
+			treeNode5.Text = "Settings";
+			treeNode6.Name = "Node0";
+			treeNode6.Text = "Node0";
+			treeNode7.Name = "Node1";
+			treeNode7.Text = "Node1";
+			treeNode8.Name = "Node2";
+			treeNode8.Text = "Node2";
+			treeNode9.Name = "Node3";
+			treeNode9.Text = "Node3";
+			treeNode10.Name = "statsNode";
+			treeNode10.Text = "Statistics";
 			this.conditionTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode11,
-            treeNode15,
-            treeNode20});
+            treeNode1,
+            treeNode5,
+            treeNode10});
 			this.conditionTreeView.Size = new System.Drawing.Size(312, 202);
 			this.conditionTreeView.TabIndex = 1;
 			// 
@@ -142,6 +142,13 @@
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
 			this.optionsToolStripMenuItem.Text = "Options";
 			// 
+			// startConditionEditorToolStripMenuItem
+			// 
+			this.startConditionEditorToolStripMenuItem.Name = "startConditionEditorToolStripMenuItem";
+			this.startConditionEditorToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.startConditionEditorToolStripMenuItem.Text = "Open Condition Editor";
+			this.startConditionEditorToolStripMenuItem.Click += new System.EventHandler(this.startConditionEditorToolStripMenuItem_Click);
+			// 
 			// settingsToolStripMenuItem
 			// 
 			this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
@@ -149,19 +156,34 @@
 			this.settingsToolStripMenuItem.Text = "Settings";
 			this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
 			// 
+			// twitterToolStripMenuItem
+			// 
+			this.twitterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addAccountToolStripMenuItem,
+            this.removeAccountToolStripMenuItem});
+			this.twitterToolStripMenuItem.Name = "twitterToolStripMenuItem";
+			this.twitterToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.twitterToolStripMenuItem.Text = "Twitter";
+			// 
+			// removeAccountToolStripMenuItem
+			// 
+			this.removeAccountToolStripMenuItem.Name = "removeAccountToolStripMenuItem";
+			this.removeAccountToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.removeAccountToolStripMenuItem.Text = "Remove Account";
+			// 
+			// addAccountToolStripMenuItem
+			// 
+			this.addAccountToolStripMenuItem.Name = "addAccountToolStripMenuItem";
+			this.addAccountToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.addAccountToolStripMenuItem.Text = "Add Account";
+			this.addAccountToolStripMenuItem.Click += new System.EventHandler(this.addAccountToolStripMenuItem_Click);
+			// 
 			// emailContentConfigToolStripMenuItem
 			// 
 			this.emailContentConfigToolStripMenuItem.Name = "emailContentConfigToolStripMenuItem";
 			this.emailContentConfigToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
 			this.emailContentConfigToolStripMenuItem.Text = "Email Content Config";
 			this.emailContentConfigToolStripMenuItem.Click += new System.EventHandler(this.emailContentConfigToolStripMenuItem_Click);
-			// 
-			// startConditionEditorToolStripMenuItem
-			// 
-			this.startConditionEditorToolStripMenuItem.Name = "startConditionEditorToolStripMenuItem";
-			this.startConditionEditorToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
-			this.startConditionEditorToolStripMenuItem.Text = "Open Condition Editor";
-			this.startConditionEditorToolStripMenuItem.Click += new System.EventHandler(this.startConditionEditorToolStripMenuItem_Click);
 			// 
 			// openLogFileToolStripMenuItem
 			// 
@@ -237,28 +259,6 @@
 			this.notifyIcon.Visible = true;
 			this.notifyIcon.BalloonTipClicked += new System.EventHandler(this.notifyIcon_BalloonTipClicked);
 			// 
-			// twitterToolStripMenuItem
-			// 
-			this.twitterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showAuthenticatedUsersToolStripMenuItem,
-            this.addAccountToolStripMenuItem});
-			this.twitterToolStripMenuItem.Name = "twitterToolStripMenuItem";
-			this.twitterToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
-			this.twitterToolStripMenuItem.Text = "Twitter";
-			// 
-			// addAccountToolStripMenuItem
-			// 
-			this.addAccountToolStripMenuItem.Name = "addAccountToolStripMenuItem";
-			this.addAccountToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
-			this.addAccountToolStripMenuItem.Text = "Add Account";
-			this.addAccountToolStripMenuItem.Click += new System.EventHandler(this.addAccountToolStripMenuItem_Click);
-			// 
-			// showAuthenticatedUsersToolStripMenuItem
-			// 
-			this.showAuthenticatedUsersToolStripMenuItem.Name = "showAuthenticatedUsersToolStripMenuItem";
-			this.showAuthenticatedUsersToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
-			this.showAuthenticatedUsersToolStripMenuItem.Text = "Show Authenticated Users";
-			// 
 			// PlaneAlerter
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -301,7 +301,7 @@
 		public System.Windows.Forms.NotifyIcon notifyIcon;
 		public System.Windows.Forms.ToolStripMenuItem reloadConditionsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem twitterToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem showAuthenticatedUsersToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem removeAccountToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem addAccountToolStripMenuItem;
 	}
 }

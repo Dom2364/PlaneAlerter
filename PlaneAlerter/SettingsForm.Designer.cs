@@ -302,7 +302,7 @@
 			this.latLabel.Size = new System.Drawing.Size(45, 13);
 			this.latLabel.TabIndex = 17;
 			this.latLabel.Text = "Latitude";
-			this.toolTip.SetToolTip(this.latLabel, "Leave blank for unpassworded servers");
+			this.toolTip.SetToolTip(this.latLabel, "Latitude used for distance measurement");
 			// 
 			// longLabel
 			// 
@@ -312,7 +312,7 @@
 			this.longLabel.Size = new System.Drawing.Size(54, 13);
 			this.longLabel.TabIndex = 22;
 			this.longLabel.Text = "Longitude";
-			this.toolTip.SetToolTip(this.longLabel, "Leave blank for unpassworded servers");
+			this.toolTip.SetToolTip(this.longLabel, "Longitude used for distance measurement");
 			// 
 			// label11
 			// 

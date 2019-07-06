@@ -12,6 +12,7 @@ using System.Net.Mail;
 using System.Threading;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -62,11 +63,15 @@ namespace PlaneAlerter {
 					int aircraftCount = 1;
 					//Current condition being checked
 					Core.Condition condition;
+					//Ignore following conditions for an aircraft
+					bool ignorefollowing = false;
 					foreach (Core.Aircraft aircraft in Core.aircraftlist.ToList()) {
 						//Update UI with aircraft being checked
 						Core.UI.updateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " + Core.aircraftlist.Count());
 						aircraftCount++;
 
+						if (Core.activeMatches.ContainsKey(aircraft.ICAO) && Core.activeMatches[aircraft.ICAO].IgnoreFollowing) continue;
+						
 						//Iterate conditions
 						foreach (int conditionid in Core.conditions.Keys.ToList()) {
 							condition = Core.conditions[conditionid];
@@ -86,10 +91,7 @@ namespace PlaneAlerter {
 
 								//Get internal name for property to compare
 								propertyInternalName = Core.vrsPropertyData[trigger.Property][2].ToString();
-
-								//If aircraft properties do not contain property, skip
-								if (aircraft.GetProperty(propertyInternalName) == null)
-									continue;
+								
 								//Check property against value
 								if (trigger.ComparisonType == "Equals" && aircraft.GetProperty(propertyInternalName) == trigger.Value)
 									triggersMatching++;
@@ -118,11 +120,6 @@ namespace PlaneAlerter {
 							//If condition doesn't exist in waiting matches and all triggers match, add to waiting matches
 							if (wmIcaoIndex == -1 && triggersMatching == condition.triggers.Count) {
 								Core.waitingMatches.Add(new string[] { aircraft.ICAO, conditionid.ToString() });
-								//If ignore following is true, skip the following conditions
-								if (condition.ignoreFollowing)
-									break;
-								else
-									continue;
 							}
 							//If condition exists in waiting matches with this condition id, remove from waiting matches and send alert
 							if (wmIcaoIndex != -1 && Core.waitingMatches[wmIcaoIndex][1] == conditionid.ToString()) {
@@ -132,7 +129,6 @@ namespace PlaneAlerter {
 								foreach (Core.Reciever reciever in Core.receivers)
 									if (reciever.Id == aircraft.GetProperty("Rcvr"))
 										recieverName = reciever.Name;
-
 								
 								//If active matches contains aircraft, add condition to the match
 								if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
@@ -145,6 +141,9 @@ namespace PlaneAlerter {
 									Core.activeMatches.Add(aircraft.ICAO, m);
 								}
 
+								//Cancel checking for conditions for this aircraft
+								ignorefollowing = condition.ignoreFollowing;
+
 								//Update stats and log to console
 								Stats.updateStats();
 								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | Condition: " + condition.conditionName, Color.LightGreen);
@@ -153,6 +152,7 @@ namespace PlaneAlerter {
 								if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
 									SendAlert(condition, aircraft, recieverName, true);
 							}
+							if (ignorefollowing) break;
 						}
 						//If active matches contains this aircraft, update aircraft info
 						if (Core.activeMatches.ContainsKey(aircraft.ICAO))
@@ -196,11 +196,11 @@ namespace PlaneAlerter {
 							if (!stillActive && match.SignalLost == false) {
 								Core.activeMatches[match.Icao].SignalLostTime = DateTime.Now;
 								Core.activeMatches[match.Icao].SignalLost = true;
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.DisplayName, Color.LightGoldenrodYellow);
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
 							}
 							if (stillActive && match.SignalLost == true) {
 								Core.activeMatches[match.Icao].SignalLost = false;
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.DisplayName, Color.LightGoldenrodYellow);
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
 							}
 						}
 					}
@@ -247,8 +247,8 @@ namespace PlaneAlerter {
 					Email.SendEmail(email, message, condition, aircraft, receiver, emailPropertyInfo, isFirst);
 			}
 			
-			if (condition.twitterEnabled && isFirst) {
-				string content = condition.tweetFormat;
+			if (condition.twitterEnabled) {
+				string content = isFirst?condition.tweetFirstFormat:condition.tweetLastFormat;
 
 				//Check if selected account is valid
 				if (string.IsNullOrWhiteSpace(condition.twitterAccount)) {
@@ -277,7 +277,12 @@ namespace PlaneAlerter {
 						content = Regex.Replace(content, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);
 					}
 				}
-
+				if (content.Length > 250) {
+					int charsover = content.Length - 250;
+					content = content.Substring(0, 250) + "...";
+					Core.UI.writeToConsole("WARNING: Tweet content is " + charsover + " characters over the limit of 280, removing end of message", Color.Orange);
+				}
+					
 				//Add link to tweet
 				switch (condition.tweetLink) {
 					case Core.TweetLink.None:
@@ -286,15 +291,18 @@ namespace PlaneAlerter {
 						content += " " + Settings.radarUrl;
 						break;
 					case Core.TweetLink.Radar_link_with_aircraft_selected:
-						content += " " + Settings.radarUrl + "?icao=" + aircraft.ICAO;
+						if (isFirst) content += " " + Settings.radarUrl + "?icao=" + aircraft.ICAO;
 						break;
 					case Core.TweetLink.Report_link:
 						content += " " + Core.GenerateReportURL(aircraft.ICAO); ;
 						break;
 				}
 
+				//Get map URL if enabled
+				string mapURL = condition.tweetMap?Core.GenerateMapURL(aircraft):"";
+
 				//Send tweet
-				bool success = Twitter.Tweet(creds[0], creds[1], content);
+				bool success = Twitter.Tweet(creds[0], creds[1], content, mapURL);
 				if (success) {
 					Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.ICAO + " | Condition: " + condition.conditionName, Color.LightBlue);
 				}
@@ -302,6 +310,10 @@ namespace PlaneAlerter {
 					Core.UI.writeToConsole("ERROR: Unknown error sending tweet", Color.Red);
 				}
 			}
+
+			//Increase sent emails for condition and update stats
+			condition.increaseSentAlerts();
+			Stats.updateStats();
 		}
 
 		/// <summary>
@@ -353,7 +365,7 @@ namespace PlaneAlerter {
 						aircraft.Trail = new double[a["Cot"].Count()];
 					for (int i = 0;i < aircraft.Trail.Length - 1;i++)
 						if (a["Cot"][i].Value<string>() != null)
-							aircraft.Trail[i] = Convert.ToDouble(a["Cot"][i].Value<string>());
+							aircraft.Trail[i] = double.Parse(a["Cot"][i].Value<string>(), CultureInfo.InvariantCulture);
 						else
 							aircraft.Trail[i] = 0;
 					//Parse aircraft properties
@@ -413,7 +425,9 @@ namespace PlaneAlerter {
 						emailEnabled = (bool)(condition["emailEnabled"]??false),
 						twitterEnabled = (bool)(condition["twitterEnabled"]??false),
 						twitterAccount = (condition["twitterAccount"]??"").ToString(),
-						tweetFormat = (condition["tweetFormat"]??"").ToString(),
+						tweetFirstFormat = (condition["tweetFirstFormat"]??"").ToString(),
+						tweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
+						tweetMap = (bool)(condition["tweetMap"] ?? true),
 						tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), (condition["tweetLink"]??Core.TweetLink.None.ToString()).ToString()),
 						emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"]??Core.vrsProperty.Registration.ToString()).ToString())
 					};

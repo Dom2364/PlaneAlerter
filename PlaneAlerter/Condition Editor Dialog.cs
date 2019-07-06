@@ -33,12 +33,15 @@ namespace PlaneAlerter {
 			//Set form element values from condition info
 			Core.Condition c = EditorConditionsList.conditions[conditionToUpdate];
 			conditionNameTextBox.Text = c.conditionName;
+			ignoreFollowingCheckbox.Checked = c.ignoreFollowing;
 			emailCheckBox.Checked = c.emailEnabled;
 			emailPropertyComboBox.Text = c.emailProperty.ToString();
 			recieverEmailTextBox.Text = string.Join(Environment.NewLine, c.recieverEmails.ToArray());
 			twitterCheckBox.Checked = c.twitterEnabled;
 			twitterAccountComboBox.Text = c.twitterAccount;
-			twitterContentTextBox.Text = c.tweetFormat;
+			tweetFirstFormatTextBox.Text = c.tweetFirstFormat;
+			tweetLastFormatTextBox.Text = c.tweetLastFormat;
+			tweetMapCheckBox.Checked = c.tweetMap;
 			tweetLinkComboBox.Text = c.tweetLink.ToString().Replace('_', ' ');
 			alertTypeComboBox.Text = c.alertType.ToString().Replace('_', ' ');
 			foreach (Core.Trigger trigger in c.triggers.Values) {
@@ -55,7 +58,7 @@ namespace PlaneAlerter {
 			emailPropertyComboBox.Enabled = emailCheckBox.Checked;
 			recieverEmailTextBox.Enabled = emailCheckBox.Checked;
 			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
-			twitterContentTextBox.Enabled = twitterCheckBox.Checked;
+			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked;
 		}
 		
 		/// <summary>
@@ -66,12 +69,14 @@ namespace PlaneAlerter {
 			Initialise();
 			//Set Defaults
 			conditionNameTextBox.Text = "New Condition";
-			twitterContentTextBox.Text = "";
+			tweetFirstFormatTextBox.Text = "";
 			emailCheckBox.Checked = false;
 			emailPropertyComboBox.Text = "Registration";
 			twitterCheckBox.Checked = false;
+			twitterAccountComboBox.Text = "";
 			tweetLinkComboBox.SelectedIndex = 0;
-			twitterContentTextBox.Text = "Alert! Registration: [Reg], Callsign: [Call]";
+			tweetFirstFormatTextBox.Text = "Alert! Registration: [Reg], Callsign: [Call]";
+			tweetLastFormatTextBox.Text = "Aircraft out of range, Registration: [Reg], Callsign: [Call]";
 			alertTypeComboBox.SelectedIndex = 1;
 		}
 		
@@ -100,6 +105,7 @@ namespace PlaneAlerter {
 			foreach (Core.TweetLink linktype in Enum.GetValues(typeof(Core.TweetLink)))
 				tweetLinkComboBox.Items.Add(linktype.ToString().Replace('_', ' '));
 			//Add twitter accounts to combobox
+			twitterAccountComboBox.Items.Add("Add Account");
 			twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
 		}
 		
@@ -230,12 +236,19 @@ namespace PlaneAlerter {
 				else {
 					twitterAccountLabel.ForeColor = SystemColors.ControlText;
 				}
-				if (twitterContentTextBox.Text == "") {
-					tweetContentLabel.ForeColor = Color.Red;
+				if (tweetFirstFormatTextBox.Text == "") {
+					tweetFirstFormatLabel.ForeColor = Color.Red;
 					cancelSave = true;
 				}
 				else {
-					tweetContentLabel.ForeColor = SystemColors.ControlText;
+					tweetFirstFormatLabel.ForeColor = SystemColors.ControlText;
+				}
+				if (tweetLastFormatTextBox.Text == "") {
+					tweetLastFormatLabel.ForeColor = Color.Red;
+					cancelSave = true;
+				}
+				else {
+					tweetLastFormatLabel.ForeColor = SystemColors.ControlText;
 				}
 			}
 			if(alertTypeComboBox.Text == "") {
@@ -295,7 +308,9 @@ namespace PlaneAlerter {
 				recieverEmails = recieverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
 				twitterEnabled = twitterCheckBox.Checked,
 				twitterAccount = twitterAccountComboBox.Text,
-				tweetFormat = twitterContentTextBox.Text,
+				tweetFirstFormat = tweetFirstFormatTextBox.Text,
+				tweetLastFormat = tweetLastFormatTextBox.Text,
+				tweetMap = tweetMapCheckBox.Checked,
 				tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), tweetLinkComboBox.Text.Replace(' ', '_'))
 			};
 			if (triggerDataGridView.Rows.Count != 0)
@@ -337,7 +352,24 @@ namespace PlaneAlerter {
 		/// </summary>
 		private void twitterCheckBox_CheckedChanged(object sender, EventArgs e) {
 			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
-			twitterContentTextBox.Enabled = twitterCheckBox.Checked;
+			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked;
+		}
+		
+		//Show add account dialog if add account is selected
+		private void twitterAccountComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+			if (twitterAccountComboBox.Text == "Add Account") {
+				//Show add account dialog
+				Twitter.AddAccount();
+				
+				//Update accounts
+				twitterAccountComboBox.Items.Clear();
+				twitterAccountComboBox.Items.Add("Add Account");
+				twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
+
+				//Clear selection
+				twitterAccountComboBox.SelectedIndex = -1;
+				twitterAccountComboBox.Text = "";
+			}
 		}
 	}
 }
