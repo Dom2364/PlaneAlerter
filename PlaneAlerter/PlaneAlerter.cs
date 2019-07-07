@@ -90,7 +90,8 @@ namespace PlaneAlerter
 			foreach(int conditionid in Core.conditions.Keys) {
 				TreeNode conditionNode;
 				Core.Condition c = Core.conditions[conditionid];
-				conditionNode = conditionTreeView.Nodes[0].Nodes.Add("Name: " + c.conditionName); 
+				conditionNode = conditionTreeView.Nodes[0].Nodes.Add("Name: " + c.conditionName);
+				conditionNode.Tag = conditionid;
 				conditionNode.Nodes.Add("Id: " + conditionid);
 				conditionNode.Nodes.Add("Alert Type: " + c.alertType.ToString().Replace("_", " "));
 				conditionNode.Nodes.Add("Email Enabled: " + c.emailEnabled);

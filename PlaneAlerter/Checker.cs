@@ -13,6 +13,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -97,15 +98,15 @@ namespace PlaneAlerter {
 									triggersMatching++;
 								else if (trigger.ComparisonType == "Not Equals" && aircraft.GetProperty(propertyInternalName) != trigger.Value)
 									triggersMatching++;
-								else if (trigger.ComparisonType == "Contains" && aircraft.GetProperty(propertyInternalName).Contains(trigger.Value))
+								else if (trigger.ComparisonType == "Contains" && aircraft.GetProperty(propertyInternalName) != null && aircraft.GetProperty(propertyInternalName).Contains(trigger.Value))
 									triggersMatching++;
-								else if (trigger.ComparisonType == "Higher Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) > Convert.ToDouble(trigger.Value))
+								else if (trigger.ComparisonType == "Higher Than" && !string.IsNullOrEmpty(aircraft.GetProperty(propertyInternalName)) && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) > Convert.ToDouble(trigger.Value))
 									triggersMatching++;
-								else if (trigger.ComparisonType == "Lower Than" && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) < Convert.ToDouble(trigger.Value))
+								else if (trigger.ComparisonType == "Lower Than" && !string.IsNullOrEmpty(aircraft.GetProperty(propertyInternalName)) && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) < Convert.ToDouble(trigger.Value))
 									triggersMatching++;
-								else if (trigger.ComparisonType == "Starts With" && (aircraft.GetProperty(propertyInternalName).Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(0, trigger.Value.Length) == trigger.Value))
+								else if (trigger.ComparisonType == "Starts With" && aircraft.GetProperty(propertyInternalName) != null && (aircraft.GetProperty(propertyInternalName).Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(0, trigger.Value.Length) == trigger.Value))
 									triggersMatching++;
-								else if (trigger.ComparisonType == "Ends With" && (aircraft.GetProperty(propertyInternalName).ToString().Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(aircraft.GetProperty(propertyInternalName).Length - trigger.Value.Length) == trigger.Value))
+								else if (trigger.ComparisonType == "Ends With" && aircraft.GetProperty(propertyInternalName) != null && (aircraft.GetProperty(propertyInternalName).ToString().Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(aircraft.GetProperty(propertyInternalName).Length - trigger.Value.Length) == trigger.Value))
 									triggersMatching++;
 							}
 

@@ -127,7 +127,8 @@ namespace PlaneAlerter {
 					}
 				}
 				//Format squawk to 4 digits e.g. 0010
-				if (triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString() == "Squawk" && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString().Length != 4)
+				//Commenting out due to starts/ends with
+				/*if (triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString() == "Squawk" && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString().Length != 4)
 					if (triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString().Length == 1)
 						triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "000" + triggerDataGridView.Rows[e.RowIndex].Cells[2].Value;
 					else
@@ -137,7 +138,7 @@ namespace PlaneAlerter {
 							if(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString().Length == 3)
 								triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "0" + triggerDataGridView.Rows[e.RowIndex].Cells[2].Value;
 							else
-								triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
+								triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";*/
 			}
 			//Change comparison type combo box based on property selected
 			if (e.ColumnIndex == 0 && triggerDataGridView.Rows.Count != 1) {

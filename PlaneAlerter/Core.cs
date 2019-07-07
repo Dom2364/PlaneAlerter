@@ -482,7 +482,7 @@ namespace PlaneAlerter {
 			vrsPropertyData.Add(vrsProperty.Arrival_Airport, new string[] { "String", "AE", "To", "The code and name of the arrival airport." });
 			vrsPropertyData.Add(vrsProperty.Operator, new string[] { "String", "AE", "Op", "The name of the aircraft's operator." });
 			vrsPropertyData.Add(vrsProperty.Operator_Icao_Code, new string[] { "String", "A", "OpIcao", "The operator's ICAO code." });
-			vrsPropertyData.Add(vrsProperty.Squawk, new string[] { "Number", "A", "Sqk", "The squawk." });
+			vrsPropertyData.Add(vrsProperty.Squawk, new string[] { "Number", "ABD", "Sqk", "The squawk." });
 			vrsPropertyData.Add(vrsProperty.Is_In_Emergency, new string[] { "Boolean", "C", "Help", "True if the aircraft is transmitting an emergency squawk." });
 			vrsPropertyData.Add(vrsProperty.Distance, new string[] { "Number", "B", "Dst", "The distance to the aircraft in kilometres." });
 			vrsPropertyData.Add(vrsProperty.Wake_Turbulence_Category, new string[] { "Number", "A", "WTC", "The wake turbulence category of the aircraft. 1 = none, 2 = light, 3 = medium, 4 = heavy" });
