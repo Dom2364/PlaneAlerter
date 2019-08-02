@@ -246,7 +246,7 @@ namespace PlaneAlerter
 		/// <param name="e">Event Args</param>
 		private void donateToolStripMenuItem_Click(object sender, EventArgs e) {
 			//Open donate link
-			Process.Start(@"http://donate.dom2364.com");
+			Process.Start(@"https://www.paypal.me/dom2364");
 		}
 
 		private void addAccountToolStripMenuItem_Click(object sender, EventArgs e) {

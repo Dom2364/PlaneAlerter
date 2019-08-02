@@ -423,7 +423,7 @@ namespace PlaneAlerter {
 						conditionName = condition["conditionName"].ToString(),
 						alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
 						ignoreFollowing = (bool)condition["ignoreFollowing"],
-						emailEnabled = (bool)(condition["emailEnabled"]??false),
+						emailEnabled = (bool)(condition["emailEnabled"]??true),
 						twitterEnabled = (bool)(condition["twitterEnabled"]??false),
 						twitterAccount = (condition["twitterAccount"]??"").ToString(),
 						tweetFirstFormat = (condition["tweetFirstFormat"]??"").ToString(),

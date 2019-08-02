@@ -203,9 +203,13 @@ namespace PlaneAlerter {
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
 		void SaveButtonClick(object sender, EventArgs e) {
-
-			//Check if values are empty/invalid
 			bool cancelSave = false;
+			//Cancel if both email and twitter are disabled
+			if (!emailCheckBox.Checked && !twitterCheckBox.Checked) {
+				cancelSave = true;
+				MessageBox.Show("Please enable either email or twitter alerts. Click on the tabs to configure email and twitter alerts.", "Please enable one type of alert");
+			}
+			//Check if values are empty/invalid
 			if (conditionNameTextBox.Text == "") {
 				conditionNameLabel.ForeColor = Color.Red;
 				cancelSave = true;
@@ -266,6 +270,8 @@ namespace PlaneAlerter {
 			else {
 				triggerDataGridView.BackgroundColor = SystemColors.AppWorkspace;
 			}
+			//Trim empty lines from email textbox
+			recieverEmailTextBox.Text = recieverEmailTextBox.Text.TrimEnd('\r', '\n');
 			//Check if emails are valid
 			foreach (string line in recieverEmailTextBox.Lines) {
 				try {
@@ -276,11 +282,6 @@ namespace PlaneAlerter {
 					cancelSave = true;
 					break;
 				}
-			}
-			//Cancel if both email and twitter are disabled
-			if (!emailCheckBox.Checked && !twitterCheckBox.Checked) {
-				cancelSave = true;
-				MessageBox.Show("Please enable either email or twitter alerts. Click on the tabs to configure email and twitter alerts.", "Please enable one type of alert");
 			}
 			//Cancel if values are invalid
 			if (cancelSave) {
@@ -354,6 +355,7 @@ namespace PlaneAlerter {
 		private void twitterCheckBox_CheckedChanged(object sender, EventArgs e) {
 			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
 			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked;
+			tweetLastFormatTextBox.Enabled = twitterCheckBox.Checked;
 		}
 		
 		//Show add account dialog if add account is selected

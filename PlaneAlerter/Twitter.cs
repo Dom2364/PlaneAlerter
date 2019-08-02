@@ -28,10 +28,15 @@ namespace PlaneAlerter {
 			Auth.SetUserCredentials(AppCredentials.ConsumerKey, AppCredentials.ConsumerSecret, token, tokensecret);
 			PublishTweetOptionalParameters options = new PublishTweetOptionalParameters();
 			if (mediaURL != "") {
-				using (var webClient = new WebClient()) {
-					byte[] imageBytes = webClient.DownloadData(mediaURL);
-					IMedia media = Upload.UploadBinary(imageBytes);
-					options.Medias.Add(media);
+				try {
+					using (var webClient = new WebClient()) {
+						byte[] imageBytes = webClient.DownloadData(mediaURL);
+						IMedia media = Upload.UploadBinary(imageBytes);
+						options.Medias.Add(media);
+					}
+				}
+				catch (WebException e) { 
+					Core.UI.writeToConsole("ERROR: Error downloading map: " + e.Message, System.Drawing.Color.Red);
 				}
 			}
 			ITweet tweet = Tweetinvi.Tweet.PublishTweet(content, options);
