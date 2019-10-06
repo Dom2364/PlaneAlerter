@@ -398,6 +398,10 @@ namespace PlaneAlerter {
 				Core.UI.writeToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
 				return;
 			}
+			catch (JsonReaderException e) {
+				Core.UI.writeToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
+				return;
+			}
 		}
 
 		/// <summary>
