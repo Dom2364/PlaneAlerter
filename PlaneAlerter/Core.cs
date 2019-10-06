@@ -538,7 +538,7 @@ namespace PlaneAlerter {
 				UI.writeToConsole("ERROR: Please enter radar URL in settings", Color.Red);
 				return "";
 			}
-			if (!Settings.radarUrl.Contains("VirtualRadar")) {
+			if (!Settings.radarUrl.ToLower().Contains("virtualradar")) {
 				UI.writeToConsole("WARNING: Radar URL must end with /VirtualRadar/ for report links to work", Color.Orange);
 			}
 

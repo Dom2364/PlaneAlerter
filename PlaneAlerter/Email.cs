@@ -119,7 +119,7 @@ namespace PlaneAlerter {
                     //If status is not 404, add images to image HTML
                     if (imageResponseJson["status"].ToString() != "404")
                         foreach (JObject image in imageResponseJson["data"])
-                            imageHTML += "<img style='margin: 5px;border: 2px solid;border-radius: 10px;' src='" + image + "' />";
+                            imageHTML += "<img style='margin: 5px;border: 2px solid;border-radius: 10px;' src='" + image["image"].Value<string>() + "' />";
                     imageHTML += "<br>";
                 }
                 catch (Exception) {
