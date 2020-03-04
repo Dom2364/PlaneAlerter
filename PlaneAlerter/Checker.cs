@@ -9,11 +9,11 @@ using System.IO;
 using System.Drawing;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using System.Diagnostics;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -340,11 +340,19 @@ namespace PlaneAlerter {
 					request.Headers.Add("Authorization", "Basic " + encoded);
 				}
 				//Send request and parse json response
-				using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+				try {
+					using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
 					using (Stream responsestream = response.GetResponseStream())
-						using (StreamReader reader = new StreamReader(responsestream))
-							using (JsonTextReader jsonreader = new JsonTextReader(reader))
-								responseJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
+					using (StreamReader reader = new StreamReader(responsestream))
+					using (JsonTextReader jsonreader = new JsonTextReader(reader))
+						responseJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
+				}
+				catch (SocketException e) {
+					Core.UI.writeToConsole("ERROR: Network error while downloading AircraftList.json: " + e.Message, Color.Red);
+					Thread.Sleep(5000);
+					return;
+				}
+				
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null) {
 					Core.UI.writeToConsole("ERROR: Invalid response recieved from server", Color.Red);

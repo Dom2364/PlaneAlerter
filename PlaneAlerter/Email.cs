@@ -136,8 +136,8 @@ namespace PlaneAlerter {
                 //Get name of transponder type
                 transponderName = transponderTypes[Convert.ToInt32(aircraft.GetProperty("Trt")) - 1];
 
-                //Write to log and UI
-                Core.logFileSW.WriteLine(DateTime.Now.ToLongTimeString() + " | SENDING ALERT: " + Environment.NewLine + aircraft.ToString() + Environment.NewLine + Environment.NewLine);
+				//Write to log and UI
+				if (Core.logFileSW != null) Core.logFileSW.WriteLine(DateTime.Now.ToLongTimeString() + " | SENDING ALERT: " + Environment.NewLine + aircraft.ToString() + Environment.NewLine + Environment.NewLine);
                 Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);
 
                 //Generate aircraft property value table

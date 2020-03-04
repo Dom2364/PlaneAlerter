@@ -25,23 +25,44 @@ namespace PlaneAlerter {
 		/// Posts a tweet
 		/// </summary>
 		public static bool Tweet(string token, string tokensecret, string content, string mediaURL) {
+			//Set credentials
 			Auth.SetUserCredentials(AppCredentials.ConsumerKey, AppCredentials.ConsumerSecret, token, tokensecret);
+			
 			PublishTweetOptionalParameters options = new PublishTweetOptionalParameters();
+			//Upload map image if required
 			if (mediaURL != "") {
 				try {
 					using (var webClient = new WebClient()) {
 						byte[] imageBytes = webClient.DownloadData(mediaURL);
 						IMedia media = Upload.UploadBinary(imageBytes);
-						options.Medias.Add(media);
+						if (media != null) {
+							if (media.HasBeenUploaded) options.Medias.Add(media);
+							else Core.UI.writeToConsole("ERROR: Error uploading map", System.Drawing.Color.Red);
+						}
+						else {
+							var e = ExceptionHandler.GetLastException();
+							Core.UI.writeToConsole("ERROR: Error uploading map: " + e.TwitterDescription, System.Drawing.Color.Red);
+						}
 					}
 				}
 				catch (WebException e) { 
 					Core.UI.writeToConsole("ERROR: Error downloading map: " + e.Message, System.Drawing.Color.Red);
 				}
 			}
-			ITweet tweet = Tweetinvi.Tweet.PublishTweet(content, options);
-			if (tweet == null) return false;
-			return tweet.IsTweetPublished;
+			//Publish tweet
+			try {
+				ITweet tweet = Tweetinvi.Tweet.PublishTweet(content, options);
+				if (tweet == null) {
+					var e = ExceptionHandler.GetLastException();
+					Core.UI.writeToConsole("ERROR: Error publishing tweet: " + e.TwitterDescription, System.Drawing.Color.Red);
+					return false;
+				}
+				return tweet.IsTweetPublished;
+			}
+			catch (Exception e) {
+				Core.UI.writeToConsole("ERROR: Error publishing tweet: " + e.Message, System.Drawing.Color.Red);
+				return false;
+			}
 		}
 
 		/// <summary>

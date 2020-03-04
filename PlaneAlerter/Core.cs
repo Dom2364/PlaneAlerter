@@ -63,12 +63,12 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// File stream for log file
 		/// </summary>
-		public static FileStream logFile = new FileStream("alerts.log", FileMode.Append, FileAccess.Write);
+		public static FileStream logFile;
 
 		/// <summary>
 		/// Log file stream writer
 		/// </summary>
-		public static StreamWriter logFileSW = new StreamWriter(logFile);
+		public static StreamWriter logFileSW;
 
 		/// <summary>
 		/// Active form
@@ -218,6 +218,7 @@ namespace PlaneAlerter {
 			Squawk,
 			Is_In_Emergency,
 			Distance,
+			Bearing,
 			Wake_Turbulence_Category,
 			Engines,
 			Engine_Type,
@@ -485,6 +486,7 @@ namespace PlaneAlerter {
 			vrsPropertyData.Add(vrsProperty.Squawk, new string[] { "Number", "ABD", "Sqk", "The squawk." });
 			vrsPropertyData.Add(vrsProperty.Is_In_Emergency, new string[] { "Boolean", "C", "Help", "True if the aircraft is transmitting an emergency squawk." });
 			vrsPropertyData.Add(vrsProperty.Distance, new string[] { "Number", "B", "Dst", "The distance to the aircraft in kilometres." });
+			vrsPropertyData.Add(vrsProperty.Bearing, new string[] { "Number", "B", "Brng", "The bearing to the aircraft from 0° north" });
 			vrsPropertyData.Add(vrsProperty.Wake_Turbulence_Category, new string[] { "Number", "A", "WTC", "The wake turbulence category of the aircraft. 1 = none, 2 = light, 3 = medium, 4 = heavy" });
 			vrsPropertyData.Add(vrsProperty.Engines, new string[] { "Number", "AB", "Engines", "The number of engines the aircraft has." });
 			vrsPropertyData.Add(vrsProperty.Engine_Type, new string[] { "Number", "A", "EngType", "The type of engine the aircraft uses. 0 = none, 1 = piston, 2 = turbo, 3 = jet, 4 = electric" });
@@ -527,6 +529,16 @@ namespace PlaneAlerter {
 			comparisonTypes.Add("C", new string[] { "Equals", "Not Equals" });
 			comparisonTypes.Add("D", new string[] { "Starts With", "Ends With" });
 			comparisonTypes.Add("E", new string[] { "Contains" });
+
+			//Open logfile stream
+			try {
+				logFile = new FileStream("alerts.log", FileMode.Append, FileAccess.Write);
+				logFileSW = new StreamWriter(logFile);
+			}
+			catch (Exception e) {
+				UI.writeToConsole("ERROR: Error opening alerts.log file: " + e.Message + ". Logging disabled, please restart program.", Color.Red);
+				logFileSW = null;
+			}
 		}
 
 		/// <summary>
