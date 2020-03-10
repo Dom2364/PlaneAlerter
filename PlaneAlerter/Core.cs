@@ -192,6 +192,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// List of VRS properties
 		/// </summary>
+		/// //ADD NEW ITEMS TO END
 		public enum vrsProperty {
 			Time_Tracked,
 			Receiver,
@@ -218,7 +219,6 @@ namespace PlaneAlerter {
 			Squawk,
 			Is_In_Emergency,
 			Distance,
-			Bearing,
 			Wake_Turbulence_Category,
 			Engines,
 			Engine_Type,
@@ -234,7 +234,8 @@ namespace PlaneAlerter {
 			Has_Signal_Level,
 			Signal_Level,
 			Mlat,
-			Manufacturer
+			Manufacturer,
+			Bearing
 		}
 
 		/// <summary>
