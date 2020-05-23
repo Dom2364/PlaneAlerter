@@ -6,6 +6,7 @@ using Tweetinvi;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 using System.Windows.Forms;
+using System.IO;
 
 
 namespace PlaneAlerter {
@@ -32,17 +33,26 @@ namespace PlaneAlerter {
 			//Upload map image if required
 			if (mediaURL != "") {
 				try {
-					using (var webClient = new WebClient()) {
-						byte[] imageBytes = webClient.DownloadData(mediaURL);
-						IMedia media = Upload.UploadBinary(imageBytes);
-						if (media != null) {
-							if (media.HasBeenUploaded) options.Medias.Add(media);
-							else Core.UI.writeToConsole("ERROR: Error uploading map", System.Drawing.Color.Red);
-						}
-						else {
-							var e = ExceptionHandler.GetLastException();
-							Core.UI.writeToConsole("ERROR: Error uploading map: " + e.TwitterDescription, System.Drawing.Color.Red);
-						}
+					//Download the map image from google
+					HttpWebRequest req = (HttpWebRequest)WebRequest.Create(mediaURL);
+					WebResponse res = req.GetResponse();
+					MemoryStream ms = new MemoryStream();
+					res.GetResponseStream().CopyTo(ms);
+					byte[] imageBytes = ms.ToArray();
+
+					//Upload it to twitter
+					IMedia media = Upload.UploadBinary(imageBytes);
+					res.Dispose();
+					ms.Dispose();
+
+					//Check if it was uploaded properly
+					if (media != null) {
+						if (media.HasBeenUploaded) options.Medias.Add(media);
+						else Core.UI.writeToConsole("ERROR: Error uploading map", System.Drawing.Color.Red);
+					}
+					else {
+						var e = ExceptionHandler.GetLastException();
+						Core.UI.writeToConsole("ERROR: Error uploading map: " + e.TwitterDescription, System.Drawing.Color.Red);
 					}
 				}
 				catch (WebException e) { 

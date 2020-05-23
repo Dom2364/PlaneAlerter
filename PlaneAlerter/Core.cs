@@ -578,17 +578,19 @@ namespace PlaneAlerter {
 			for (int i = 0; i < aircraft.Trail.Count() / 3; i++) {
 				//Get coordinate
 				string[] coord = new string[] {
-						aircraft.Trail[i * 3].ToString(),
-						aircraft.Trail[i * 3 + 1].ToString(),
-						aircraft.Trail[i * 3 + 2].ToString()
+						aircraft.Trail[i * 3].ToString("#.####"),
+						aircraft.Trail[i * 3 + 1].ToString("#.####"),
+						aircraft.Trail[i * 3 + 2].ToString("#.####")
 					};
+				string coordstring = coord[0] + "," + coord[1] + "|";
+
+				//Check if adding another coordinate will make the url too long
+				if (staticMapUrl.Length + coordstring.Length > 8000) break; //Limit is 8192, using 8000 to give some headroom. Allows for about 440 points
+
 				//Add coordinate to google map url
-				staticMapUrl += coord[0] + "," + coord[1];
-				//If this is not the last coordinate, add a separator
-				if (i != (aircraft.Trail.Count() / 3) - 1)
-					staticMapUrl += "|";
+				staticMapUrl += coordstring;
 			}
-			return staticMapUrl;
+			return staticMapUrl.Substring(0, staticMapUrl.Length-1);
 		}
 	}
 }
