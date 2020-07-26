@@ -219,9 +219,9 @@ namespace PlaneAlerter {
                 message.Body =
                     "<!DOCTYPE html PUBLIC ' -W3CDTD XHTML 1.0 TransitionalEN' 'http:www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'><html><body>";
                 if (isDetection)
-                    message.Body += "<h1>Plane Alert - Last Contact</h1>";
-                else
                     message.Body += "<h1>Plane Alert - First Contact</h1>";
+                else
+                    message.Body += "<h1>Plane Alert - Last Contact</h1>";
 
                 //Condition name + email property
                 message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;margin-left: 10px;'>Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")</h2>";

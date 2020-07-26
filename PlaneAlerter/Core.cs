@@ -590,6 +590,10 @@ namespace PlaneAlerter {
 				//Add coordinate to google map url
 				staticMapUrl += coordstring;
 			}
+
+			//Return empty string if no positions
+			if (staticMapUrl == "" || staticMapUrl.Length == 0) return "";
+
 			return staticMapUrl.Substring(0, staticMapUrl.Length-1);
 		}
 	}

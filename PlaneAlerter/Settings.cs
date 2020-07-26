@@ -70,6 +70,16 @@ namespace PlaneAlerter {
 		public static int timeout;
 
 		/// <summary>
+		/// Checker request timeout
+		/// </summary>
+		public static bool showNotifications;
+
+		/// <summary>
+		/// Checker request timeout
+		/// </summary>
+		public static bool soundAlerts;
+
+		/// <summary>
 		/// SMTP Host
 		/// </summary>
 		public static string SMTPHost;
@@ -136,6 +146,8 @@ namespace PlaneAlerter {
 			settingsDictionary.Add("timeoutLength", removalTimeout);
 			settingsDictionary.Add("refreshRate", refreshRate);
 			settingsDictionary.Add("timeout", timeout);
+			settingsDictionary.Add("showNotifications", showNotifications);
+			settingsDictionary.Add("soundAlerts", soundAlerts);
 			settingsDictionary.Add("SMTPHost", SMTPHost);
 			settingsDictionary.Add("SMTPPort", SMTPPort);
 			settingsDictionary.Add("SMTPUsr", SMTPUsr);
@@ -275,6 +287,8 @@ namespace PlaneAlerter {
 				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
 				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 30;
 				if (settingsJson["timeout"] != null && Convert.ToInt32(settingsJson["timeout"]) >= 5) timeout = Convert.ToInt32(settingsJson["timeout"]); else timeout = 30;
+				if (settingsJson["showNotifications"] != null) showNotifications = (settingsJson["showNotifications"].ToString().ToLower() == "true"); else showNotifications = true;
+				if (settingsJson["soundAlerts"] != null) soundAlerts = (settingsJson["soundAlerts"].ToString().ToLower() == "true"); else soundAlerts = false;
 				if (settingsJson["radarURL"] != null) radarUrl = settingsJson["radarURL"].ToString();
 				if (settingsJson["SMTPHost"] != null) SMTPHost = settingsJson["SMTPHost"].ToString();
 				try {

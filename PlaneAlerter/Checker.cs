@@ -222,10 +222,10 @@ namespace PlaneAlerter {
 
 		public static void SendAlert(Core.Condition condition, Core.Aircraft aircraft, string receiver, bool isFirst) {
 			//Show notification
-			Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", "Condition: " + condition.conditionName + "\nRegistration: " + aircraft.GetProperty("Reg"), ToolTipIcon.Info);
+			if (Settings.showNotifications) Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", "Condition: " + condition.conditionName + "\nRegistration: " + aircraft.GetProperty("Reg"), ToolTipIcon.Info);
 
-			//Make a ding noise or something
-			SystemSounds.Exclamation.Play();
+			//Make a ding noise
+			if (Settings.soundAlerts) SystemSounds.Exclamation.Play();
 
 			if (condition.emailEnabled) {
 				//Create email message

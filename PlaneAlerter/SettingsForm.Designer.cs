@@ -51,6 +51,8 @@
 			this.latLabel = new System.Windows.Forms.Label();
 			this.longLabel = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
+			this.soundAlertsCheckBox = new System.Windows.Forms.CheckBox();
+			this.notificationsCheckBox = new System.Windows.Forms.CheckBox();
 			this.saveSettingsButton = new System.Windows.Forms.Button();
 			this.emailGroupBox = new System.Windows.Forms.GroupBox();
 			this.gmailLink = new System.Windows.Forms.LinkLabel();
@@ -325,9 +327,33 @@
 			this.toolTip.SetToolTip(this.label11, "Request timeout for aircraftlist.json. Increasing this allows longer aircraft lis" +
         "ts to not time out");
 			// 
+			// soundAlertsCheckBox
+			// 
+			this.soundAlertsCheckBox.AutoSize = true;
+			this.soundAlertsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.soundAlertsCheckBox.Location = new System.Drawing.Point(6, 98);
+			this.soundAlertsCheckBox.Name = "soundAlertsCheckBox";
+			this.soundAlertsCheckBox.Size = new System.Drawing.Size(86, 17);
+			this.soundAlertsCheckBox.TabIndex = 26;
+			this.soundAlertsCheckBox.Text = "Sound Alerts";
+			this.toolTip.SetToolTip(this.soundAlertsCheckBox, "Play a sound on alert");
+			this.soundAlertsCheckBox.UseVisualStyleBackColor = true;
+			// 
+			// notificationsCheckBox
+			// 
+			this.notificationsCheckBox.AutoSize = true;
+			this.notificationsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.notificationsCheckBox.Location = new System.Drawing.Point(172, 100);
+			this.notificationsCheckBox.Name = "notificationsCheckBox";
+			this.notificationsCheckBox.Size = new System.Drawing.Size(148, 17);
+			this.notificationsCheckBox.TabIndex = 27;
+			this.notificationsCheckBox.Text = "Show Notification on Alert";
+			this.toolTip.SetToolTip(this.notificationsCheckBox, "Show a notification on alert");
+			this.notificationsCheckBox.UseVisualStyleBackColor = true;
+			// 
 			// saveSettingsButton
 			// 
-			this.saveSettingsButton.Location = new System.Drawing.Point(12, 468);
+			this.saveSettingsButton.Location = new System.Drawing.Point(12, 493);
 			this.saveSettingsButton.Name = "saveSettingsButton";
 			this.saveSettingsButton.Size = new System.Drawing.Size(329, 23);
 			this.saveSettingsButton.TabIndex = 20;
@@ -433,6 +459,8 @@
 			// 
 			// programGroupBox
 			// 
+			this.programGroupBox.Controls.Add(this.notificationsCheckBox);
+			this.programGroupBox.Controls.Add(this.soundAlertsCheckBox);
 			this.programGroupBox.Controls.Add(this.label11);
 			this.programGroupBox.Controls.Add(this.timeoutTextBox);
 			this.programGroupBox.Controls.Add(this.refreshLabel);
@@ -442,7 +470,7 @@
 			this.programGroupBox.Controls.Add(this.runOnStartupCheckBox);
 			this.programGroupBox.Location = new System.Drawing.Point(12, 361);
 			this.programGroupBox.Name = "programGroupBox";
-			this.programGroupBox.Size = new System.Drawing.Size(329, 101);
+			this.programGroupBox.Size = new System.Drawing.Size(329, 126);
 			this.programGroupBox.TabIndex = 24;
 			this.programGroupBox.TabStop = false;
 			this.programGroupBox.Text = "Program";
@@ -485,7 +513,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(353, 500);
+			this.ClientSize = new System.Drawing.Size(353, 525);
 			this.Controls.Add(this.programGroupBox);
 			this.Controls.Add(this.radarGroupBox);
 			this.Controls.Add(this.emailGroupBox);
@@ -550,5 +578,7 @@
 		private System.Windows.Forms.Label longLabel;
 		private System.Windows.Forms.Label label11;
 		private System.Windows.Forms.NumericUpDown timeoutTextBox;
+		private System.Windows.Forms.CheckBox notificationsCheckBox;
+		private System.Windows.Forms.CheckBox soundAlertsCheckBox;
 	}
 }

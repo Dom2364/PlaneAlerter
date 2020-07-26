@@ -43,6 +43,8 @@ namespace PlaneAlerter {
 			longTextBox.Value = Settings.Long;
 			removalTimeoutTextBox.Value = Settings.removalTimeout;
 			refreshTextBox.Value = Settings.refreshRate;
+			soundAlertsCheckBox.Checked = Settings.soundAlerts;
+			notificationsCheckBox.Checked = Settings.showNotifications;
 			smtpHostComboBox.Text = Settings.SMTPHost;
 			smtpHostPortTextBox.Value = Settings.SMTPPort;
 			smtpUsrTextBox.Text = Settings.SMTPUsr;
@@ -80,6 +82,8 @@ namespace PlaneAlerter {
 			Settings.Long = longTextBox.Value;
 			Settings.removalTimeout = Convert.ToInt32(removalTimeoutTextBox.Value);
 			Settings.refreshRate = Convert.ToInt32(refreshTextBox.Value);
+			Settings.soundAlerts = soundAlertsCheckBox.Checked;
+			Settings.showNotifications = notificationsCheckBox.Checked;
 			Settings.SMTPHost = smtpHostComboBox.Text;
 			Settings.SMTPPort = Convert.ToInt32(smtpHostPortTextBox.Value);
 			Settings.SMTPUsr = smtpUsrTextBox.Text;
