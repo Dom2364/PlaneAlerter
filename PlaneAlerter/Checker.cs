@@ -323,9 +323,9 @@ namespace PlaneAlerter {
 				//Generate aircraftlist.json url
 				string url = "";
 				if (!Settings.acListUrl.Contains("?"))
-					url = Settings.acListUrl + "?trFmt=f&refreshTrails=1&lat=" + Settings.Lat + "&lng=" + Settings.Long;
+					url = Settings.acListUrl + "?trFmt=f&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".");
 				else
-					url = Settings.acListUrl + "&trFmt=f&refreshTrails=1&lat=" + Settings.Lat + "&lng=" + Settings.Long;
+					url = Settings.acListUrl + "&trFmt=f&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".");
 				//Create request
 				request = (HttpWebRequest)WebRequest.Create(url);
 				request.Method = "GET";
