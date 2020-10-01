@@ -241,19 +241,31 @@ namespace PlaneAlerter {
 				else {
 					twitterAccountLabel.ForeColor = SystemColors.ControlText;
 				}
+
 				if (tweetFirstFormatTextBox.Text == "") {
 					tweetFirstFormatLabel.ForeColor = Color.Red;
 					cancelSave = true;
 				}
 				else {
-					tweetFirstFormatLabel.ForeColor = SystemColors.ControlText;
+					if (tweetFirstFormatTextBox.Text.Contains("@")) {
+						tweetFirstFormatLabel.ForeColor = Color.Red;
+						cancelSave = true;
+						MessageBox.Show("Mentions are not allowed in automated tweets as per Twitter rules", "Mentions not permitted");
+					}
+					else tweetFirstFormatLabel.ForeColor = SystemColors.ControlText;
 				}
+
 				if (tweetLastFormatTextBox.Text == "") {
 					tweetLastFormatLabel.ForeColor = Color.Red;
 					cancelSave = true;
 				}
 				else {
-					tweetLastFormatLabel.ForeColor = SystemColors.ControlText;
+					if (tweetLastFormatTextBox.Text.Contains("@")) {
+						tweetLastFormatLabel.ForeColor = Color.Red;
+						cancelSave = true;
+						MessageBox.Show("Mentions are not allowed in automated tweets as per Twitter rules", "Mentions not permitted");
+					}
+					else tweetLastFormatLabel.ForeColor = SystemColors.ControlText;
 				}
 			}
 			if(alertTypeComboBox.Text == "") {

@@ -15,9 +15,9 @@ namespace PlaneAlerter {
 	/// </summary>
 	static class Twitter {
 		//Don't even think about it
-		private const string Key = "ZGdJYmh6R1hCdldqRUNJUlF2d2p3aVFaQg==";
-		private const string SecretKey = "alRlNVh2bk8zS0IzWlNuSnVmalU5NUdqenN6ZUs3SUtiVlBsM1NBZHp1Yjc5eVh1NlY=";
-		
+		private const string Key = "U1dYZUhZT0RqOG1hV25xRzczMXZ6Y3k3NA==";
+		private const string SecretKey = "UWlBcGtJaXJFdnpZaFhVb0FGVE93R003dnR0YnhJdWI1Y1BzVmxxSktuZGlmSkZvMzA=";
+
 		private static IConsumerCredentials AppCredentials = new ConsumerCredentials(
 			Encoding.UTF8.GetString(Convert.FromBase64String(Key)),
 			Encoding.UTF8.GetString(Convert.FromBase64String(SecretKey)));
@@ -26,6 +26,11 @@ namespace PlaneAlerter {
 		/// Posts a tweet
 		/// </summary>
 		public static bool Tweet(string token, string tokensecret, string content, string mediaURL) {
+			if (content.Contains("@")) {
+				Core.UI.writeToConsole("ERROR: Mentions are not allowed in tweets", System.Drawing.Color.Red);
+				return false;
+			}
+
 			//Set credentials
 			Auth.SetUserCredentials(AppCredentials.ConsumerKey, AppCredentials.ConsumerSecret, token, tokensecret);
 			
@@ -64,8 +69,20 @@ namespace PlaneAlerter {
 				ITweet tweet = Tweetinvi.Tweet.PublishTweet(content, options);
 				if (tweet == null) {
 					var e = ExceptionHandler.GetLastException();
-					Core.UI.writeToConsole("ERROR: Error publishing tweet: " + e.TwitterDescription, System.Drawing.Color.Red);
+					//Check if exception has extra details
+					if (e.TwitterExceptionInfos != null) {
+						string details = "";
+						foreach (Tweetinvi.Core.Exceptions.ITwitterExceptionInfo einfo in e.TwitterExceptionInfos) details += einfo.Message + ", ";
+						if (details.Length != 0) details = details.Substring(0, details.Length-2);
+						Core.UI.writeToConsole("ERROR: Error publishing tweet: " + e.TwitterDescription + " (" + details + ")", System.Drawing.Color.Red);
+					}
+					else {
+						Core.UI.writeToConsole("ERROR: Error publishing tweet: " + e.TwitterDescription, System.Drawing.Color.Red);
+					}
 					return false;
+				}
+				if (!tweet.IsTweetPublished) {
+					Core.UI.writeToConsole("ERROR: Unknown error publishing tweet", System.Drawing.Color.Red);
 				}
 				return tweet.IsTweetPublished;
 			}
@@ -82,7 +99,17 @@ namespace PlaneAlerter {
 			//Authenticate PlaneAlerter
 			IAuthenticationContext authenticationContext = AuthFlow.InitAuthentication(AppCredentials);
 			if (authenticationContext == null) {
-				MessageBox.Show("Error while authenticating PlaneAlerter with Twitter, please contact developer", "Authentication Error");
+				var e = ExceptionHandler.GetLastException();
+				//Check if exception has extra details
+				if (e.TwitterExceptionInfos != null) {
+					string details = "";
+					foreach (Tweetinvi.Core.Exceptions.ITwitterExceptionInfo einfo in e.TwitterExceptionInfos) details += einfo.Message + ", ";
+					if (details.Length != 0) details = details.Substring(0, details.Length - 2);
+					MessageBox.Show("ERROR: Error authenticating PlaneAlerter with Twitter, please contact developer with details of this message" + Environment.NewLine + Environment.NewLine + e.TwitterDescription + Environment.NewLine + Environment.NewLine + details, "Authentication Error");
+				}
+				else {
+					MessageBox.Show("ERROR: Error authenticating PlaneAlerter with Twitter, please contact developer with details of this message" + Environment.NewLine + Environment.NewLine + e.TwitterDescription, "Authentication Error");
+				}
 				return;
 			}
 

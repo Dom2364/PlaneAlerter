@@ -307,9 +307,6 @@ namespace PlaneAlerter {
 				if (success) {
 					Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.ICAO + " | Condition: " + condition.conditionName, Color.LightBlue);
 				}
-				else {
-					Core.UI.writeToConsole("ERROR: Unknown error sending tweet", Color.Red);
-				}
 			}
 
 			//Increase sent emails for condition and update stats
