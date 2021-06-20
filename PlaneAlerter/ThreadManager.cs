@@ -1,4 +1,7 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Threading;
+using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Drawing;
 
@@ -13,20 +16,37 @@ namespace PlaneAlerter {
 		public static CheckerStatus threadStatus = CheckerStatus.WaitingForLoad;
 
 		/// <summary>
+		/// Thread for thread manager
+		/// </summary>
+		private static Thread ThreadManagerThread;
+
+		/// <summary>
+		/// Dispatcher for thread manager
+		/// </summary>
+		public static Dispatcher ThreadManagerDispatcher;
+
+		static ThreadManager() {
+			TaskCompletionSource<Dispatcher> dispatcherReady = new TaskCompletionSource<Dispatcher>();
+			ThreadManagerThread = new Thread(() => {
+				dispatcherReady.SetResult(Dispatcher.CurrentDispatcher);
+				Dispatcher.Run();
+			});
+			ThreadManagerThread.Name = "Thread Manager Thread";
+			ThreadManagerThread.IsBackground = true;
+			ThreadManagerThread.Start();
+			ThreadManagerDispatcher = dispatcherReady.Task.Result;
+		}
+
+		/// <summary>
 		/// Start threads
 		/// </summary>
-		/// <param name="restart">Is this a restart?</param>
-		public static void StartOrRestart() {
-			bool restart = Core.loopThread != null;
-
-			//Start checker thread
-			Thread startThread = new Thread(() => {
-				//If thread is not null, wait for it to stop
-				if (restart) {
-					threadStatus = CheckerStatus.Stopping;
-					while (threadStatus == CheckerStatus.Stopping && Core.loopThread.ThreadState != ThreadState.Stopped)
-						Thread.Sleep(200);
-				}
+		public static void Start() {
+			if (Core.loopThread != null || threadStatus == CheckerStatus.Running || threadStatus == CheckerStatus.Waiting) {
+				Restart();
+				return;
+			}
+			
+			ThreadManagerDispatcher.BeginInvoke((MethodInvoker)(() => {
 				//Check for errors
 				bool error = false;
 				if (Core.conditions.Count == 0) {
@@ -50,44 +70,69 @@ namespace PlaneAlerter {
 					Core.UI.statusLabel.Text = "Status: Idle";
 					return;
 				}
-				//Clear matches
-				Core.activeMatches.Clear();
-				Core.waitingMatches.Clear();
-
-				//Start stats thread if stats thread is null
-				if (Core.statsThread == null) {
-					Core.statsThread = new Thread(Stats.updateStatsLoop);
-					Core.statsThread.Name = "Stats Thread";
-					Core.statsThread.Start();
-				}
+				
 				//Start thread
 				threadStatus = CheckerStatus.Running;
 				Core.loopThread = new Thread(new ThreadStart(Checker.Start));
 				Core.loopThread.IsBackground = true;
 				Core.loopThread.Name = "Checker Thread";
 				Core.loopThread.Start();
-				//If restart, log to UI
-				if (restart) {
-					Core.UI.writeToConsole("Checker Restarted", Color.White);
-					Core.UI.reloadConditionsToolStripMenuItem.Enabled = true;
+				
+				Core.UI.writeToConsole("Checker Started", Color.White);
+				Core.UI.restartToolStripMenuItem.Enabled = true;
+				Core.UI.startToolStripMenuItem.Text = "Stop";
+			}));
+		}
+
+		/// <summary>
+		/// Stop threads
+		/// </summary>
+		public static void Stop() {
+			ThreadManagerDispatcher.BeginInvoke((MethodInvoker)(() => {
+				if (threadStatus == CheckerStatus.Running || threadStatus == CheckerStatus.Waiting) {
+					threadStatus = CheckerStatus.Stopping;
+					Core.UI.startToolStripMenuItem.Enabled = false;
+					Core.UI.startToolStripMenuItem.Text = "Stopping";
+					Core.UI.restartToolStripMenuItem.Enabled = false;
+					while (Core.loopThread.ThreadState != ThreadState.Stopped) Thread.Sleep(200);
+					Core.loopThread = null;
+					threadStatus = CheckerStatus.Stopped;
+
+					//Clear matches
+					Core.activeMatches.Clear();
+					Core.waitingMatches.Clear();
+
+					Stats.updateStats();
+
+					Core.UI.statusLabel.Text = "Status: Idle";
+					Core.UI.startToolStripMenuItem.Text = "Start";
+					Core.UI.startToolStripMenuItem.Enabled = true;
+					Core.UI.writeToConsole("Checker Stopped", Color.White);
 				}
-				else {
-					Core.UI.writeToConsole("Checker Started", Color.White);
-				}
-			});
-			startThread.Name = "Checker Starter Thread";
-			startThread.Start();
+			}));
+		}
+
+		/// <summary>
+		/// Restart threads
+		/// </summary>
+		public static void Restart() {
+			if (threadStatus == CheckerStatus.Running || threadStatus == CheckerStatus.Waiting) {
+				ThreadManagerDispatcher.BeginInvoke((MethodInvoker)(() => {
+					Stop();
+					Start();
+				}));
+			}
 		}
 
 		/// <summary>
 		/// Enum for thread status
 		/// </summary>
 		public enum CheckerStatus {
+			WaitingForLoad,
 			Running,
-			Stopped,
 			Waiting,
 			Stopping,
-			WaitingForLoad
+			Stopped
 		}
 	}
 }

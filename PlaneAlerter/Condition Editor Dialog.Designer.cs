@@ -47,6 +47,7 @@
 			this.emailTabPage = new System.Windows.Forms.TabPage();
 			this.emailCheckBox = new System.Windows.Forms.CheckBox();
 			this.twitterTabPage = new System.Windows.Forms.TabPage();
+			this.tweetMapCheckBox = new System.Windows.Forms.CheckBox();
 			this.tweetLastFormatLabel = new System.Windows.Forms.Label();
 			this.tweetLastFormatTextBox = new System.Windows.Forms.RichTextBox();
 			this.twitterLinkLabel = new System.Windows.Forms.Label();
@@ -57,7 +58,6 @@
 			this.twitterAccountComboBox = new System.Windows.Forms.ComboBox();
 			this.twitterAccountLabel = new System.Windows.Forms.Label();
 			this.twitterCheckBox = new System.Windows.Forms.CheckBox();
-			this.tweetMapCheckBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.triggerDataGridView)).BeginInit();
 			this.tabControl.SuspendLayout();
 			this.triggersTabPage.SuspendLayout();
@@ -103,6 +103,7 @@
 			// 
 			// triggerDataGridView
 			// 
+			this.triggerDataGridView.AllowUserToResizeRows = false;
 			this.triggerDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
 			this.triggerDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.triggerDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -118,6 +119,7 @@
 			this.triggerDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.triggerDataGridView.Size = new System.Drawing.Size(491, 194);
 			this.triggerDataGridView.TabIndex = 7;
+			this.triggerDataGridView.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.triggerDataGridView_CellMouseClick);
 			this.triggerDataGridView.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.triggerDataGridView_CellValueChanged);
 			this.triggerDataGridView.UserAddedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.TriggerDataGridViewUserAddedRow);
 			// 
@@ -306,6 +308,16 @@
 			this.twitterTabPage.Text = "Twitter";
 			this.twitterTabPage.UseVisualStyleBackColor = true;
 			// 
+			// tweetMapCheckBox
+			// 
+			this.tweetMapCheckBox.AutoSize = true;
+			this.tweetMapCheckBox.Location = new System.Drawing.Point(413, 8);
+			this.tweetMapCheckBox.Name = "tweetMapCheckBox";
+			this.tweetMapCheckBox.Size = new System.Drawing.Size(81, 17);
+			this.tweetMapCheckBox.TabIndex = 23;
+			this.tweetMapCheckBox.Text = "Attach Map";
+			this.tweetMapCheckBox.UseVisualStyleBackColor = true;
+			// 
 			// tweetLastFormatLabel
 			// 
 			this.tweetLastFormatLabel.AutoSize = true;
@@ -396,16 +408,6 @@
 			this.twitterCheckBox.Text = "Twitter Alerts Enabled";
 			this.twitterCheckBox.UseVisualStyleBackColor = true;
 			this.twitterCheckBox.CheckedChanged += new System.EventHandler(this.twitterCheckBox_CheckedChanged);
-			// 
-			// tweetMapCheckBox
-			// 
-			this.tweetMapCheckBox.AutoSize = true;
-			this.tweetMapCheckBox.Location = new System.Drawing.Point(413, 8);
-			this.tweetMapCheckBox.Name = "tweetMapCheckBox";
-			this.tweetMapCheckBox.Size = new System.Drawing.Size(81, 17);
-			this.tweetMapCheckBox.TabIndex = 23;
-			this.tweetMapCheckBox.Text = "Attach Map";
-			this.tweetMapCheckBox.UseVisualStyleBackColor = true;
 			// 
 			// Condition_Editor
 			// 

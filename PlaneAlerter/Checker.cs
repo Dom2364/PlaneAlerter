@@ -147,7 +147,7 @@ namespace PlaneAlerter {
 
 								//Update stats and log to console
 								Stats.updateStats();
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | Condition: " + condition.conditionName, Color.LightGreen);
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightGreen);
 								
 								//Send Alert
 								if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
@@ -222,10 +222,13 @@ namespace PlaneAlerter {
 
 		public static void SendAlert(Core.Condition condition, Core.Aircraft aircraft, string receiver, bool isFirst) {
 			//Show notification
-			if (Settings.showNotifications) Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", "Condition: " + condition.conditionName + "\nRegistration: " + aircraft.GetProperty("Reg"), ToolTipIcon.Info);
+			if (Settings.showNotifications) Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.conditionName}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
 
 			//Make a ding noise
 			if (Settings.soundAlerts) SystemSounds.Exclamation.Play();
+
+			//Log
+			Core.LogAlert(condition, aircraft, receiver, isFirst);
 
 			if (condition.emailEnabled) {
 				//Create email message
@@ -295,7 +298,7 @@ namespace PlaneAlerter {
 						if (isFirst) content += " " + Settings.radarUrl + "?icao=" + aircraft.ICAO;
 						break;
 					case Core.TweetLink.Report_link:
-						content += " " + Core.GenerateReportURL(aircraft.ICAO); ;
+						content += " " + Core.GenerateReportURL(aircraft.ICAO, true);
 						break;
 				}
 
@@ -305,11 +308,11 @@ namespace PlaneAlerter {
 				//Send tweet
 				bool success = Twitter.Tweet(creds[0], creds[1], content, mapURL);
 				if (success) {
-					Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.ICAO + " | Condition: " + condition.conditionName, Color.LightBlue);
+					Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightBlue);
 				}
 			}
 
-			//Increase sent emails for condition and update stats
+			//Increase sent alerts for condition and update stats
 			condition.increaseSentAlerts();
 			Stats.updateStats();
 		}
@@ -464,8 +467,8 @@ namespace PlaneAlerter {
 				//Log to UI
 				Core.UI.writeToConsole("Conditions Loaded", Color.White);
 				//Restart threads
-				if (ThreadManager.threadStatus != ThreadManager.CheckerStatus.WaitingForLoad) 
-					ThreadManager.StartOrRestart();
+				if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.WaitingForLoad) 
+					ThreadManager.Restart();
 
 			}
 			catch (Exception e) {

@@ -136,9 +136,8 @@ namespace PlaneAlerter {
                 //Get name of transponder type
                 transponderName = transponderTypes[Convert.ToInt32(aircraft.GetProperty("Trt")) - 1];
 
-				//Write to log and UI
-				if (Core.logFileSW != null) Core.logFileSW.WriteLine(DateTime.Now.ToLongTimeString() + " | SENDING ALERT: " + Environment.NewLine + aircraft.ToString() + Environment.NewLine + Environment.NewLine);
-                Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);
+				//Write to UI
+                Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.ICAO + " | " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);
 
                 //Generate aircraft property value table
                 bool isAlternateStyle = false;
@@ -233,10 +232,10 @@ namespace PlaneAlerter {
                     message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;margin-left: 10px;'>Transponder: " + transponderName + "</h2>";
                 //Radar url
                 if (Settings.EmailContentConfig.RadarLink)
-                    message.Body += "<h3><a style='text-decoration: none;' href='" + Settings.radarUrl + "'>Goto Radar</a></h3>";
+                    message.Body += $"<h3><a style='text-decoration: none;' href='{Settings.radarUrl}?icao={aircraft.ICAO}'>Goto Radar</a></h3>";
                 //Report url
                 if (Settings.EmailContentConfig.ReportLink)
-                    message.Body += "<h3><a style='text-decoration: none;' href='" + Core.GenerateReportURL(aircraft.ICAO) + "'>VRS Report Lookup</a></h3>";
+                    message.Body += $"<h3>VRS Report: <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.ICAO, false)}'>Desktop</a>   <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.ICAO, true)}'>Mobile</a></h3>";
                 //Airframes.org url
                 if (Settings.EmailContentConfig.AfLookup)
                     message.Body += airframesUrl;
@@ -279,7 +278,7 @@ namespace PlaneAlerter {
 			}
 
 			//Log to UI
-			Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.ICAO + " | Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);
+			Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.ICAO + " | " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);
 		}
 	}
 }

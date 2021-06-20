@@ -61,16 +61,6 @@ namespace PlaneAlerter {
 		public static Thread statsThread;
 
 		/// <summary>
-		/// File stream for log file
-		/// </summary>
-		public static FileStream logFile;
-
-		/// <summary>
-		/// Log file stream writer
-		/// </summary>
-		public static StreamWriter logFileSW;
-
-		/// <summary>
 		/// Active form
 		/// </summary>
 		public static PlaneAlerter UI;
@@ -124,6 +114,13 @@ namespace PlaneAlerter {
 			/// <returns>List of property keys</returns>
 			public Dictionary<string, string>.KeyCollection GetPropertyKeys() {
 				return Properties.Keys;
+			}
+
+			/// <summary>
+			/// ToString
+			/// </summary>
+			public string ToJSON() {
+				return Newtonsoft.Json.JsonConvert.SerializeObject(Properties);
 			}
 
 			/// <summary>
@@ -530,22 +527,24 @@ namespace PlaneAlerter {
 			comparisonTypes.Add("C", new string[] { "Equals", "Not Equals" });
 			comparisonTypes.Add("D", new string[] { "Starts With", "Ends With" });
 			comparisonTypes.Add("E", new string[] { "Contains" });
+		}
 
-			//Open logfile stream
+		public static void LogAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
 			try {
-				logFile = new FileStream("alerts.log", FileMode.Append, FileAccess.Write);
-				logFileSW = new StreamWriter(logFile);
+				string message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")} | {condition.conditionName} | {receiver} | {(isFirst?"FIRST":"LAST")} CONTACT ALERT: " + Environment.NewLine;
+				message += aircraft.ToJSON() + Environment.NewLine + Environment.NewLine;
+
+				File.AppendAllText("alerts.log", message);
 			}
 			catch (Exception e) {
-				UI.writeToConsole("ERROR: Error opening alerts.log file: " + e.Message + ". Logging disabled, please restart program.", Color.Red);
-				logFileSW = null;
+				UI.writeToConsole("ERROR: Error writing to alerts.log file: " + e.Message, Color.Red);
 			}
 		}
 
 		/// <summary>
 		/// Generate the report url for a specific icao
 		/// </summary>
-		public static string GenerateReportURL(string ICAO) {
+		public static string GenerateReportURL(string ICAO, bool mobile) {
 			string reportUrl = "";
 			if (string.IsNullOrWhiteSpace(Settings.radarUrl)) {
 				UI.writeToConsole("ERROR: Please enter radar URL in settings", Color.Red);
@@ -553,12 +552,16 @@ namespace PlaneAlerter {
 			}
 			if (!Settings.radarUrl.ToLower().Contains("virtualradar")) {
 				UI.writeToConsole("WARNING: Radar URL must end with /VirtualRadar/ for report links to work", Color.Orange);
+				return "";
 			}
 
-			if (Settings.radarUrl[Settings.radarUrl.Length - 1] == '/')
-				reportUrl = Settings.radarUrl + "desktopReport.html?icao-Q=" + ICAO;
-			else
-				reportUrl = Settings.radarUrl + "/desktopReport.html?icao-Q=" + ICAO;
+
+			reportUrl += Settings.radarUrl;
+			if (Settings.radarUrl[Settings.radarUrl.Length - 1] != '/') reportUrl += "/";
+
+			if (mobile) reportUrl += "mobileReport.html?sort1=date&sortAsc1=0&icao-Q=" + ICAO;
+			else reportUrl += "desktopReport.html?sort1=date&sortAsc1=0&icao-Q=" + ICAO;
+
 			return reportUrl;
 		}
 

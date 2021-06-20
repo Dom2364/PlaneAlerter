@@ -62,7 +62,8 @@ namespace PlaneAlerter
 			Shown += delegate {
 				while (!Settings.SettingsLoaded || !Checker.ConditionsLoaded)
 					Thread.Sleep(100);
-				ThreadManager.StartOrRestart();
+				if (Settings.startOnStart) ThreadManager.Start();
+				Stats.updateStats();
 			};
 		}
 
@@ -150,14 +151,12 @@ namespace PlaneAlerter
 		}
 		
 		/// <summary>
-		/// Reload conditions button click
+		/// Restart button click
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		void ReloadConditionsToolStripMenuItemClick(object sender, EventArgs e) {
-			//Disable button then restart threads
-			reloadConditionsToolStripMenuItem.Enabled = false;
-			ThreadManager.StartOrRestart();
+		void RestartToolStripMenuItemClick(object sender, EventArgs e) {
+			ThreadManager.Restart();
 		}
 		
 		/// <summary>
@@ -171,7 +170,7 @@ namespace PlaneAlerter
 				Core.statsThread.Abort();
 			if (Core.loopThread != null)
 				Core.loopThread.Abort();
-
+			ThreadManager.ThreadManagerDispatcher.InvokeShutdown();
 			Settings.Save();
 		}
 		
@@ -251,6 +250,15 @@ namespace PlaneAlerter
 
 		private void addAccountToolStripMenuItem_Click(object sender, EventArgs e) {
 			Twitter.AddAccount();
+		}
+
+		private void startToolStripMenuItem_Click(object sender, EventArgs e) {
+			if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Running || ThreadManager.threadStatus == ThreadManager.CheckerStatus.Waiting) {
+				ThreadManager.Stop();
+			}
+			else {
+				ThreadManager.Start();
+			}
 		}
 	}
 }

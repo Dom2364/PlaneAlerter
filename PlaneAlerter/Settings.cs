@@ -65,17 +65,22 @@ namespace PlaneAlerter {
 		public static int refreshRate;
 
 		/// <summary>
+		/// Start checker on program start
+		/// </summary>
+		public static bool startOnStart;
+
+		/// <summary>
 		/// Checker request timeout
 		/// </summary>
 		public static int timeout;
 
 		/// <summary>
-		/// Checker request timeout
+		/// Show notifications
 		/// </summary>
 		public static bool showNotifications;
 
 		/// <summary>
-		/// Checker request timeout
+		/// Sound alerts
 		/// </summary>
 		public static bool soundAlerts;
 
@@ -145,6 +150,7 @@ namespace PlaneAlerter {
 			settingsDictionary.Add("Long", Long);
 			settingsDictionary.Add("timeoutLength", removalTimeout);
 			settingsDictionary.Add("refreshRate", refreshRate);
+			settingsDictionary.Add("startOnStart", startOnStart);
 			settingsDictionary.Add("timeout", timeout);
 			settingsDictionary.Add("showNotifications", showNotifications);
 			settingsDictionary.Add("soundAlerts", soundAlerts);
@@ -210,8 +216,7 @@ namespace PlaneAlerter {
 			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Removal Timeout: " + removalTimeout + " secs");
 
 			//If its an update, restart threads
-			if (update)
-				ThreadManager.StartOrRestart();
+			if (update) ThreadManager.Restart();
 		}
 
         /// <summary>
@@ -286,6 +291,7 @@ namespace PlaneAlerter {
 				VRSAuthenticate = (VRSUsr != "");
 				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
 				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 30;
+				if (settingsJson["startOnStart"] != null) startOnStart = (settingsJson["startOnStart"].ToString().ToLower() == "true"); else startOnStart = true;
 				if (settingsJson["timeout"] != null && Convert.ToInt32(settingsJson["timeout"]) >= 5) timeout = Convert.ToInt32(settingsJson["timeout"]); else timeout = 30;
 				if (settingsJson["showNotifications"] != null) showNotifications = (settingsJson["showNotifications"].ToString().ToLower() == "true"); else showNotifications = true;
 				if (settingsJson["soundAlerts"] != null) soundAlerts = (settingsJson["soundAlerts"].ToString().ToLower() == "true"); else soundAlerts = false;
