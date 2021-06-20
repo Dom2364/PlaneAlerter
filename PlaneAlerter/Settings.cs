@@ -220,15 +220,6 @@ namespace PlaneAlerter {
 		}
 
         /// <summary>
-        /// Load default settings
-        /// </summary>
-        static void LoadDefaults() {
-            SMTPPort = 21;
-			timeout = 5;
-            File.WriteAllText("settings.json", JsonConvert.SerializeObject(returnSettingsDictionary(), Formatting.Indented));
-        }
-
-        /// <summary>
         /// Load default ecc settings
         /// </summary>
         static void LoadECCDefaults() {
@@ -249,9 +240,9 @@ namespace PlaneAlerter {
 		/// </summary>
 		public static void Save() {
 			//Serialise and save settings and email config
-			string serialisedSettings = JsonConvert.SerializeObject(Settings.returnSettingsDictionary(), Formatting.Indented);
+			string serialisedSettings = JsonConvert.SerializeObject(returnSettingsDictionary(), Formatting.Indented);
 			File.WriteAllText("settings.json", serialisedSettings);
-			string serialisedEcc = JsonConvert.SerializeObject(Settings.returnECCDictionary(), Formatting.Indented);
+			string serialisedEcc = JsonConvert.SerializeObject(returnECCDictionary(), Formatting.Indented);
 			File.WriteAllText("emailconfig.json", serialisedEcc);
 		}
 
@@ -263,7 +254,7 @@ namespace PlaneAlerter {
 			//Create settings file if one does not exist
 			if (!File.Exists("settings.json")) {
 				Core.UI.writeToConsole("No settings file! Creating one...", Color.White);
-                LoadDefaults();
+				File.WriteAllText("settings.json", JsonConvert.SerializeObject(new Dictionary<string, object>(), Formatting.Indented));
 			}
 
 			//Deserialise settings file
@@ -275,8 +266,8 @@ namespace PlaneAlerter {
 
 			//If file could not be parsed, create a new one, else parse settings
 			if (settingsJson == null) {
-				SMTPPort = 21;
-				File.WriteAllText("settings.json", JsonConvert.SerializeObject(returnSettingsDictionary(), Formatting.Indented));
+				MessageBox.Show("Unable to parse settings.json, exiting program", "Settings.json parse error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				Application.Exit();
 			}
 			else {
 				//Copy settings from parsed json
@@ -290,20 +281,22 @@ namespace PlaneAlerter {
 				if (settingsJson["Long"] != null) Long = Convert.ToDecimal(settingsJson["Long"]);
 				VRSAuthenticate = (VRSUsr != "");
 				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
-				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 30;
+				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 60;
 				if (settingsJson["startOnStart"] != null) startOnStart = (settingsJson["startOnStart"].ToString().ToLower() == "true"); else startOnStart = true;
-				if (settingsJson["timeout"] != null && Convert.ToInt32(settingsJson["timeout"]) >= 5) timeout = Convert.ToInt32(settingsJson["timeout"]); else timeout = 30;
+				if (settingsJson["timeout"] != null && Convert.ToInt32(settingsJson["timeout"]) >= 5) timeout = Convert.ToInt32(settingsJson["timeout"]); else timeout = 5;
 				if (settingsJson["showNotifications"] != null) showNotifications = (settingsJson["showNotifications"].ToString().ToLower() == "true"); else showNotifications = true;
-				if (settingsJson["soundAlerts"] != null) soundAlerts = (settingsJson["soundAlerts"].ToString().ToLower() == "true"); else soundAlerts = false;
+				if (settingsJson["soundAlerts"] != null) soundAlerts = (settingsJson["soundAlerts"].ToString().ToLower() == "true"); else soundAlerts = true;
 				if (settingsJson["radarURL"] != null) radarUrl = settingsJson["radarURL"].ToString();
 				if (settingsJson["SMTPHost"] != null) SMTPHost = settingsJson["SMTPHost"].ToString();
-				try {
-					SMTPPort = Convert.ToInt32(settingsJson["SMTPPort"]);
-					if (SMTPPort == 0) SMTPPort = 21;
-				}
-				catch {
-					SMTPPort = 21;
-				}
+				if (settingsJson["SMTPPort"] != null) {
+					try {
+						SMTPPort = Convert.ToInt32(settingsJson["SMTPPort"]);
+						if (SMTPPort == 0) SMTPPort = 21;
+					}
+					catch {
+						SMTPPort = 21;
+					}
+				} else SMTPPort = 21;
 				if (settingsJson["SMTPUsr"] != null) SMTPUsr = settingsJson["SMTPUsr"].ToString();
 				if (settingsJson["SMTPPwd"] != null) SMTPPwd = settingsJson["SMTPPwd"].ToString();
 				if (settingsJson["SMTPSSL"] != null) SMTPSSL = (settingsJson["SMTPSSL"].ToString().ToLower() == "true");
