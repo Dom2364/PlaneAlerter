@@ -27,24 +27,24 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Windows.Forms.TreeNode treeNode28 = new System.Windows.Forms.TreeNode("Conditions");
-			System.Windows.Forms.TreeNode treeNode29 = new System.Windows.Forms.TreeNode("Email");
-			System.Windows.Forms.TreeNode treeNode30 = new System.Windows.Forms.TreeNode("Radar");
-			System.Windows.Forms.TreeNode treeNode31 = new System.Windows.Forms.TreeNode("Program");
-			System.Windows.Forms.TreeNode treeNode32 = new System.Windows.Forms.TreeNode("Settings", new System.Windows.Forms.TreeNode[] {
-            treeNode29,
-            treeNode30,
-            treeNode31});
-			System.Windows.Forms.TreeNode treeNode33 = new System.Windows.Forms.TreeNode("Node0");
-			System.Windows.Forms.TreeNode treeNode34 = new System.Windows.Forms.TreeNode("Node1");
-			System.Windows.Forms.TreeNode treeNode35 = new System.Windows.Forms.TreeNode("Node2");
-			System.Windows.Forms.TreeNode treeNode36 = new System.Windows.Forms.TreeNode("Statistics", new System.Windows.Forms.TreeNode[] {
-            treeNode33,
-            treeNode34,
-            treeNode35});
+			System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Conditions");
+			System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Email");
+			System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Radar");
+			System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Program");
+			System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Settings", new System.Windows.Forms.TreeNode[] {
+            treeNode2,
+            treeNode3,
+            treeNode4});
+			System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Node0");
+			System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("Node1");
+			System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode("Node2");
+			System.Windows.Forms.TreeNode treeNode9 = new System.Windows.Forms.TreeNode("Statistics", new System.Windows.Forms.TreeNode[] {
+            treeNode6,
+            treeNode7,
+            treeNode8});
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PlaneAlerter));
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.console = new System.Windows.Forms.RichTextBox();
 			this.conditionTreeView = new System.Windows.Forms.TreeView();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -103,28 +103,28 @@
 			this.conditionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.conditionTreeView.Location = new System.Drawing.Point(0, 0);
 			this.conditionTreeView.Name = "conditionTreeView";
-			treeNode28.Name = "conditionsNode";
-			treeNode28.Text = "Conditions";
-			treeNode29.Name = "emailSettingsNode";
-			treeNode29.Text = "Email";
-			treeNode30.Name = "radarSettingsNode";
-			treeNode30.Text = "Radar";
-			treeNode31.Name = "programSettingsNode";
-			treeNode31.Text = "Program";
-			treeNode32.Name = "settingsNode";
-			treeNode32.Text = "Settings";
-			treeNode33.Name = "Node0";
-			treeNode33.Text = "Node0";
-			treeNode34.Name = "Node1";
-			treeNode34.Text = "Node1";
-			treeNode35.Name = "Node2";
-			treeNode35.Text = "Node2";
-			treeNode36.Name = "statsNode";
-			treeNode36.Text = "Statistics";
+			treeNode1.Name = "conditionsNode";
+			treeNode1.Text = "Conditions";
+			treeNode2.Name = "emailSettingsNode";
+			treeNode2.Text = "Email";
+			treeNode3.Name = "radarSettingsNode";
+			treeNode3.Text = "Radar";
+			treeNode4.Name = "programSettingsNode";
+			treeNode4.Text = "Program";
+			treeNode5.Name = "settingsNode";
+			treeNode5.Text = "Settings";
+			treeNode6.Name = "Node0";
+			treeNode6.Text = "Node0";
+			treeNode7.Name = "Node1";
+			treeNode7.Text = "Node1";
+			treeNode8.Name = "Node2";
+			treeNode8.Text = "Node2";
+			treeNode9.Name = "statsNode";
+			treeNode9.Text = "Statistics";
 			this.conditionTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode28,
-            treeNode32,
-            treeNode36});
+            treeNode1,
+            treeNode5,
+            treeNode9});
 			this.conditionTreeView.Size = new System.Drawing.Size(260, 163);
 			this.conditionTreeView.TabIndex = 1;
 			// 
@@ -313,18 +313,19 @@
 			// 
 			this.activeMatchesDataGridView.AllowUserToAddRows = false;
 			this.activeMatchesDataGridView.AllowUserToDeleteRows = false;
+			this.activeMatchesDataGridView.AllowUserToResizeRows = false;
 			this.activeMatchesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.activeMatchesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-			dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-			this.activeMatchesDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
+			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+			this.activeMatchesDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
 			this.activeMatchesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.activeMatchesDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Column1,
@@ -332,14 +333,14 @@
             this.Column3,
             this.Column4,
             this.Column5});
-			dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Window;
-			dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.ControlText;
-			dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.activeMatchesDataGridView.DefaultCellStyle = dataGridViewCellStyle8;
+			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+			dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+			dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.activeMatchesDataGridView.DefaultCellStyle = dataGridViewCellStyle2;
 			this.activeMatchesDataGridView.Location = new System.Drawing.Point(0, 16);
 			this.activeMatchesDataGridView.Name = "activeMatchesDataGridView";
 			this.activeMatchesDataGridView.ReadOnly = true;

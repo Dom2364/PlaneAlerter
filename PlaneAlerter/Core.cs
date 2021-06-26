@@ -117,10 +117,14 @@ namespace PlaneAlerter {
 			}
 
 			/// <summary>
-			/// ToString
+			/// ToJSON
 			/// </summary>
 			public string ToJSON() {
 				return Newtonsoft.Json.JsonConvert.SerializeObject(Properties);
+			}
+
+			public override string ToString() {
+				return $"Aircraft: { GetProperty("Icao")} | { GetProperty("Reg")} | { GetProperty("Type")} | { GetProperty("Call")}";
 			}
 
 			/// <summary>

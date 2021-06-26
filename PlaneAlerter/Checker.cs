@@ -92,22 +92,38 @@ namespace PlaneAlerter {
 
 								//Get internal name for property to compare
 								propertyInternalName = Core.vrsPropertyData[trigger.Property][2].ToString();
-								
+								string propertyValue = aircraft.GetProperty(propertyInternalName);
+
 								//Check property against value
-								if (trigger.ComparisonType == "Equals" && aircraft.GetProperty(propertyInternalName) == trigger.Value)
-									triggersMatching++;
-								else if (trigger.ComparisonType == "Not Equals" && aircraft.GetProperty(propertyInternalName) != trigger.Value)
-									triggersMatching++;
-								else if (trigger.ComparisonType == "Contains" && aircraft.GetProperty(propertyInternalName) != null && aircraft.GetProperty(propertyInternalName).Contains(trigger.Value))
-									triggersMatching++;
-								else if (trigger.ComparisonType == "Higher Than" && !string.IsNullOrEmpty(aircraft.GetProperty(propertyInternalName)) && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) > Convert.ToDouble(trigger.Value))
-									triggersMatching++;
-								else if (trigger.ComparisonType == "Lower Than" && !string.IsNullOrEmpty(aircraft.GetProperty(propertyInternalName)) && Convert.ToDouble(aircraft.GetProperty(propertyInternalName)) < Convert.ToDouble(trigger.Value))
-									triggersMatching++;
-								else if (trigger.ComparisonType == "Starts With" && aircraft.GetProperty(propertyInternalName) != null && (aircraft.GetProperty(propertyInternalName).Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(0, trigger.Value.Length) == trigger.Value))
-									triggersMatching++;
-								else if (trigger.ComparisonType == "Ends With" && aircraft.GetProperty(propertyInternalName) != null && (aircraft.GetProperty(propertyInternalName).ToString().Length > trigger.Value.Length && aircraft.GetProperty(propertyInternalName).Substring(aircraft.GetProperty(propertyInternalName).Length - trigger.Value.Length) == trigger.Value))
-									triggersMatching++;
+								if (trigger.ComparisonType == "Equals") {
+									if (propertyValue == null) {
+										if (trigger.Value == "") triggersMatching++;
+									}
+									else {
+										if (propertyValue == trigger.Value) triggersMatching++;
+									}
+								}	
+								else if (trigger.ComparisonType == "Not Equals") {
+									if (propertyValue == null) {
+										if (trigger.Value != "") triggersMatching++;
+									}
+									else {
+										if (propertyValue != trigger.Value) triggersMatching++;
+									}
+								}
+								//These comparisons must have a non-empty value to compare with
+								else if (!string.IsNullOrEmpty(propertyValue)) {
+									if (trigger.ComparisonType == "Contains" && propertyValue.Contains(trigger.Value))
+										triggersMatching++;
+									else if (trigger.ComparisonType == "Higher Than" && Convert.ToDouble(propertyValue) > Convert.ToDouble(trigger.Value))
+										triggersMatching++;
+									else if (trigger.ComparisonType == "Lower Than" && Convert.ToDouble(propertyValue) < Convert.ToDouble(trigger.Value))
+										triggersMatching++;
+									else if (trigger.ComparisonType == "Starts With" && (propertyValue.Length > trigger.Value.Length && propertyValue.Substring(0, trigger.Value.Length) == trigger.Value))
+										triggersMatching++;
+									else if (trigger.ComparisonType == "Ends With" && (propertyValue.Length > trigger.Value.Length && propertyValue.Substring(propertyValue.Length - trigger.Value.Length) == trigger.Value))
+										triggersMatching++;
+								}
 							}
 
 							//Get position in waiting matches
