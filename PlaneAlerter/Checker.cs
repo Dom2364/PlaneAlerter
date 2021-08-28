@@ -139,35 +139,38 @@ namespace PlaneAlerter {
 								Core.waitingMatches.Add(new string[] { aircraft.ICAO, conditionid.ToString() });
 							}
 							//If condition exists in waiting matches with this condition id, remove from waiting matches and send alert
-							if (wmIcaoIndex != -1 && Core.waitingMatches[wmIcaoIndex][1] == conditionid.ToString()) {
+							else if (wmIcaoIndex != -1 && Core.waitingMatches[wmIcaoIndex][1] == conditionid.ToString()) {
 								Core.waitingMatches.RemoveAt(wmIcaoIndex);
 
-								//Get receiver name
-								foreach (Core.Reciever reciever in Core.receivers)
-									if (reciever.Id == aircraft.GetProperty("Rcvr"))
-										recieverName = reciever.Name;
-								
-								//If active matches contains aircraft, add condition to the match
-								if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
-									Core.activeMatches[aircraft.ICAO].AddCondition(conditionid, condition, aircraft);
-								}
-								//Else add to active matches
-								else {
-									Core.Match m = new Core.Match(aircraft.ICAO);
-									m.AddCondition(conditionid, condition, aircraft);
-									Core.activeMatches.Add(aircraft.ICAO, m);
-								}
+								//Check if condition still matches
+								if (triggersMatching == condition.triggers.Count) {
+									//Get receiver name
+									foreach (Core.Reciever reciever in Core.receivers)
+										if (reciever.Id == aircraft.GetProperty("Rcvr"))
+											recieverName = reciever.Name;
 
-								//Cancel checking for conditions for this aircraft
-								ignorefollowing = condition.ignoreFollowing;
+									//If active matches contains aircraft, add condition to the match
+									if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
+										Core.activeMatches[aircraft.ICAO].AddCondition(conditionid, condition, aircraft);
+									}
+									//Else add to active matches
+									else {
+										Core.Match m = new Core.Match(aircraft.ICAO);
+										m.AddCondition(conditionid, condition, aircraft);
+										Core.activeMatches.Add(aircraft.ICAO, m);
+									}
 
-								//Update stats and log to console
-								Stats.updateStats();
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightGreen);
-								
-								//Send Alert
-								if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
-									SendAlert(condition, aircraft, recieverName, true);
+									//Cancel checking for conditions for this aircraft
+									ignorefollowing = condition.ignoreFollowing;
+
+									//Update stats and log to console
+									Stats.updateStats();
+									Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightGreen);
+
+									//Send Alert
+									if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
+										SendAlert(condition, aircraft, recieverName, true);
+								}
 							}
 							if (ignorefollowing) break;
 						}
@@ -184,10 +187,11 @@ namespace PlaneAlerter {
 						foreach (Core.MatchedCondition c in match.Conditions) {
 							//Check if signal has been lost for more than the removal timeout
 							if (match.SignalLostTime != DateTime.MinValue && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.removalTimeout - (Settings.removalTimeout * 2)))) < 0) {
-								//Log to UI
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.conditionName, Color.Orange);
 								//Remove from active matches
 								Core.activeMatches.Remove(match.Icao);
+								//Update stats and log to console
+								Stats.updateStats();
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.conditionName, Color.Orange);
 								//Update aircraft info
 								Core.Aircraft aircraft = c.AircraftInfo;
 
@@ -363,8 +367,8 @@ namespace PlaneAlerter {
 					using (JsonTextReader jsonreader = new JsonTextReader(reader))
 						responseJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
 				}
-				catch (SocketException e) {
-					Core.UI.writeToConsole("ERROR: Network error while downloading AircraftList.json: " + e.Message, Color.Red);
+				catch (Exception e) {
+					Core.UI.writeToConsole("ERROR: " + e.GetType().ToString() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					Thread.Sleep(5000);
 					return;
 				}
