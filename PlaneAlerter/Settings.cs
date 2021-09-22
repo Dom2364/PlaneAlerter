@@ -115,6 +115,17 @@ namespace PlaneAlerter {
 		public static bool SettingsLoaded = false;
 
 		/// <summary>
+		/// What distance to ignore aircraft beyond (for bandwidth saving)?
+		/// </summary>
+		public static double IgnoreDistance;
+
+		/// <summary>
+		/// What altitude to ignore aircraft beyond (for bandwidth saving)?
+		/// </summary>
+		public static int IgnoreAltitude;
+
+
+		/// <summary>
 		/// List of Twitter user credentials
 		/// </summary>
 		public static Dictionary<string, string[]> TwitterUsers = new Dictionary<string, string[]>();
@@ -131,7 +142,9 @@ namespace PlaneAlerter {
 			public static bool AircraftPhotos;
 			public static bool Map;
             public static bool TwitterOptimised;
+			public static bool KMLfile;
 			public static Core.PropertyListType PropertyList;
+			public static bool CentreMapOnAircraft;
 		}
 
 		/// <summary>
@@ -160,6 +173,8 @@ namespace PlaneAlerter {
 			settingsDictionary.Add("SMTPPwd", SMTPPwd);
 			settingsDictionary.Add("SMTPSSL", SMTPSSL);
 			settingsDictionary.Add("TwitterUsers", TwitterUsers);
+			settingsDictionary.Add("IgnoreDistance", IgnoreDistance);
+			settingsDictionary.Add("IgnoreAltitude", IgnoreAltitude);
 			return settingsDictionary;
 		}
 
@@ -178,6 +193,8 @@ namespace PlaneAlerter {
 			eccDictionary.Add("Map", EmailContentConfig.Map);
             eccDictionary.Add("TwitterOptimised", EmailContentConfig.TwitterOptimised);
             eccDictionary.Add("PropertyList", EmailContentConfig.PropertyList.ToString());
+			eccDictionary.Add("KMLfile", EmailContentConfig.KMLfile);
+			eccDictionary.Add("CentreMapOnAircraft", EmailContentConfig.CentreMapOnAircraft);
 			return eccDictionary;
 		}
 
@@ -214,7 +231,8 @@ namespace PlaneAlerter {
 			else
 				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " + VRSAuthenticate);
 			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Removal Timeout: " + removalTimeout + " secs");
-
+			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Ignore aircraft further than: " + IgnoreDistance + " km away");
+				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Ignore aircraft higher than: " + IgnoreAltitude + " ft");
 			//If its an update, restart threads
 			if (update) ThreadManager.Restart();
 		}
@@ -226,12 +244,14 @@ namespace PlaneAlerter {
             EmailContentConfig.AfLookup = true;
             EmailContentConfig.AircraftPhotos = true;
             EmailContentConfig.Map = true;
+			EmailContentConfig.KMLfile = true;
             EmailContentConfig.PropertyList = Core.PropertyListType.All;
             EmailContentConfig.RadarLink = true;
             EmailContentConfig.ReportLink = true;
             EmailContentConfig.ReceiverName = true;
             EmailContentConfig.TransponderType = true;
             EmailContentConfig.TwitterOptimised = false;
+			EmailContentConfig.CentreMapOnAircraft = false;
             File.WriteAllText("emailconfig.json", JsonConvert.SerializeObject(returnECCDictionary(), Formatting.Indented));
         }
 
@@ -279,6 +299,8 @@ namespace PlaneAlerter {
 				if (settingsJson["VRSPwd"] != null) VRSPwd = settingsJson["VRSPwd"].ToString();
 				if (settingsJson["Lat"] != null) Lat = Convert.ToDecimal(settingsJson["Lat"]);
 				if (settingsJson["Long"] != null) Long = Convert.ToDecimal(settingsJson["Long"]);
+				if (settingsJson["IgnoreDistance"] != null) IgnoreDistance = Convert.ToDouble(settingsJson["IgnoreDistance"]);
+				if (settingsJson["IgnoreAltitude"] != null) IgnoreAltitude = Convert.ToInt16(settingsJson["IgnoreAltitude"]);
 				VRSAuthenticate = (VRSUsr != "");
 				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
 				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 60;
@@ -288,6 +310,7 @@ namespace PlaneAlerter {
 				if (settingsJson["soundAlerts"] != null) soundAlerts = (settingsJson["soundAlerts"].ToString().ToLower() == "true"); else soundAlerts = true;
 				if (settingsJson["radarURL"] != null) radarUrl = settingsJson["radarURL"].ToString();
 				if (settingsJson["SMTPHost"] != null) SMTPHost = settingsJson["SMTPHost"].ToString();
+				
 				if (settingsJson["SMTPPort"] != null) {
 					try {
 						SMTPPort = Convert.ToInt32(settingsJson["SMTPPort"]);
@@ -340,6 +363,8 @@ namespace PlaneAlerter {
                 EmailContentConfig.Map = (bool)eccJson["Map"];
                 EmailContentConfig.TwitterOptimised = (bool)eccJson["TwitterOptimised"];
                 EmailContentConfig.PropertyList = (Core.PropertyListType)Enum.Parse(typeof(Core.PropertyListType), eccJson["PropertyList"].ToString());
+				EmailContentConfig.KMLfile = (bool)eccJson["KMLfile"];
+				EmailContentConfig.CentreMapOnAircraft = (bool)eccJson["CentreMapOnAircraft"];
             }
 			catch {
                 File.Delete("emailconfig.json");

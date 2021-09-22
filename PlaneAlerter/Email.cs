@@ -253,6 +253,11 @@ namespace PlaneAlerter {
                     message.Body += "<h3 style='margin: 0px'><a style='text-decoration: none' href=" + googleMapsUrl + ">Open in Google Maps</a></h3><br />" +
                     "<img style='border: 2px solid;border-radius: 10px;' alt='Loading Map...' src='" + Core.GenerateMapURL(aircraft).Replace("&", "&amp;") + "' />";
                 }
+                //KML
+                if (Settings.EmailContentConfig.KMLfile)
+                message.Attachments.Add(Attachment.CreateAttachmentFromString(Core.GenerateKML(aircraft), "Attachment.kml"));
+                
+
                 message.Body += "</td></tr></table></body></html>";
             }
 
