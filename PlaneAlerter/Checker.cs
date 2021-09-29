@@ -241,6 +241,8 @@ namespace PlaneAlerter {
 		}
 
 		public static void SendAlert(Core.Condition condition, Core.Aircraft aircraft, string receiver, bool isFirst) {
+			Core.Aircraft aircraftwithtrails;
+			
 			//Show notification
 			if (Settings.showNotifications) Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.conditionName}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
 
@@ -249,6 +251,10 @@ namespace PlaneAlerter {
 
 			//Log
 			Core.LogAlert(condition, aircraft, receiver, isFirst);
+
+			//Get trails
+		
+			aircraftwithtrails = GetAircraftWithTrails(aircraft);
 
 			if (condition.emailEnabled) {
 				//Create email message
@@ -268,7 +274,7 @@ namespace PlaneAlerter {
 
 				//Send emails
 				foreach (string email in condition.recieverEmails)
-					Email.SendEmail(email, message, condition, aircraft, receiver, emailPropertyInfo, isFirst);
+					Email.SendEmail(email, message, condition, aircraftwithtrails, receiver, emailPropertyInfo, isFirst);
 			}
 			
 			if (condition.twitterEnabled) {
@@ -323,7 +329,7 @@ namespace PlaneAlerter {
 				}
 
 				//Get map URL if enabled
-				string mapURL = condition.tweetMap?Core.GenerateMapURL(aircraft):"";
+				string mapURL = condition.tweetMap?Core.GenerateMapURL(aircraftwithtrails):"";
 
 				//Send tweet
 				bool success = Twitter.Tweet(creds[0], creds[1], content, mapURL);
@@ -342,13 +348,14 @@ namespace PlaneAlerter {
 		/// </summary>
 		public static void GetAircraft() {
 			JObject responseJson;
+			
 			try {
 				//Generate aircraftlist.json url
 				string url = "";
 				if (!Settings.acListUrl.Contains("?"))
-					url = Settings.acListUrl + "?trFmt=f&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".");
+					url = Settings.acListUrl + "?lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fAltL=-1000&fAltU=" + Convert.ToString(Settings.IgnoreAltitude) + "&fDstL=0&fDstU=" + Settings.IgnoreDistance.ToString("#.#") ;
 				else
-					url = Settings.acListUrl + "&trFmt=f&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".");
+					url = Settings.acListUrl + "lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fAltL=-1000&fAltU=" + Convert.ToString(Settings.IgnoreAltitude) + "&fDstL=0&fDstU=" + Settings.IgnoreDistance.ToString("#.#");
 				//Create request
 				request = (HttpWebRequest)WebRequest.Create(url);
 				request.Method = "GET";
@@ -362,16 +369,20 @@ namespace PlaneAlerter {
 				//Send request and parse json response
 				try {
 					using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-					using (Stream responsestream = response.GetResponseStream())
+					using (Stream responsestream = response.GetResponseStream())	
 					using (StreamReader reader = new StreamReader(responsestream))
 					using (JsonTextReader jsonreader = new JsonTextReader(reader))
-						responseJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
-				}
+					
+							responseJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
+				// Was used to check approximate data consumption
+					//	Core.UI.writeToConsole("Relative size " + responseJson.ToString().Length, Color.Green);
+								}
 				catch (Exception e) {
 					Core.UI.writeToConsole("ERROR: " + e.GetType().ToString() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					Thread.Sleep(5000);
 					return;
 				}
+
 				
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null) {
@@ -432,6 +443,122 @@ namespace PlaneAlerter {
 			}
 		}
 
+
+		public static Core.Aircraft GetAircraftWithTrails(Core.Aircraft inputaircraft)
+		{
+			JObject responseJson;
+			try
+			{
+				Core.UI.updateStatusLabel("Downloading Aircraft Trails for " + inputaircraft.GetProperty("Reg") + " (" + inputaircraft.ICAO + ")...");
+				//Generate aircraftlist.json url
+				string url = "";
+				if (!Settings.acListUrl.Contains("?"))
+					url = Settings.acListUrl + "?trFmt=fa&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fIcoQ=" + inputaircraft.ICAO;
+				else
+					url = Settings.acListUrl + "&trFmt=fa&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fIcoQ=" + inputaircraft.ICAO;
+				//Create request
+				request = (HttpWebRequest)WebRequest.Create(url);
+				request.Method = "GET";
+				request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+				request.Timeout = Settings.timeout * 1000;
+				//Add credentials if they are provided
+				if (Settings.VRSAuthenticate)
+				{
+					string encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
+					request.Headers.Add("Authorization", "Basic " + encoded);
+				}
+				//Send request and parse json response
+				try
+				{
+					using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+					using (Stream responsestream = response.GetResponseStream())
+					using (StreamReader reader = new StreamReader(responsestream))
+					using (JsonTextReader jsonreader = new JsonTextReader(reader))
+						responseJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
+				}
+				catch (Exception e)
+				{
+					Core.UI.writeToConsole("ERROR: " + e.GetType().ToString() + " while downloading AircraftList.json with trails: " + e.Message, Color.Red);
+					Thread.Sleep(5000);
+					return inputaircraft;
+				}
+				
+				//Check if we actually got aircraft data
+				if (responseJson["acList"] == null)
+				{
+					Core.UI.writeToConsole("ERROR: Invalid response recieved from server", Color.Red);
+					Thread.Sleep(5000);
+					return inputaircraft;
+				}
+				//Throw error if server time was not parsed
+				if (responseJson["stm"] == null)
+					throw new JsonReaderException();
+				//Parse aircraft data
+				
+				// Don't clear list!
+				// Core.aircraftlist.Clear();
+				foreach (JObject a in responseJson["acList"].ToList())
+				{
+					//Ignore if no icao is provided
+					if (a["Icao"] == null) continue;
+
+					
+					//Create new aircraft
+					Core.Aircraft aircraft = new Core.Aircraft(a["Icao"].ToString());
+					//Parse aircraft trail
+					if (a["Cot"] != null)
+						aircraft.Trail = new double[a["Cot"].Count()];
+					for (int i = 0; i < aircraft.Trail.Length - 1; i++)
+						if (a["Cot"][i].Value<string>() != null)
+							aircraft.Trail[i] = double.Parse(a["Cot"][i].Value<string>(), CultureInfo.InvariantCulture);
+						else
+							aircraft.Trail[i] = 0;
+					//Parse aircraft properties
+					List<JProperty> properties = a.Properties().ToList();
+					for (int i = 0; i < properties.Count(); i++)
+						aircraft.AddProperty(properties[i].Name, properties[i].Value.ToString());
+					properties = null;
+
+					//Is this the aircraft we are looking for?
+
+					if (aircraft.ICAO == inputaircraft.ICAO)
+						return aircraft;
+
+					//Add aircraft to list
+					//Core.aircraftlist.Add(aircraft);
+				}
+				
+				
+				//Try to clean up json parsing
+				responseJson.RemoveAll();
+				responseJson = null;
+				GC.Collect(2, GCCollectionMode.Forced);
+			}
+			catch (UriFormatException)
+			{
+				Core.UI.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.acListUrl + ")", Color.Red);
+				return inputaircraft;
+			}
+			catch (InvalidDataException)
+			{
+				Core.UI.writeToConsole("ERROR: Data returned from " + Settings.acListUrl + " was not gzip compressed", Color.Red);
+				return inputaircraft;
+			}
+			catch (WebException e)
+			{
+				Core.UI.writeToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
+				return inputaircraft;
+			}
+			catch (JsonReaderException e)
+			{
+				Core.UI.writeToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
+				return inputaircraft;
+			}
+
+			// If we've fallen out the bottom then just return the original aircraft
+			return inputaircraft;
+
+		}
 		/// <summary>
 		/// Load conditions
 		/// </summary>

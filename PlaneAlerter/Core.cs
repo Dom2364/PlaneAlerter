@@ -576,20 +576,28 @@ namespace PlaneAlerter {
 			string staticMapUrl = "";
 			//If aircraft has a position, generate a google map url
 			if (aircraft.GetProperty("Lat") != null)
-				if (aircraft.Trail.Count() != 3)
-					staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
+				if (Settings.EmailContentConfig.CentreMapOnAircraft) {
+					if (aircraft.Trail.Count() != 4)
+						staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
+					else
+						staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&zoom=8&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
+				}
+				else { 
+					if (aircraft.Trail.Count() != 4)
+					staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + Settings.Lat + "," + Settings.Long + "&size=800x800&markers=" + Settings.Lat + "," + Settings.Long + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
 				else
-					staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&zoom=8&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
-
-			//Process aircraft trail
-			for (int i = 0; i < aircraft.Trail.Count() / 3; i++) {
+					staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + Settings.Lat + "," + Settings.Long + "&size=800x800&zoom=8&markers=" + Settings.Lat + "," + Settings.Long + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
+				}
+					//Process aircraft trail
+					for (int i = 0; i < aircraft.Trail.Count() / 4; i++) {
 				//Get coordinate
 				string[] coord = new string[] {
-						aircraft.Trail[i * 3].ToString("#.####"),
-						aircraft.Trail[i * 3 + 1].ToString("#.####"),
-						aircraft.Trail[i * 3 + 2].ToString("#.####")
+						aircraft.Trail[i * 4].ToString("#.####"),
+						aircraft.Trail[i * 4 + 1].ToString("#.####"),
+						aircraft.Trail[i * 4 + 2].ToString("#.####"),
+						aircraft.Trail[i * 4 + 3].ToString("#.####")
 					};
-				string coordstring = coord[0] + "," + coord[1] + "|";
+				string coordstring = coord[0] + "," + coord[1]  + "|";
 
 				//Check if adding another coordinate will make the url too long
 				if (staticMapUrl.Length + coordstring.Length > 8000) break; //Limit is 8192, using 8000 to give some headroom. Allows for about 440 points
@@ -603,5 +611,138 @@ namespace PlaneAlerter {
 
 			return staticMapUrl.Substring(0, staticMapUrl.Length-1);
 		}
+
+		/// <summary>
+		/// Generate a KML
+		/// </summary>
+		public static string GenerateKML(Aircraft aircraft)
+		{
+			string KMLData = "";
+			//If aircraft has a position, generate a google map url
+			if (aircraft.GetProperty("Lat") != null)
+				if (aircraft.Trail.Count() != 4)
+					KMLData = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+  <kml xmlns = ""http://www.opengis.net/kml/2.2"">
+   
+	 <Document>
+   
+	   <name>" + aircraft.GetProperty("Reg") + @"  </name>
+   
+	   <description> Trace of suspect aircraft </description>
+
+   <Style id = ""yellowLineGreenPoly"">
+
+	  <LineStyle>
+
+		<color> 7f00ffff </color>
+   
+		   <width> 4 </width>
+   
+		 </LineStyle>
+   
+		 <PolyStyle>
+   
+		   <color> 7f00ff00 </color>
+	  
+			</PolyStyle>
+	  
+		  </Style>
+	  
+		  <Placemark>
+	  
+			<name> Absolute Extruded </name>
+		 
+			   <description> Transparent green wall with yellow outlines </description>
+			
+				  <styleUrl>#yellowLineGreenPoly</styleUrl>
+      <LineString>
+			
+					<extrude> 1 </extrude>
+			
+					<tessellate> 1 </tessellate>
+			
+					<altitudeMode> absolute </altitudeMode>
+			
+					<coordinates> ";
+				else
+					KMLData = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+  <kml xmlns = ""http://www.opengis.net/kml/2.2"">
+   
+	 <Document>
+   
+	   <name>" + aircraft.GetProperty("Reg") + @"  </name>
+   
+	   <description> Trace of suspect aircraft </description>
+
+   <Style id = ""yellowLineGreenPoly"">
+
+	  <LineStyle>
+
+		<color> 7f00ffff </color>
+   
+		   <width> 4 </width>
+   
+		 </LineStyle>
+   
+		 <PolyStyle>
+   
+		   <color> 7f00ff00 </color>
+	  
+			</PolyStyle>
+	  
+		  </Style>
+	  
+		  <Placemark>
+	  
+			<name> Absolute Extruded </name>
+		 
+			   <description> Transparent green wall with yellow outlines </description>
+			
+				  <styleUrl>#yellowLineGreenPoly</styleUrl>
+      <LineString>
+			
+					<extrude> 1 </extrude>
+			
+					<tessellate> 1 </tessellate>
+			
+					<altitudeMode> absolute </altitudeMode>
+			
+					<coordinates> ";
+
+			//Process aircraft trail
+			for (int i = 0; i < aircraft.Trail.Count() / 4; i++)
+			{
+				//Get coordinate
+				string[] coord = new string[] {
+						aircraft.Trail[i * 4].ToString("#.####"),
+						aircraft.Trail[i * 4 + 1].ToString("#.####"),
+						aircraft.Trail[i * 4 + 2].ToString("#.####"),
+						(aircraft.Trail[i * 4 + 3] * 0.3048).ToString("#.####") // Convert feet to metres for KML
+					};
+				string coordstring = coord[1] + "," + coord[0] + "," + coord[3] + Environment.NewLine;
+
+				//Check if adding another coordinate will make the url too long
+				//if (KMLData.Length + coordstring.Length > 8000) break; //Limit is 8192, using 8000 to give some headroom. Allows for about 440 points
+
+				//Add coordinates to KML
+				KMLData += coordstring;
+
+
+			}
+
+			//Add rest of KML
+			KMLData += @" </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml> ";
+			//Return empty string if no positions
+			if (KMLData == "" || KMLData.Length == 0) return "";
+
+			return KMLData.Substring(0, KMLData.Length - 1);
+		}
+
+
+
 	}
 }

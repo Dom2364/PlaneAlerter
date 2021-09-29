@@ -52,6 +52,8 @@ namespace PlaneAlerter {
 			smtpPwdTextBox.Text = Settings.SMTPPwd;
 			smtpSSLCheckBox.Checked = Settings.SMTPSSL;
 			timeoutTextBox.Value = Settings.timeout;
+			IgnoreDistTextBox.Value = Convert.ToDecimal(Settings.IgnoreDistance);
+			IgnoreAltTextBox.Value = Settings.IgnoreAltitude;
 		}
 
 		/// <summary>
@@ -92,6 +94,8 @@ namespace PlaneAlerter {
 			Settings.SMTPPwd = smtpPwdTextBox.Text;
 			Settings.SMTPSSL = smtpSSLCheckBox.Checked;
 			Settings.timeout = Convert.ToInt32(timeoutTextBox.Value);
+			Settings.IgnoreAltitude = Convert.ToInt32(IgnoreAltTextBox.Value);
+			Settings.IgnoreDistance = Convert.ToDouble(IgnoreDistTextBox.Value);
 			Settings.Save();
 		}
 
@@ -114,12 +118,17 @@ namespace PlaneAlerter {
 			//Open gmail link
 			Process.Start("https://www.google.com/settings/security/lesssecureapps");
 		}
-	}
 
-	/// <summary>
-	/// Smtp host info
-	/// </summary>
-	public static class smtpHostInfo {
+        private void label12_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
+
+    /// <summary>
+    /// Smtp host info
+    /// </summary>
+    public static class smtpHostInfo {
 		/// <summary>
 		/// Smtp host info
 		/// </summary>
