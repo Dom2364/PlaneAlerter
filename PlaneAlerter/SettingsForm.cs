@@ -118,11 +118,6 @@ namespace PlaneAlerter {
 			//Open gmail link
 			Process.Start("https://www.google.com/settings/security/lesssecureapps");
 		}
-
-        private void label12_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 
     /// <summary>

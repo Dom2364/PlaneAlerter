@@ -299,8 +299,8 @@ namespace PlaneAlerter {
 				if (settingsJson["VRSPwd"] != null) VRSPwd = settingsJson["VRSPwd"].ToString();
 				if (settingsJson["Lat"] != null) Lat = Convert.ToDecimal(settingsJson["Lat"]);
 				if (settingsJson["Long"] != null) Long = Convert.ToDecimal(settingsJson["Long"]);
-				if (settingsJson["IgnoreDistance"] != null) IgnoreDistance = Convert.ToDouble(settingsJson["IgnoreDistance"]);
-				if (settingsJson["IgnoreAltitude"] != null) IgnoreAltitude = Convert.ToInt16(settingsJson["IgnoreAltitude"]);
+				if (settingsJson["IgnoreDistance"] != null) IgnoreDistance = Convert.ToDouble(settingsJson["IgnoreDistance"]); else IgnoreDistance = 50000;
+				if (settingsJson["IgnoreAltitude"] != null) IgnoreAltitude = Convert.ToInt16(settingsJson["IgnoreAltitude"]); else IgnoreAltitude = 100000;
 				VRSAuthenticate = (VRSUsr != "");
 				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
 				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 60;

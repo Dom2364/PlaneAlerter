@@ -276,7 +276,6 @@
             this.MaximizeBox = false;
             this.Name = "Email_Content_Config";
             this.Text = "Email Content Config";
-            this.Load += new System.EventHandler(this.Email_Content_Config_Load);
             this.propertyListGroupBox.ResumeLayout(false);
             this.propertyListGroupBox.PerformLayout();
             this.checkBoxesPanel.ResumeLayout(false);

@@ -79,10 +79,5 @@ namespace PlaneAlerter {
             checkBoxesPanel.Enabled = !twitterCheckBox.Checked;
             propertyListGroupBox.Enabled = !twitterCheckBox.Checked;
         }
-
-        private void Email_Content_Config_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

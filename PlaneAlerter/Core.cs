@@ -489,7 +489,7 @@ namespace PlaneAlerter {
 			vrsPropertyData.Add(vrsProperty.Is_In_Emergency, new string[] { "Boolean", "C", "Help", "True if the aircraft is transmitting an emergency squawk." });
 			vrsPropertyData.Add(vrsProperty.Distance, new string[] { "Number", "B", "Dst", "The distance to the aircraft in kilometres." });
 			vrsPropertyData.Add(vrsProperty.Bearing, new string[] { "Number", "B", "Brng", "The bearing to the aircraft from 0° north" });
-			vrsPropertyData.Add(vrsProperty.Wake_Turbulence_Category, new string[] { "Number", "A", "WTC", "The wake turbulence category of the aircraft. 1 = none, 2 = light, 3 = medium, 4 = heavy" });
+			vrsPropertyData.Add(vrsProperty.Wake_Turbulence_Category, new string[] { "Number", "AB", "WTC", "The wake turbulence category of the aircraft. 1 = none, 2 = light, 3 = medium, 4 = heavy" });
 			vrsPropertyData.Add(vrsProperty.Engines, new string[] { "Number", "AB", "Engines", "The number of engines the aircraft has." });
 			vrsPropertyData.Add(vrsProperty.Engine_Type, new string[] { "Number", "A", "EngType", "The type of engine the aircraft uses. 0 = none, 1 = piston, 2 = turbo, 3 = jet, 4 = electric" });
 			vrsPropertyData.Add(vrsProperty.Species, new string[] { "Number", "A", "Species", "The species of the aircraft (helicopter, jet etc.). 0 = none, 1 = landplane, 2 = seaplane, 3 = amphibian, 4 = helicopter, 5 = gyrocopter, 6 = tiltwing, 7 = ground vehicle, 8 = tower" });
@@ -500,7 +500,7 @@ namespace PlaneAlerter {
 			vrsPropertyData.Add(vrsProperty.Is_On_Ground, new string[] { "Boolean", "C", "Gnd", "True if the aircraft is on the ground." });
 			vrsPropertyData.Add(vrsProperty.User_Tag, new string[] { "String", "AE", "Tag", "The user tag found for the aircraft in the BaseStation.sqb local database." });
 			vrsPropertyData.Add(vrsProperty.Is_Interesting, new string[] { "Boolean", "C", "Interested", "True if the aircraft is flagged as interesting in the BaseStation.sqb local database." });
-			vrsPropertyData.Add(vrsProperty.Transponder_Type, new string[] { "Number", "A", "Trt", "Transponder type. 0 = Unknown, 1 = Mode-S, 2 = ADS-B (unknown version), 3 = ADS-B 1, 4 = ADS-B 2." });
+			vrsPropertyData.Add(vrsProperty.Transponder_Type, new string[] { "Number", "AB", "Trt", "Transponder type. 0 = Unknown, 1 = Mode-S, 2 = ADS-B (unknown version), 3 = ADS-B 1, 4 = ADS-B 2." });
 			vrsPropertyData.Add(vrsProperty.Has_Signal_Level, new string[] { "Boolean", "C", "HasSig", "True if the aircraft has a signal level associated with it." });
 			vrsPropertyData.Add(vrsProperty.Signal_Level, new string[] { "Number", "B", "Sig", "The signal level for the last message received from the aircraft, as reported by the receiver. Not all receivers pass signal levels. The value's units are receiver-dependent." });
 			vrsPropertyData.Add(vrsProperty.Mlat, new string[] { "Boolean", "C", "Mlat", "True if the aircraft's position was determined using Multilateration." });
