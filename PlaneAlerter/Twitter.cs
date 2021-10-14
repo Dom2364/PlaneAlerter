@@ -2,11 +2,13 @@
 using System.Diagnostics;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
 using Tweetinvi;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
-using System.Windows.Forms;
-using System.IO;
+using Tweetinvi.Exceptions;
 
 
 namespace PlaneAlerter {
@@ -18,118 +20,125 @@ namespace PlaneAlerter {
 		private const string Key = "U1dYZUhZT0RqOG1hV25xRzczMXZ6Y3k3NA==";
 		private const string SecretKey = "UWlBcGtJaXJFdnpZaFhVb0FGVE93R003dnR0YnhJdWI1Y1BzVmxxSktuZGlmSkZvMzA=";
 
-		private static IConsumerCredentials AppCredentials = new ConsumerCredentials(
-			Encoding.UTF8.GetString(Convert.FromBase64String(Key)),
-			Encoding.UTF8.GetString(Convert.FromBase64String(SecretKey)));
+		private static string ConsumerKey = Encoding.UTF8.GetString(Convert.FromBase64String(Key));
+		private static string ConsumerSecretKey = Encoding.UTF8.GetString(Convert.FromBase64String(SecretKey));
 
 		/// <summary>
 		/// Posts a tweet
 		/// </summary>
-		public static bool Tweet(string token, string tokensecret, string content, string mediaURL) {
+		public static async Task<bool> Tweet(string token, string tokensecret, string content, string mediaURL) {
 			if (content.Contains("@")) {
 				Core.UI.writeToConsole("ERROR: Mentions are not allowed in tweets", System.Drawing.Color.Red);
 				return false;
 			}
 
 			//Set credentials
-			Auth.SetUserCredentials(AppCredentials.ConsumerKey, AppCredentials.ConsumerSecret, token, tokensecret);
-			
-			PublishTweetOptionalParameters options = new PublishTweetOptionalParameters();
+			TwitterClient twitterClient = new TwitterClient(ConsumerKey, ConsumerSecretKey, token, tokensecret);
+
+			PublishTweetParameters parameters = new PublishTweetParameters(content);
+
 			//Upload map image if required
 			if (mediaURL != "") {
+				MemoryStream ms = new MemoryStream();
+
 				try {
 					//Download the map image from google
 					HttpWebRequest req = (HttpWebRequest)WebRequest.Create(mediaURL);
-					WebResponse res = req.GetResponse();
-					MemoryStream ms = new MemoryStream();
-					res.GetResponseStream().CopyTo(ms);
-					byte[] imageBytes = ms.ToArray();
+					using (WebResponse res = req.GetResponse()) {
+						res.GetResponseStream().CopyTo(ms);
+					}	
+				}
+				catch (Exception e) {
+					Core.UI.writeToConsole($"ERROR: {e.GetType()} error downloading map image from Google: {e.Message}", System.Drawing.Color.Red);
+					return false;
+				}
 
+				try {
 					//Upload it to twitter
-					IMedia media = Upload.UploadBinary(imageBytes);
-					res.Dispose();
+					byte[] imageBytes = ms.ToArray();
+					IMedia media = await twitterClient.Upload.UploadTweetImageAsync(imageBytes);
 					ms.Dispose();
 
 					//Check if it was uploaded properly
-					if (media != null) {
-						if (media.HasBeenUploaded) options.Medias.Add(media);
-						else Core.UI.writeToConsole("ERROR: Error uploading map", System.Drawing.Color.Red);
-					}
-					else {
-						var e = ExceptionHandler.GetLastException();
-						Core.UI.writeToConsole("ERROR: Error uploading map: " + e.TwitterDescription, System.Drawing.Color.Red);
-					}
+					if (media.HasBeenUploaded) parameters.Medias.Add(media);
+					else Core.UI.writeToConsole("ERROR: Error uploading map", System.Drawing.Color.Red);
 				}
-				catch (WebException e) { 
-					Core.UI.writeToConsole("ERROR: Error downloading map: " + e.Message, System.Drawing.Color.Red);
+				catch (TwitterException e) {
+					Core.UI.writeToConsole($"ERROR: Error uploading map image to Twitter: {e.ToString()}", System.Drawing.Color.Red);
+				}
+				catch (Exception e) { 
+					Core.UI.writeToConsole($"ERROR: {e.GetType()} error uploading map image to Twitter: {e.Message}", System.Drawing.Color.Red);
 				}
 			}
 			//Publish tweet
 			try {
-				ITweet tweet = Tweetinvi.Tweet.PublishTweet(content, options);
-				if (tweet == null) {
-					var e = ExceptionHandler.GetLastException();
-					//Check if exception has extra details
-					if (e.TwitterExceptionInfos != null) {
-						string details = "";
-						foreach (Tweetinvi.Core.Exceptions.ITwitterExceptionInfo einfo in e.TwitterExceptionInfos) details += einfo.Message + ", ";
-						if (details.Length != 0) details = details.Substring(0, details.Length-2);
-						Core.UI.writeToConsole("ERROR: Error publishing tweet: " + e.TwitterDescription + " (" + details + ")", System.Drawing.Color.Red);
-					}
-					else {
-						Core.UI.writeToConsole("ERROR: Error publishing tweet: " + e.TwitterDescription, System.Drawing.Color.Red);
-					}
-					return false;
-				}
-				if (!tweet.IsTweetPublished) {
-					Core.UI.writeToConsole("ERROR: Unknown error publishing tweet", System.Drawing.Color.Red);
-				}
-				return tweet.IsTweetPublished;
+				var tweet = twitterClient.Tweets.PublishTweetAsync(parameters);
 			}
-			catch (Exception e) {
-				Core.UI.writeToConsole("ERROR: Error publishing tweet: " + e.Message, System.Drawing.Color.Red);
+			catch (TwitterException e) {
+				Core.UI.writeToConsole($"ERROR: Error publishing tweet: {e.ToString()}", System.Drawing.Color.Red);
 				return false;
 			}
+			catch (Exception e) {
+				Core.UI.writeToConsole($"ERROR: {e.GetType()} error publishing tweet: " + e.Message, System.Drawing.Color.Red);
+				return false;
+			}
+
+			return true;
 		}
 
 		/// <summary>
 		/// Authenticate account and add to accounts list
 		/// </summary>
-		public static void AddAccount() {
+		public static async void AddAccount() {
+			TwitterClient appClient = new TwitterClient(ConsumerKey, ConsumerSecretKey);
+
 			//Authenticate PlaneAlerter
-			IAuthenticationContext authenticationContext = AuthFlow.InitAuthentication(AppCredentials);
-			if (authenticationContext == null) {
-				var e = ExceptionHandler.GetLastException();
-				//Check if exception has extra details
-				if (e.TwitterExceptionInfos != null) {
-					string details = "";
-					foreach (Tweetinvi.Core.Exceptions.ITwitterExceptionInfo einfo in e.TwitterExceptionInfos) details += einfo.Message + ", ";
-					if (details.Length != 0) details = details.Substring(0, details.Length - 2);
-					MessageBox.Show("ERROR: Error authenticating PlaneAlerter with Twitter, please contact developer with details of this message" + Environment.NewLine + Environment.NewLine + e.TwitterDescription + Environment.NewLine + Environment.NewLine + details, "Authentication Error");
-				}
-				else {
-					MessageBox.Show("ERROR: Error authenticating PlaneAlerter with Twitter, please contact developer with details of this message" + Environment.NewLine + Environment.NewLine + e.TwitterDescription, "Authentication Error");
-				}
+			IAuthenticationRequest authenticationRequest;
+			try {
+				authenticationRequest = await appClient.Auth.RequestAuthenticationUrlAsync();
+			}
+			catch (TwitterAuthException e) {
+				MessageBox.Show("Auth error authenticating PlaneAlerter with Twitter, please contact developer with details of this message: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+				return;
+			}
+			catch (TwitterException e) {
+				MessageBox.Show("Error authenticating PlaneAlerter with Twitter, please contact developer with details of this message: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+				return;
+			}
+			catch (Exception e) {
+				MessageBox.Show($"{e.GetType()} error authenticating PlaneAlerter with Twitter: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
 				return;
 			}
 
 			//Open URL for user to authenticate PlaneAlerter app
-			Process.Start(authenticationContext.AuthorizationURL);
+			Process.Start(new ProcessStartInfo(authenticationRequest.AuthorizationURL) { UseShellExecute = true });
 
 			//Show dialog for user to enter pin
 			PinPromptDialog dialog = new PinPromptDialog();
 			if (dialog.ShowDialog() == DialogResult.OK) {
 				//Get credentials from Twitter
-				ITwitterCredentials userCredentials = AuthFlow.CreateCredentialsFromVerifierCode(dialog.PIN, authenticationContext);
-				if (userCredentials == null) {
-					MessageBox.Show("Incorrect PIN Entered", "Authentication Error");
+				ITwitterCredentials userCredentials;
+				try {
+					userCredentials = await appClient.Auth.RequestCredentialsFromVerifierCodeAsync(dialog.PIN, authenticationRequest);
+				}
+				catch (TwitterAuthException e) {
+					MessageBox.Show("Auth error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+					return;
+				}
+				catch (TwitterException e) {
+					MessageBox.Show("Error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+					return;
+				}
+				catch (Exception e) {
+					MessageBox.Show($"{e.GetType()} error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
 					return;
 				}
 
 				//Set active credentials
-				Auth.SetCredentials(userCredentials);
+				TwitterClient userClient = new TwitterClient(userCredentials);
+				IAuthenticatedUser user = await userClient.Users.GetAuthenticatedUserAsync();
 				//Get screen name
-				string screenname = User.GetAuthenticatedUser().ScreenName;
+				string screenname = user.ScreenName;
 
 				//Check if users list already contains user that was just authenticated
 				if (Settings.TwitterUsers.ContainsKey(screenname)) {

@@ -332,7 +332,7 @@ namespace PlaneAlerter {
 				string mapURL = condition.tweetMap?Core.GenerateMapURL(aircraftwithtrails):"";
 
 				//Send tweet
-				bool success = Twitter.Tweet(creds[0], creds[1], content, mapURL);
+				bool success = Twitter.Tweet(creds[0], creds[1], content, mapURL).Result;
 				if (success) {
 					Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightBlue);
 				}
@@ -353,9 +353,9 @@ namespace PlaneAlerter {
 				//Generate aircraftlist.json url
 				string url = "";
 				if (!Settings.acListUrl.Contains("?"))
-					url = Settings.acListUrl + "?lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fAltL=-1000&fAltU=" + Convert.ToString(Settings.IgnoreAltitude) + "&fDstL=0&fDstU=" + Settings.IgnoreDistance.ToString("#.#") ;
+					url = Settings.acListUrl + "?lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fAltU=" + Convert.ToString(Settings.IgnoreAltitude) + "&fDstU=" + Settings.IgnoreDistance.ToString("#.##") ;
 				else
-					url = Settings.acListUrl + "lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fAltL=-1000&fAltU=" + Convert.ToString(Settings.IgnoreAltitude) + "&fDstL=0&fDstU=" + Settings.IgnoreDistance.ToString("#.#");
+					url = Settings.acListUrl + "lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fAltU=" + Convert.ToString(Settings.IgnoreAltitude) + "&fDstU=" + Settings.IgnoreDistance.ToString("#.##");
 				//Create request
 				request = (HttpWebRequest)WebRequest.Create(url);
 				request.Method = "GET";

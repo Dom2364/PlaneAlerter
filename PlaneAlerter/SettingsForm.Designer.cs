@@ -477,11 +477,6 @@
             0,
             0,
             0});
-			this.IgnoreAltTextBox.Minimum = new decimal(new int[] {
-            500,
-            0,
-            0,
-            0});
 			this.IgnoreAltTextBox.Name = "IgnoreAltTextBox";
 			this.IgnoreAltTextBox.Size = new System.Drawing.Size(75, 20);
 			this.IgnoreAltTextBox.TabIndex = 29;
@@ -493,10 +488,10 @@
 			// 
 			// IgnoreDistTextBox
 			// 
-			this.IgnoreDistTextBox.DecimalPlaces = 1;
+			this.IgnoreDistTextBox.DecimalPlaces = 2;
 			this.IgnoreDistTextBox.Location = new System.Drawing.Point(245, 179);
 			this.IgnoreDistTextBox.Maximum = new decimal(new int[] {
-            50000,
+            30000,
             0,
             0,
             0});
