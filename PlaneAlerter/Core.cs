@@ -576,7 +576,7 @@ namespace PlaneAlerter {
 			string staticMapUrl = "";
 			//If aircraft has a position, generate a google map url
 			if (aircraft.GetProperty("Lat") != null)
-				if (Settings.EmailContentConfig.CentreMapOnAircraft) {
+				if (Settings.centreMapOnAircraft) {
 					if (aircraft.Trail.Count() != 4)
 						staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
 					else

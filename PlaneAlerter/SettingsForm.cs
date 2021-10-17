@@ -46,14 +46,21 @@ namespace PlaneAlerter {
 			startOnStartCheckBox.Checked = Settings.startOnStart;
 			soundAlertsCheckBox.Checked = Settings.soundAlerts;
 			notificationsCheckBox.Checked = Settings.showNotifications;
+			centreAircraftRadioButton.Checked = Settings.centreMapOnAircraft;
+			centreLatLngRadioButton.Checked = !Settings.centreMapOnAircraft;
 			smtpHostComboBox.Text = Settings.SMTPHost;
 			smtpHostPortTextBox.Value = Settings.SMTPPort;
 			smtpUsrTextBox.Text = Settings.SMTPUsr;
 			smtpPwdTextBox.Text = Settings.SMTPPwd;
 			smtpSSLCheckBox.Checked = Settings.SMTPSSL;
 			timeoutTextBox.Value = Settings.timeout;
-			IgnoreDistTextBox.Value = Convert.ToDecimal(Settings.IgnoreDistance);
-			IgnoreAltTextBox.Value = Settings.IgnoreAltitude;
+			filterDstCheckBox.Checked = Settings.filterDistance;
+			filterDstCheckBox_CheckedChanged(this, new EventArgs());
+			filterAltCheckBox.Checked = Settings.filterAltitude;
+			filterAltCheckBox_CheckedChanged(this, new EventArgs());
+			ignoreModeSCheckBox.Checked = Settings.ignoreModeS;
+			ignoreDistTextBox.Value = Convert.ToDecimal(Settings.ignoreDistance);
+			ignoreAltTextBox.Value = Settings.ignoreAltitude;
 		}
 
 		/// <summary>
@@ -88,14 +95,18 @@ namespace PlaneAlerter {
 			Settings.startOnStart = startOnStartCheckBox.Checked;
 			Settings.soundAlerts = soundAlertsCheckBox.Checked;
 			Settings.showNotifications = notificationsCheckBox.Checked;
+			Settings.centreMapOnAircraft = centreAircraftRadioButton.Checked;
 			Settings.SMTPHost = smtpHostComboBox.Text;
 			Settings.SMTPPort = Convert.ToInt32(smtpHostPortTextBox.Value);
 			Settings.SMTPUsr = smtpUsrTextBox.Text;
 			Settings.SMTPPwd = smtpPwdTextBox.Text;
 			Settings.SMTPSSL = smtpSSLCheckBox.Checked;
 			Settings.timeout = Convert.ToInt32(timeoutTextBox.Value);
-			Settings.IgnoreAltitude = Convert.ToInt32(IgnoreAltTextBox.Value);
-			Settings.IgnoreDistance = Convert.ToDouble(IgnoreDistTextBox.Value);
+			Settings.filterDistance = filterDstCheckBox.Checked;
+			Settings.filterAltitude = filterAltCheckBox.Checked;
+			Settings.ignoreModeS = ignoreModeSCheckBox.Checked;
+			Settings.ignoreAltitude = Convert.ToInt32(ignoreAltTextBox.Value);
+			Settings.ignoreDistance = Convert.ToDouble(ignoreDistTextBox.Value);
 			Settings.Save();
 		}
 
@@ -118,12 +129,21 @@ namespace PlaneAlerter {
 			//Open gmail link
 			Process.Start("https://www.google.com/settings/security/lesssecureapps");
 		}
-    }
 
-    /// <summary>
-    /// Smtp host info
-    /// </summary>
-    public static class smtpHostInfo {
+		private void filterDstCheckBox_CheckedChanged(object sender, EventArgs e) {
+			ignoreDistTextBox.Enabled = filterDstCheckBox.Checked;
+			ignoreModeSCheckBox.Enabled = filterDstCheckBox.Checked;
+		}
+
+		private void filterAltCheckBox_CheckedChanged(object sender, EventArgs e) {
+			ignoreAltTextBox.Enabled = filterAltCheckBox.Checked;
+		}
+	}
+
+	/// <summary>
+	/// Smtp host info
+	/// </summary>
+	public static class smtpHostInfo {
 		/// <summary>
 		/// Smtp host info
 		/// </summary>

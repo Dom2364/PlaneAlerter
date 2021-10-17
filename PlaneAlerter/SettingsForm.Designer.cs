@@ -55,26 +55,30 @@
 			this.notificationsCheckBox = new System.Windows.Forms.CheckBox();
 			this.startOnStartCheckBox = new System.Windows.Forms.CheckBox();
 			this.gmailLink = new System.Windows.Forms.LinkLabel();
-			this.label12 = new System.Windows.Forms.Label();
-			this.label13 = new System.Windows.Forms.Label();
+			this.label14 = new System.Windows.Forms.Label();
+			this.filterDstCheckBox = new System.Windows.Forms.CheckBox();
+			this.filterAltCheckBox = new System.Windows.Forms.CheckBox();
+			this.ignoreModeSCheckBox = new System.Windows.Forms.CheckBox();
 			this.saveSettingsButton = new System.Windows.Forms.Button();
 			this.emailGroupBox = new System.Windows.Forms.GroupBox();
 			this.radarGroupBox = new System.Windows.Forms.GroupBox();
-			this.IgnoreAltTextBox = new System.Windows.Forms.NumericUpDown();
-			this.IgnoreDistTextBox = new System.Windows.Forms.NumericUpDown();
+			this.ignoreDistTextBox = new System.Windows.Forms.NumericUpDown();
 			this.longTextBox = new System.Windows.Forms.NumericUpDown();
+			this.ignoreAltTextBox = new System.Windows.Forms.NumericUpDown();
 			this.latTextBox = new System.Windows.Forms.NumericUpDown();
 			this.timeoutTextBox = new System.Windows.Forms.NumericUpDown();
 			this.radarURLTextBox = new System.Windows.Forms.TextBox();
 			this.programGroupBox = new System.Windows.Forms.GroupBox();
+			this.centreLatLngRadioButton = new System.Windows.Forms.RadioButton();
+			this.centreAircraftRadioButton = new System.Windows.Forms.RadioButton();
 			this.refreshTextBox = new System.Windows.Forms.NumericUpDown();
 			((System.ComponentModel.ISupportInitialize)(this.removalTimeoutTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.smtpHostPortTextBox)).BeginInit();
 			this.emailGroupBox.SuspendLayout();
 			this.radarGroupBox.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.IgnoreAltTextBox)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.IgnoreDistTextBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ignoreDistTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.longTextBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ignoreAltTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.latTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.timeoutTextBox)).BeginInit();
 			this.programGroupBox.SuspendLayout();
@@ -382,35 +386,65 @@
 			this.toolTip.SetToolTip(this.gmailLink, resources.GetString("gmailLink.ToolTip"));
 			this.gmailLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.gmailLink_LinkClicked);
 			// 
-			// label12
+			// label14
 			// 
-			this.label12.AutoSize = true;
-			this.label12.Location = new System.Drawing.Point(6, 181);
-			this.label12.Name = "label12";
-			this.label12.Size = new System.Drawing.Size(152, 13);
-			this.label12.TabIndex = 26;
-			this.label12.Text = "Ignore aircraft further than (km)";
-			this.toolTip.SetToolTip(this.label12, "Aircraft further than this distance will not be returned by VRS, this can be usef" +
-        "ul for reducing bandwidth");
+			this.label14.AutoSize = true;
+			this.label14.Location = new System.Drawing.Point(8, 119);
+			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(81, 13);
+			this.label14.TabIndex = 29;
+			this.label14.Text = "Centre maps on";
+			this.toolTip.SetToolTip(this.label14, "Centre maps on aircraft or provided lat/lng");
 			// 
-			// label13
+			// filterDstCheckBox
 			// 
-			this.label13.AutoSize = true;
-			this.label13.Location = new System.Drawing.Point(6, 204);
-			this.label13.Name = "label13";
-			this.label13.Size = new System.Drawing.Size(143, 13);
-			this.label13.TabIndex = 27;
-			this.label13.Text = "Ignore aircraft higher than (ft)";
-			this.toolTip.SetToolTip(this.label13, "Aircraft higher than this altitude will not be returned by VRS, this can be usefu" +
-        "l for reducing bandwidth");
+			this.filterDstCheckBox.AutoSize = true;
+			this.filterDstCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.filterDstCheckBox.Location = new System.Drawing.Point(6, 204);
+			this.filterDstCheckBox.Name = "filterDstCheckBox";
+			this.filterDstCheckBox.Size = new System.Drawing.Size(171, 17);
+			this.filterDstCheckBox.TabIndex = 30;
+			this.filterDstCheckBox.Text = "Ignore aircraft further than (km)";
+			this.toolTip.SetToolTip(this.filterDstCheckBox, "Aircraft further than this distance will not be returned by VRS, this can be usef" +
+        "ul for reducing bandwidth. Enabling this and altitude filtering at the same time" +
+        " with the VRS 3.0.0 beta may not work.");
+			this.filterDstCheckBox.UseVisualStyleBackColor = true;
+			this.filterDstCheckBox.CheckedChanged += new System.EventHandler(this.filterDstCheckBox_CheckedChanged);
+			// 
+			// filterAltCheckBox
+			// 
+			this.filterAltCheckBox.AutoSize = true;
+			this.filterAltCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.filterAltCheckBox.Location = new System.Drawing.Point(6, 177);
+			this.filterAltCheckBox.Name = "filterAltCheckBox";
+			this.filterAltCheckBox.Size = new System.Drawing.Size(162, 17);
+			this.filterAltCheckBox.TabIndex = 31;
+			this.filterAltCheckBox.Text = "Ignore aircraft higher than (ft)";
+			this.toolTip.SetToolTip(this.filterAltCheckBox, "Aircraft higher than this altitude will not be returned by VRS, this can be usefu" +
+        "l for reducing bandwidth. Enabling this and distance filtering at the same time " +
+        "with the VRS 3.0.0 beta may not work.");
+			this.filterAltCheckBox.UseVisualStyleBackColor = true;
+			this.filterAltCheckBox.CheckedChanged += new System.EventHandler(this.filterAltCheckBox_CheckedChanged);
+			// 
+			// ignoreModeSCheckBox
+			// 
+			this.ignoreModeSCheckBox.AutoSize = true;
+			this.ignoreModeSCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.ignoreModeSCheckBox.Location = new System.Drawing.Point(153, 229);
+			this.ignoreModeSCheckBox.Name = "ignoreModeSCheckBox";
+			this.ignoreModeSCheckBox.Size = new System.Drawing.Size(167, 17);
+			this.ignoreModeSCheckBox.TabIndex = 32;
+			this.ignoreModeSCheckBox.Text = "Ignore aircraft without position";
+			this.toolTip.SetToolTip(this.ignoreModeSCheckBox, "VRS ignores aircraft without positions when filtering by distance. Disabling this" +
+        " requests aircraft without position separately.");
+			this.ignoreModeSCheckBox.UseVisualStyleBackColor = true;
 			// 
 			// saveSettingsButton
 			// 
-			this.saveSettingsButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.saveSettingsButton.Location = new System.Drawing.Point(12, 570);
+			this.saveSettingsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.saveSettingsButton.Location = new System.Drawing.Point(573, 319);
 			this.saveSettingsButton.Name = "saveSettingsButton";
-			this.saveSettingsButton.Size = new System.Drawing.Size(329, 23);
+			this.saveSettingsButton.Size = new System.Drawing.Size(103, 23);
 			this.saveSettingsButton.TabIndex = 20;
 			this.saveSettingsButton.Text = "Save Settings";
 			this.saveSettingsButton.UseVisualStyleBackColor = true;
@@ -430,7 +464,7 @@
 			this.emailGroupBox.Controls.Add(this.smtpPwdTextBox);
 			this.emailGroupBox.Controls.Add(this.label6);
 			this.emailGroupBox.Controls.Add(this.smtpSSLCheckBox);
-			this.emailGroupBox.Location = new System.Drawing.Point(12, 137);
+			this.emailGroupBox.Location = new System.Drawing.Point(12, 165);
 			this.emailGroupBox.Name = "emailGroupBox";
 			this.emailGroupBox.Size = new System.Drawing.Size(329, 179);
 			this.emailGroupBox.TabIndex = 22;
@@ -439,11 +473,12 @@
 			// 
 			// radarGroupBox
 			// 
-			this.radarGroupBox.Controls.Add(this.IgnoreAltTextBox);
-			this.radarGroupBox.Controls.Add(this.IgnoreDistTextBox);
-			this.radarGroupBox.Controls.Add(this.label13);
-			this.radarGroupBox.Controls.Add(this.label12);
+			this.radarGroupBox.Controls.Add(this.ignoreModeSCheckBox);
+			this.radarGroupBox.Controls.Add(this.filterAltCheckBox);
+			this.radarGroupBox.Controls.Add(this.filterDstCheckBox);
+			this.radarGroupBox.Controls.Add(this.ignoreDistTextBox);
 			this.radarGroupBox.Controls.Add(this.longTextBox);
+			this.radarGroupBox.Controls.Add(this.ignoreAltTextBox);
 			this.radarGroupBox.Controls.Add(this.longLabel);
 			this.radarGroupBox.Controls.Add(this.latTextBox);
 			this.radarGroupBox.Controls.Add(this.timeoutTextBox);
@@ -457,47 +492,25 @@
 			this.radarGroupBox.Controls.Add(this.label3);
 			this.radarGroupBox.Controls.Add(this.label4);
 			this.radarGroupBox.Controls.Add(this.label11);
-			this.radarGroupBox.Location = new System.Drawing.Point(12, 322);
+			this.radarGroupBox.Location = new System.Drawing.Point(347, 12);
 			this.radarGroupBox.Name = "radarGroupBox";
-			this.radarGroupBox.Size = new System.Drawing.Size(329, 242);
+			this.radarGroupBox.Size = new System.Drawing.Size(329, 254);
 			this.radarGroupBox.TabIndex = 23;
 			this.radarGroupBox.TabStop = false;
 			this.radarGroupBox.Text = "Radar";
 			// 
-			// IgnoreAltTextBox
+			// ignoreDistTextBox
 			// 
-			this.IgnoreAltTextBox.Increment = new decimal(new int[] {
-            500,
-            0,
-            0,
-            0});
-			this.IgnoreAltTextBox.Location = new System.Drawing.Point(245, 203);
-			this.IgnoreAltTextBox.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-			this.IgnoreAltTextBox.Name = "IgnoreAltTextBox";
-			this.IgnoreAltTextBox.Size = new System.Drawing.Size(75, 20);
-			this.IgnoreAltTextBox.TabIndex = 29;
-			this.IgnoreAltTextBox.Value = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-			// 
-			// IgnoreDistTextBox
-			// 
-			this.IgnoreDistTextBox.DecimalPlaces = 2;
-			this.IgnoreDistTextBox.Location = new System.Drawing.Point(245, 179);
-			this.IgnoreDistTextBox.Maximum = new decimal(new int[] {
+			this.ignoreDistTextBox.DecimalPlaces = 2;
+			this.ignoreDistTextBox.Location = new System.Drawing.Point(245, 203);
+			this.ignoreDistTextBox.Maximum = new decimal(new int[] {
             30000,
             0,
             0,
             0});
-			this.IgnoreDistTextBox.Name = "IgnoreDistTextBox";
-			this.IgnoreDistTextBox.Size = new System.Drawing.Size(75, 20);
-			this.IgnoreDistTextBox.TabIndex = 28;
+			this.ignoreDistTextBox.Name = "ignoreDistTextBox";
+			this.ignoreDistTextBox.Size = new System.Drawing.Size(75, 20);
+			this.ignoreDistTextBox.TabIndex = 28;
 			// 
 			// longTextBox
 			// 
@@ -516,6 +529,28 @@
 			this.longTextBox.Name = "longTextBox";
 			this.longTextBox.Size = new System.Drawing.Size(75, 20);
 			this.longTextBox.TabIndex = 23;
+			// 
+			// ignoreAltTextBox
+			// 
+			this.ignoreAltTextBox.Increment = new decimal(new int[] {
+            500,
+            0,
+            0,
+            0});
+			this.ignoreAltTextBox.Location = new System.Drawing.Point(245, 177);
+			this.ignoreAltTextBox.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+			this.ignoreAltTextBox.Name = "ignoreAltTextBox";
+			this.ignoreAltTextBox.Size = new System.Drawing.Size(75, 20);
+			this.ignoreAltTextBox.TabIndex = 29;
+			this.ignoreAltTextBox.Value = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
 			// 
 			// latTextBox
 			// 
@@ -566,6 +601,9 @@
 			// 
 			// programGroupBox
 			// 
+			this.programGroupBox.Controls.Add(this.centreLatLngRadioButton);
+			this.programGroupBox.Controls.Add(this.centreAircraftRadioButton);
+			this.programGroupBox.Controls.Add(this.label14);
 			this.programGroupBox.Controls.Add(this.startOnStartCheckBox);
 			this.programGroupBox.Controls.Add(this.notificationsCheckBox);
 			this.programGroupBox.Controls.Add(this.soundAlertsCheckBox);
@@ -576,10 +614,32 @@
 			this.programGroupBox.Controls.Add(this.runOnStartupCheckBox);
 			this.programGroupBox.Location = new System.Drawing.Point(12, 12);
 			this.programGroupBox.Name = "programGroupBox";
-			this.programGroupBox.Size = new System.Drawing.Size(329, 119);
+			this.programGroupBox.Size = new System.Drawing.Size(329, 147);
 			this.programGroupBox.TabIndex = 24;
 			this.programGroupBox.TabStop = false;
-			this.programGroupBox.Text = "Program";
+			this.programGroupBox.Text = "General";
+			// 
+			// centreLatLngRadioButton
+			// 
+			this.centreLatLngRadioButton.AutoSize = true;
+			this.centreLatLngRadioButton.Location = new System.Drawing.Point(212, 117);
+			this.centreLatLngRadioButton.Name = "centreLatLngRadioButton";
+			this.centreLatLngRadioButton.Size = new System.Drawing.Size(108, 17);
+			this.centreLatLngRadioButton.TabIndex = 31;
+			this.centreLatLngRadioButton.Text = "Provided Lat/Lng";
+			this.centreLatLngRadioButton.UseVisualStyleBackColor = true;
+			// 
+			// centreAircraftRadioButton
+			// 
+			this.centreAircraftRadioButton.AutoSize = true;
+			this.centreAircraftRadioButton.Checked = true;
+			this.centreAircraftRadioButton.Location = new System.Drawing.Point(150, 117);
+			this.centreAircraftRadioButton.Name = "centreAircraftRadioButton";
+			this.centreAircraftRadioButton.Size = new System.Drawing.Size(58, 17);
+			this.centreAircraftRadioButton.TabIndex = 30;
+			this.centreAircraftRadioButton.TabStop = true;
+			this.centreAircraftRadioButton.Text = "Aircraft";
+			this.centreAircraftRadioButton.UseVisualStyleBackColor = true;
 			// 
 			// refreshTextBox
 			// 
@@ -597,7 +657,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(353, 604);
+			this.ClientSize = new System.Drawing.Size(688, 354);
 			this.Controls.Add(this.programGroupBox);
 			this.Controls.Add(this.radarGroupBox);
 			this.Controls.Add(this.emailGroupBox);
@@ -614,9 +674,9 @@
 			this.emailGroupBox.PerformLayout();
 			this.radarGroupBox.ResumeLayout(false);
 			this.radarGroupBox.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.IgnoreAltTextBox)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.IgnoreDistTextBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ignoreDistTextBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.longTextBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ignoreAltTextBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.latTextBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.timeoutTextBox)).EndInit();
 			this.programGroupBox.ResumeLayout(false);
@@ -667,9 +727,13 @@
 		private System.Windows.Forms.CheckBox notificationsCheckBox;
 		private System.Windows.Forms.CheckBox soundAlertsCheckBox;
 		private System.Windows.Forms.CheckBox startOnStartCheckBox;
-        private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.NumericUpDown IgnoreAltTextBox;
-        private System.Windows.Forms.NumericUpDown IgnoreDistTextBox;
-        private System.Windows.Forms.Label label13;
-    }
+        private System.Windows.Forms.NumericUpDown ignoreAltTextBox;
+        private System.Windows.Forms.NumericUpDown ignoreDistTextBox;
+		private System.Windows.Forms.Label label14;
+		private System.Windows.Forms.RadioButton centreLatLngRadioButton;
+		private System.Windows.Forms.RadioButton centreAircraftRadioButton;
+		private System.Windows.Forms.CheckBox filterAltCheckBox;
+		private System.Windows.Forms.CheckBox filterDstCheckBox;
+		private System.Windows.Forms.CheckBox ignoreModeSCheckBox;
+	}
 }

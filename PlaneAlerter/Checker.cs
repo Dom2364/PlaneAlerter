@@ -56,7 +56,8 @@ namespace PlaneAlerter {
 				Core.UI.updateStatusLabel("Downloading Aircraft Info...");
 				recieverName = "";
 				//Get latest aircraft information
-				GetAircraft();
+				GetAircraft(false, true);
+				if (Settings.filterDistance && !Settings.ignoreModeS) GetAircraft(true, false);
 
 				//Check if there are aircraft to check
 				if (Core.aircraftlist.Count != 0) {
@@ -346,55 +347,32 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Get latest aircraftlist.json
 		/// </summary>
-		public static void GetAircraft() {
+		public static void GetAircraft(bool modeSOnly, bool clearExisting) {
 			JObject responseJson;
 			
 			try {
-				//Generate aircraftlist.json url
-				string url = "";
-				if (!Settings.acListUrl.Contains("?"))
-					url = Settings.acListUrl + "?lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fAltU=" + Convert.ToString(Settings.IgnoreAltitude) + "&fDstU=" + Settings.IgnoreDistance.ToString("#.##") ;
-				else
-					url = Settings.acListUrl + "lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fAltU=" + Convert.ToString(Settings.IgnoreAltitude) + "&fDstU=" + Settings.IgnoreDistance.ToString("#.##");
-				//Create request
-				request = (HttpWebRequest)WebRequest.Create(url);
-				request.Method = "GET";
-				request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-				request.Timeout = Settings.timeout * 1000;
-				//Add credentials if they are provided
-				if (Settings.VRSAuthenticate) {
-					string encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
-					request.Headers.Add("Authorization", "Basic " + encoded);
-				}
-				//Send request and parse json response
 				try {
-					using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-					using (Stream responsestream = response.GetResponseStream())	
-					using (StreamReader reader = new StreamReader(responsestream))
-					using (JsonTextReader jsonreader = new JsonTextReader(reader))
-					
-							responseJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
-				// Was used to check approximate data consumption
-					//	Core.UI.writeToConsole("Relative size " + responseJson.ToString().Length, Color.Green);
-								}
+					responseJson = RequestAircraftList(modeSOnly);
+				}
 				catch (Exception e) {
 					Core.UI.writeToConsole("ERROR: " + e.GetType().ToString() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					Thread.Sleep(5000);
 					return;
 				}
 
-				
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null) {
 					Core.UI.writeToConsole("ERROR: Invalid response recieved from server", Color.Red);
 					Thread.Sleep(5000);
 					return;
 				}
+
 				//Throw error if server time was not parsed
 				if (responseJson["stm"] == null)
 					throw new JsonReaderException();
+
 				//Parse aircraft data
-				Core.aircraftlist.Clear();
+				if (clearExisting) Core.aircraftlist.Clear();
 				foreach (JObject a in responseJson["acList"].ToList()) {
 					//Ignore if no icao is provided
 					if (a["Icao"] == null) continue;
@@ -443,6 +421,32 @@ namespace PlaneAlerter {
 			}
 		}
 
+		private static JObject RequestAircraftList(bool modeSOnly=false) {
+			//Generate aircraftlist.json url
+			string url = Settings.acListUrl;
+			url += Settings.acListUrl.Contains("?") ? "&" : "?";
+			url += "lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".");
+			if (Settings.filterDistance && !modeSOnly) url += "&fDstU=" + Settings.ignoreDistance.ToString("#.##");
+			if (Settings.filterAltitude) url += "&fAltU=" + Convert.ToString(Settings.ignoreAltitude);
+			if (modeSOnly) url += "&fNoPosQN=1";
+
+			//Create request
+			request = (HttpWebRequest)WebRequest.Create(url);
+			request.Method = "GET";
+			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+			request.Timeout = Settings.timeout * 1000;
+			//Add credentials if they are provided
+			if (Settings.VRSAuthenticate) {
+				string encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
+				request.Headers.Add("Authorization", "Basic " + encoded);
+			}
+			//Send request and parse json response
+			using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+			using (Stream responsestream = response.GetResponseStream())
+			using (StreamReader reader = new StreamReader(responsestream))
+			using (JsonTextReader jsonreader = new JsonTextReader(reader))
+				return JsonSerializer.Create().Deserialize<JObject>(jsonreader);
+		}
 
 		public static Core.Aircraft GetAircraftWithTrails(Core.Aircraft inputaircraft)
 		{

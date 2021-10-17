@@ -23,8 +23,6 @@ namespace PlaneAlerter {
 			reportCheckBox.Checked = Settings.EmailContentConfig.ReportLink;
             twitterCheckBox.Checked = Settings.EmailContentConfig.TwitterOptimised;
 			kmlCheckbox.Checked = Settings.EmailContentConfig.KMLfile;
-			moAircraft.Checked = Settings.EmailContentConfig.CentreMapOnAircraft;
-			moLatLong.Checked = !Settings.EmailContentConfig.CentreMapOnAircraft;
             switch (Settings.EmailContentConfig.PropertyList) {
 				case Core.PropertyListType.All:
 					plAll.Checked = true;
@@ -60,7 +58,6 @@ namespace PlaneAlerter {
 			Settings.EmailContentConfig.ReportLink = reportCheckBox.Checked;
             Settings.EmailContentConfig.TwitterOptimised = twitterCheckBox.Checked;
 			Settings.EmailContentConfig.KMLfile = kmlCheckbox.Checked;
-			Settings.EmailContentConfig.CentreMapOnAircraft = moAircraft.Checked;
             if (plAll.Checked)
 				Settings.EmailContentConfig.PropertyList = Core.PropertyListType.All;
 			else if (plEssentials.Checked)
