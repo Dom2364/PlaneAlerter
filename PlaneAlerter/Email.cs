@@ -254,8 +254,8 @@ namespace PlaneAlerter {
                     "<img style='border: 2px solid;border-radius: 10px;' alt='Loading Map...' src='" + Core.GenerateMapURL(aircraft).Replace("&", "&amp;") + "' />";
                 }
                 //KML
-                if (Settings.EmailContentConfig.KMLfile)
-                message.Attachments.Add(Attachment.CreateAttachmentFromString(Core.GenerateKML(aircraft), "Attachment.kml"));
+                if (Settings.EmailContentConfig.KMLfile && aircraft.GetProperty("Lat") != null)
+                    message.Attachments.Add(Attachment.CreateAttachmentFromString(Core.GenerateKML(aircraft), aircraft.ICAO + ".kml"));
                 
 
                 message.Body += "</td></tr></table></body></html>";

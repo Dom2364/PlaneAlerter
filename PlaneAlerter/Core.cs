@@ -615,134 +615,49 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Generate a KML
 		/// </summary>
-		public static string GenerateKML(Aircraft aircraft)
-		{
-			string KMLData = "";
-			//If aircraft has a position, generate a google map url
-			if (aircraft.GetProperty("Lat") != null)
-				if (aircraft.Trail.Count() != 4)
-					KMLData = @"<?xml version=""1.0"" encoding=""UTF-8""?>
-  <kml xmlns = ""http://www.opengis.net/kml/2.2"">
-   
-	 <Document>
-   
-	   <name>" + aircraft.GetProperty("Reg") + @"  </name>
-   
-	   <description> Trace of suspect aircraft </description>
-
-   <Style id = ""yellowLineGreenPoly"">
-
-	  <LineStyle>
-
-		<color> 7f00ffff </color>
-   
-		   <width> 4 </width>
-   
-		 </LineStyle>
-   
-		 <PolyStyle>
-   
-		   <color> 7f00ff00 </color>
-	  
-			</PolyStyle>
-	  
-		  </Style>
-	  
-		  <Placemark>
-	  
-			<name> Absolute Extruded </name>
-		 
-			   <description> Transparent green wall with yellow outlines </description>
-			
-				  <styleUrl>#yellowLineGreenPoly</styleUrl>
-      <LineString>
-			
-					<extrude> 1 </extrude>
-			
-					<tessellate> 1 </tessellate>
-			
-					<altitudeMode> absolute </altitudeMode>
-			
-					<coordinates> ";
-				else
-					KMLData = @"<?xml version=""1.0"" encoding=""UTF-8""?>
-  <kml xmlns = ""http://www.opengis.net/kml/2.2"">
-   
-	 <Document>
-   
-	   <name>" + aircraft.GetProperty("Reg") + @"  </name>
-   
-	   <description> Trace of suspect aircraft </description>
-
-   <Style id = ""yellowLineGreenPoly"">
-
-	  <LineStyle>
-
-		<color> 7f00ffff </color>
-   
-		   <width> 4 </width>
-   
-		 </LineStyle>
-   
-		 <PolyStyle>
-   
-		   <color> 7f00ff00 </color>
-	  
-			</PolyStyle>
-	  
-		  </Style>
-	  
-		  <Placemark>
-	  
-			<name> Absolute Extruded </name>
-		 
-			   <description> Transparent green wall with yellow outlines </description>
-			
-				  <styleUrl>#yellowLineGreenPoly</styleUrl>
-      <LineString>
-			
-					<extrude> 1 </extrude>
-			
-					<tessellate> 1 </tessellate>
-			
-					<altitudeMode> absolute </altitudeMode>
-			
-					<coordinates> ";
+		public static string GenerateKML(Aircraft aircraft) {
+			string KMLData = $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<kml xmlns=""http://www.opengis.net/kml/2.2"">
+	<Document>
+		<name>{aircraft.GetProperty("Reg")}</name>
+		<Placemark>
+			<name>Flight path of {aircraft.GetProperty("Reg")}</name>
+			<Style>
+				<LineStyle>
+					<color>7fffffff</color>
+					<width>2</width>
+				</LineStyle>
+				<PolyStyle>
+					<color>7fffffff</color>
+				</PolyStyle>
+			</Style>
+			<LineString>
+				<extrude>1</extrude>
+				<altitudeMode>absolute</altitudeMode>
+				<coordinates>";
 
 			//Process aircraft trail
-			for (int i = 0; i < aircraft.Trail.Count() / 4; i++)
-			{
+			for (int i = 0; i < aircraft.Trail.Count() / 4; i++) {
 				//Get coordinate
 				string[] coord = new string[] {
-						aircraft.Trail[i * 4].ToString("#.####"),
-						aircraft.Trail[i * 4 + 1].ToString("#.####"),
-						aircraft.Trail[i * 4 + 2].ToString("#.####"),
-						(aircraft.Trail[i * 4 + 3] * 0.3048).ToString("#.####") // Convert feet to metres for KML
-					};
-				string coordstring = coord[1] + "," + coord[0] + "," + coord[3] + Environment.NewLine;
+					aircraft.Trail[i * 4].ToString("#.####"),
+					aircraft.Trail[i * 4 + 1].ToString("#.####"),
+					aircraft.Trail[i * 4 + 2].ToString("#.####"),
+					(aircraft.Trail[i * 4 + 3] * 0.3048).ToString("#.####") // Convert feet to metres for KML
+				};
 
-				//Check if adding another coordinate will make the url too long
-				//if (KMLData.Length + coordstring.Length > 8000) break; //Limit is 8192, using 8000 to give some headroom. Allows for about 440 points
-
-				//Add coordinates to KML
-				KMLData += coordstring;
-
-
+				//Add coordinate to KML
+				KMLData += coord[1] + "," + coord[0] + "," + coord[3] + " ";
 			}
 
 			//Add rest of KML
-			KMLData += @" </coordinates>
-      </LineString>
-    </Placemark>
-  </Document>
-</kml> ";
-			//Return empty string if no positions
-			if (KMLData == "" || KMLData.Length == 0) return "";
-
-			return KMLData.Substring(0, KMLData.Length - 1);
+			KMLData += @"</coordinates>
+			</LineString>
+		</Placemark>
+	</Document>
+</kml>";
+			
+			return KMLData;
 		}
-
-
-
 	}
 }

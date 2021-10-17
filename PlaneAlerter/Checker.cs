@@ -448,48 +448,43 @@ namespace PlaneAlerter {
 				return JsonSerializer.Create().Deserialize<JObject>(jsonreader);
 		}
 
-		public static Core.Aircraft GetAircraftWithTrails(Core.Aircraft inputaircraft)
-		{
+		public static Core.Aircraft GetAircraftWithTrails(Core.Aircraft inputaircraft) {
 			JObject responseJson;
-			try
-			{
+			try {
 				Core.UI.updateStatusLabel("Downloading Aircraft Trails for " + inputaircraft.GetProperty("Reg") + " (" + inputaircraft.ICAO + ")...");
 				//Generate aircraftlist.json url
-				string url = "";
-				if (!Settings.acListUrl.Contains("?"))
-					url = Settings.acListUrl + "?trFmt=fa&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fIcoQ=" + inputaircraft.ICAO;
-				else
-					url = Settings.acListUrl + "&trFmt=fa&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fIcoQ=" + inputaircraft.ICAO;
+				string url = Settings.acListUrl;
+				url += Settings.acListUrl.Contains("?") ? "&" : "?";
+				url += "trFmt=fa&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fIcoQ=" + inputaircraft.ICAO;
+
 				//Create request
 				request = (HttpWebRequest)WebRequest.Create(url);
 				request.Method = "GET";
 				request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 				request.Timeout = Settings.timeout * 1000;
+
 				//Add credentials if they are provided
-				if (Settings.VRSAuthenticate)
-				{
+				if (Settings.VRSAuthenticate) {
 					string encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
 					request.Headers.Add("Authorization", "Basic " + encoded);
 				}
+
 				//Send request and parse json response
-				try
-				{
+				try {
 					using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
 					using (Stream responsestream = response.GetResponseStream())
 					using (StreamReader reader = new StreamReader(responsestream))
 					using (JsonTextReader jsonreader = new JsonTextReader(reader))
 						responseJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
 				}
-				catch (Exception e)
-				{
+				catch (Exception e) {
 					Core.UI.writeToConsole("ERROR: " + e.GetType().ToString() + " while downloading AircraftList.json with trails: " + e.Message, Color.Red);
 					Thread.Sleep(5000);
 					return inputaircraft;
 				}
 				
 				//Check if we actually got aircraft data
-				if (responseJson["acList"] == null)
-				{
+				if (responseJson["acList"] == null) {
 					Core.UI.writeToConsole("ERROR: Invalid response recieved from server", Color.Red);
 					Thread.Sleep(5000);
 					return inputaircraft;
@@ -497,16 +492,12 @@ namespace PlaneAlerter {
 				//Throw error if server time was not parsed
 				if (responseJson["stm"] == null)
 					throw new JsonReaderException();
+
 				//Parse aircraft data
-				
-				// Don't clear list!
-				// Core.aircraftlist.Clear();
-				foreach (JObject a in responseJson["acList"].ToList())
-				{
+				foreach (JObject a in responseJson["acList"].ToList()) {
 					//Ignore if no icao is provided
 					if (a["Icao"] == null) continue;
 
-					
 					//Create new aircraft
 					Core.Aircraft aircraft = new Core.Aircraft(a["Icao"].ToString());
 					//Parse aircraft trail
@@ -524,12 +515,8 @@ namespace PlaneAlerter {
 					properties = null;
 
 					//Is this the aircraft we are looking for?
-
 					if (aircraft.ICAO == inputaircraft.ICAO)
 						return aircraft;
-
-					//Add aircraft to list
-					//Core.aircraftlist.Add(aircraft);
 				}
 				
 				
@@ -561,7 +548,6 @@ namespace PlaneAlerter {
 
 			// If we've fallen out the bottom then just return the original aircraft
 			return inputaircraft;
-
 		}
 		/// <summary>
 		/// Load conditions
