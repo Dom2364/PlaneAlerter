@@ -23,7 +23,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// List of receivers from the last aircraftlist.json response
 		/// </summary>
-		public static List<Reciever> receivers = new List<Reciever>();
+		public static Dictionary<string, string> receivers = new Dictionary<string, string>();
 
 		/// <summary>
 		/// VRS property descriptions
@@ -133,31 +133,6 @@ namespace PlaneAlerter {
 			/// <param name="icao">ICAO of aircraft</param>
 			public Aircraft(string icao) {
 				ICAO = icao;
-			}
-		}
-
-		/// <summary>
-		/// VRS Receiver information
-		/// </summary>
-		public struct Reciever {
-			/// <summary>
-			/// ID of receiver
-			/// </summary>
-			public string Id;
-
-			/// <summary>
-			/// Name or receiver
-			/// </summary>
-			public string Name;
-
-			/// <summary>
-			/// Receiver constructor
-			/// </summary>
-			/// <param name="id">Id of receiver</param>
-			/// <param name="name">Name of receiver</param>
-			public Reciever(string id, string name) {
-				Id = id;
-				Name = name;
 			}
 		}
 

@@ -115,6 +115,16 @@ namespace PlaneAlerter {
 		public static int ignoreAltitude;
 
 		/// <summary>
+		/// Filter by receiver?
+		/// </summary>
+		public static bool filterReceiver;
+
+		/// <summary>
+		/// Selected receiver to filter aircraft with
+		/// </summary>
+		public static int filterReceiverId;
+
+		/// <summary>
 		/// SMTP Host
 		/// </summary>
 		public static string SMTPHost;
@@ -191,6 +201,8 @@ namespace PlaneAlerter {
 			settingsDictionary.Add("filterDistance", filterDistance);
 			settingsDictionary.Add("filterAltitude", filterAltitude);
 			settingsDictionary.Add("ignoreModeS", ignoreModeS);
+			settingsDictionary.Add("filterReceiver", filterReceiver);
+			settingsDictionary.Add("filterReceiverId", filterReceiverId);
 			settingsDictionary.Add("centreMapOnAircraft", centreMapOnAircraft);
 			settingsDictionary.Add("SMTPHost", SMTPHost);
 			settingsDictionary.Add("SMTPPort", SMTPPort);
@@ -325,6 +337,8 @@ namespace PlaneAlerter {
 				if (settingsJson["ignoreModeS"] != null) ignoreModeS = (settingsJson["ignoreModeS"].ToString().ToLower() == "true"); else ignoreModeS = true;
 				if (settingsJson["ignoreDistance"] != null) ignoreDistance = Convert.ToDouble(settingsJson["ignoreDistance"]); else ignoreDistance = 30000;
 				if (settingsJson["ignoreAltitude"] != null) ignoreAltitude = Convert.ToInt32(settingsJson["ignoreAltitude"]); else ignoreAltitude = 100000;
+				if (settingsJson["filterReceiver"] != null) filterReceiver = (settingsJson["filterReceiver"].ToString().ToLower() == "true"); else filterReceiver = false;
+				if (settingsJson["filterReceiverId"] != null) filterReceiverId = Convert.ToInt32(settingsJson["filterReceiverId"]); else filterReceiverId = 1;
 				VRSAuthenticate = (VRSUsr != "");
 				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
 				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 60;

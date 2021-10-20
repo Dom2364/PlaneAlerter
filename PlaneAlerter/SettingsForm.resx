@@ -120,9 +120,6 @@
   <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>22, 8</value>
   </metadata>
-  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>22, 8</value>
-  </metadata>
   <data name="gmailLink.ToolTip" xml:space="preserve">
     <value>Gmail requires less secure apps to be enabled, or app passwords must be used if you use two-factor authentication.
 This is because Gmail normally requires apps to use OAuth to authenticate users, and PlaneAlerter uses regular SMTP username/password logins.</value>

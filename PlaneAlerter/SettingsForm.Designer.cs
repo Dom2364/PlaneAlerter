@@ -59,9 +59,12 @@
 			this.filterDstCheckBox = new System.Windows.Forms.CheckBox();
 			this.filterAltCheckBox = new System.Windows.Forms.CheckBox();
 			this.ignoreModeSCheckBox = new System.Windows.Forms.CheckBox();
+			this.filterReceiverCheckBox = new System.Windows.Forms.CheckBox();
 			this.saveSettingsButton = new System.Windows.Forms.Button();
 			this.emailGroupBox = new System.Windows.Forms.GroupBox();
 			this.radarGroupBox = new System.Windows.Forms.GroupBox();
+			this.refreshReceiversButton = new System.Windows.Forms.Button();
+			this.receiverComboBox = new System.Windows.Forms.ComboBox();
 			this.ignoreDistTextBox = new System.Windows.Forms.NumericUpDown();
 			this.longTextBox = new System.Windows.Forms.NumericUpDown();
 			this.ignoreAltTextBox = new System.Windows.Forms.NumericUpDown();
@@ -430,7 +433,7 @@
 			// 
 			this.ignoreModeSCheckBox.AutoSize = true;
 			this.ignoreModeSCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.ignoreModeSCheckBox.Location = new System.Drawing.Point(153, 229);
+			this.ignoreModeSCheckBox.Location = new System.Drawing.Point(6, 230);
 			this.ignoreModeSCheckBox.Name = "ignoreModeSCheckBox";
 			this.ignoreModeSCheckBox.Size = new System.Drawing.Size(167, 17);
 			this.ignoreModeSCheckBox.TabIndex = 32;
@@ -438,6 +441,22 @@
 			this.toolTip.SetToolTip(this.ignoreModeSCheckBox, "VRS ignores aircraft without positions when filtering by distance. Disabling this" +
         " requests aircraft without position separately.");
 			this.ignoreModeSCheckBox.UseVisualStyleBackColor = true;
+			// 
+			// filterReceiverCheckBox
+			// 
+			this.filterReceiverCheckBox.AutoSize = true;
+			this.filterReceiverCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.filterReceiverCheckBox.Checked = true;
+			this.filterReceiverCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.filterReceiverCheckBox.Location = new System.Drawing.Point(6, 254);
+			this.filterReceiverCheckBox.Name = "filterReceiverCheckBox";
+			this.filterReceiverCheckBox.Size = new System.Drawing.Size(103, 17);
+			this.filterReceiverCheckBox.TabIndex = 34;
+			this.filterReceiverCheckBox.Text = "Filter by receiver";
+			this.toolTip.SetToolTip(this.filterReceiverCheckBox, "Filter to only check aircraft from a specific receiver, this can be useful for re" +
+        "ducing bandwidth");
+			this.filterReceiverCheckBox.UseVisualStyleBackColor = true;
+			this.filterReceiverCheckBox.CheckedChanged += new System.EventHandler(this.filterReceiverCheckBox_CheckedChanged);
 			// 
 			// saveSettingsButton
 			// 
@@ -473,6 +492,9 @@
 			// 
 			// radarGroupBox
 			// 
+			this.radarGroupBox.Controls.Add(this.refreshReceiversButton);
+			this.radarGroupBox.Controls.Add(this.filterReceiverCheckBox);
+			this.radarGroupBox.Controls.Add(this.receiverComboBox);
 			this.radarGroupBox.Controls.Add(this.ignoreModeSCheckBox);
 			this.radarGroupBox.Controls.Add(this.filterAltCheckBox);
 			this.radarGroupBox.Controls.Add(this.filterDstCheckBox);
@@ -494,10 +516,30 @@
 			this.radarGroupBox.Controls.Add(this.label11);
 			this.radarGroupBox.Location = new System.Drawing.Point(347, 12);
 			this.radarGroupBox.Name = "radarGroupBox";
-			this.radarGroupBox.Size = new System.Drawing.Size(329, 254);
+			this.radarGroupBox.Size = new System.Drawing.Size(329, 301);
 			this.radarGroupBox.TabIndex = 23;
 			this.radarGroupBox.TabStop = false;
 			this.radarGroupBox.Text = "Radar";
+			// 
+			// refreshReceiversButton
+			// 
+			this.refreshReceiversButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.refreshReceiversButton.Location = new System.Drawing.Point(129, 251);
+			this.refreshReceiversButton.Name = "refreshReceiversButton";
+			this.refreshReceiversButton.Size = new System.Drawing.Size(56, 23);
+			this.refreshReceiversButton.TabIndex = 35;
+			this.refreshReceiversButton.Text = "Refresh";
+			this.refreshReceiversButton.UseVisualStyleBackColor = true;
+			this.refreshReceiversButton.Click += new System.EventHandler(this.refreshReceiversButton_Click);
+			// 
+			// receiverComboBox
+			// 
+			this.receiverComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.receiverComboBox.FormattingEnabled = true;
+			this.receiverComboBox.Location = new System.Drawing.Point(188, 252);
+			this.receiverComboBox.Name = "receiverComboBox";
+			this.receiverComboBox.Size = new System.Drawing.Size(132, 21);
+			this.receiverComboBox.TabIndex = 33;
 			// 
 			// ignoreDistTextBox
 			// 
@@ -735,5 +777,8 @@
 		private System.Windows.Forms.CheckBox filterAltCheckBox;
 		private System.Windows.Forms.CheckBox filterDstCheckBox;
 		private System.Windows.Forms.CheckBox ignoreModeSCheckBox;
+		private System.Windows.Forms.ComboBox receiverComboBox;
+		private System.Windows.Forms.CheckBox filterReceiverCheckBox;
+		private System.Windows.Forms.Button refreshReceiversButton;
 	}
 }

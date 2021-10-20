@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -33,6 +35,8 @@ namespace PlaneAlerter {
 			foreach (string smtpHost in smtpHostInfo.hostInfo.Keys)
 				smtpHostComboBox.Items.Add(smtpHost);
 
+			UpdateReceivers();
+
 			//Set settings from current settings
 			senderEmailTextBox.Text = Settings.senderEmail;
 			aircraftListTextBox.Text = Settings.acListUrl;
@@ -61,6 +65,32 @@ namespace PlaneAlerter {
 			ignoreModeSCheckBox.Checked = Settings.ignoreModeS;
 			ignoreDistTextBox.Value = Convert.ToDecimal(Settings.ignoreDistance);
 			ignoreAltTextBox.Value = Settings.ignoreAltitude;
+			if (filterReceiverCheckBox.Checked) filterReceiverCheckBox.Checked = Settings.filterReceiver; //Will be unchecked if there was an error getting receivers
+			filterReceiverCheckBox_CheckedChanged(this, new EventArgs());
+		}
+
+		private async void UpdateReceivers() {
+			if (string.IsNullOrWhiteSpace(Settings.acListUrl)) {
+				receiverComboBox.DataSource = null;
+				receiverComboBox.Items.Clear();
+				filterReceiverCheckBox.Checked = false;
+				return;
+			}
+
+			Dictionary<string, string> receivers = await Task.Run(() => Checker.GetReceivers());
+			if (receivers != null) {
+				receivers = receivers.OrderBy(x => x.Value, StringComparer.Ordinal).ToDictionary(x => x.Key, x => x.Value);
+
+				receiverComboBox.DataSource = new BindingSource(receivers, null);
+				receiverComboBox.DisplayMember = "Value";
+				receiverComboBox.ValueMember = "Key";
+				receiverComboBox.SelectedValue = Settings.filterReceiverId.ToString();
+			}
+			else {
+				receiverComboBox.DataSource = null;
+				receiverComboBox.Items.Clear();
+				filterReceiverCheckBox.Checked = false;
+			}
 		}
 
 		/// <summary>
@@ -107,6 +137,8 @@ namespace PlaneAlerter {
 			Settings.ignoreModeS = ignoreModeSCheckBox.Checked;
 			Settings.ignoreAltitude = Convert.ToInt32(ignoreAltTextBox.Value);
 			Settings.ignoreDistance = Convert.ToDouble(ignoreDistTextBox.Value);
+			Settings.filterReceiver = filterReceiverCheckBox.Checked;
+			Settings.filterReceiverId = Convert.ToInt32(receiverComboBox.SelectedValue);
 			Settings.Save();
 		}
 
@@ -137,6 +169,15 @@ namespace PlaneAlerter {
 
 		private void filterAltCheckBox_CheckedChanged(object sender, EventArgs e) {
 			ignoreAltTextBox.Enabled = filterAltCheckBox.Checked;
+		}
+
+		private void filterReceiverCheckBox_CheckedChanged(object sender, EventArgs e) {
+			receiverComboBox.Enabled = filterReceiverCheckBox.Checked;
+		}
+
+		private void refreshReceiversButton_Click(object sender, EventArgs e) {
+			Settings.acListUrl = aircraftListTextBox.Text;
+			UpdateReceivers();
 		}
 	}
 
