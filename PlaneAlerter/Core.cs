@@ -46,11 +46,6 @@ namespace PlaneAlerter {
 		public static Dictionary<string, Match> activeMatches = new Dictionary<string, Match>();
 
 		/// <summary>
-		/// Matches waiting to be verified
-		/// </summary>
-		public static List<string[]> waitingMatches = new List<string[]>();
-
-		/// <summary>
 		/// Thread for checking operations
 		/// </summary>
 		public static Thread loopThread;

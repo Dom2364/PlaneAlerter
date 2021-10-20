@@ -691,9 +691,19 @@
             0,
             0,
             0});
+			this.refreshTextBox.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
 			this.refreshTextBox.Name = "refreshTextBox";
 			this.refreshTextBox.Size = new System.Drawing.Size(78, 20);
 			this.refreshTextBox.TabIndex = 22;
+			this.refreshTextBox.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
 			// 
 			// SettingsForm
 			// 

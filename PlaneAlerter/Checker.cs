@@ -45,8 +45,6 @@ namespace PlaneAlerter {
 			int triggersMatching;
 			//VRS name of property
 			string propertyInternalName;
-			//Index of match in waiting matches
-			int wmIcaoIndex;
 
 			while (ThreadManager.threadStatus != ThreadManager.CheckerStatus.Stopping) {
 				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Running;
@@ -73,7 +71,9 @@ namespace PlaneAlerter {
 						aircraftCount++;
 
 						if (Core.activeMatches.ContainsKey(aircraft.ICAO) && Core.activeMatches[aircraft.ICAO].IgnoreFollowing) continue;
-						
+						if (aircraft.GetProperty("Reg") == null && aircraft.GetProperty("Type") == null && (aircraft.GetProperty("FlightsCount") == null || Convert.ToInt32(aircraft.GetProperty("FlightsCount")) == 0)) 
+							continue;
+
 						//Iterate conditions
 						foreach (int conditionid in Core.conditions.Keys.ToList()) {
 							condition = Core.conditions[conditionid];
@@ -127,49 +127,32 @@ namespace PlaneAlerter {
 								}
 							}
 
-							//Get position in waiting matches
-							wmIcaoIndex = -1;
-							for (int i = 0; i < Core.waitingMatches.Count; i++) {
-								if (Core.waitingMatches[i][0] == aircraft.ICAO && Core.waitingMatches[i][1] == conditionid.ToString()) {
-									wmIcaoIndex = i;
-									break;
+							//Check if condition still matches
+							if (triggersMatching == condition.triggers.Count) {
+								//Get receiver name
+								if (Core.receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) recieverName = Core.receivers[aircraft.GetProperty("Rcvr")];
+
+								//If active matches contains aircraft, add condition to the match
+								if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
+									Core.activeMatches[aircraft.ICAO].AddCondition(conditionid, condition, aircraft);
 								}
-							}
-							//If condition doesn't exist in waiting matches and all triggers match, add to waiting matches
-							if (wmIcaoIndex == -1 && triggersMatching == condition.triggers.Count) {
-								Core.waitingMatches.Add(new string[] { aircraft.ICAO, conditionid.ToString() });
-							}
-							//If condition exists in waiting matches with this condition id, remove from waiting matches and send alert
-							else if (wmIcaoIndex != -1 && Core.waitingMatches[wmIcaoIndex][1] == conditionid.ToString()) {
-								Core.waitingMatches.RemoveAt(wmIcaoIndex);
-
-								//Check if condition still matches
-								if (triggersMatching == condition.triggers.Count) {
-									//Get receiver name
-									if (Core.receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) recieverName = Core.receivers[aircraft.GetProperty("Rcvr")];
-
-									//If active matches contains aircraft, add condition to the match
-									if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
-										Core.activeMatches[aircraft.ICAO].AddCondition(conditionid, condition, aircraft);
-									}
-									//Else add to active matches
-									else {
-										Core.Match m = new Core.Match(aircraft.ICAO);
-										m.AddCondition(conditionid, condition, aircraft);
-										Core.activeMatches.Add(aircraft.ICAO, m);
-									}
-
-									//Cancel checking for conditions for this aircraft
-									ignorefollowing = condition.ignoreFollowing;
-
-									//Update stats and log to console
-									Stats.updateStats();
-									Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightGreen);
-
-									//Send Alert
-									if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
-										SendAlert(condition, aircraft, recieverName, true);
+								//Else add to active matches
+								else {
+									Core.Match m = new Core.Match(aircraft.ICAO);
+									m.AddCondition(conditionid, condition, aircraft);
+									Core.activeMatches.Add(aircraft.ICAO, m);
 								}
+
+								//Cancel checking for conditions for this aircraft
+								ignorefollowing = condition.ignoreFollowing;
+
+								//Update stats and log to console
+								Stats.updateStats();
+								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightGreen);
+
+								//Send Alert
+								if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
+									SendAlert(condition, aircraft, recieverName, true);
 							}
 							if (ignorefollowing) break;
 						}
@@ -250,7 +233,6 @@ namespace PlaneAlerter {
 			Core.LogAlert(condition, aircraft, receiver, isFirst);
 
 			//Get trails
-		
 			aircraftwithtrails = GetAircraftWithTrails(aircraft);
 
 			if (condition.emailEnabled) {
@@ -270,8 +252,11 @@ namespace PlaneAlerter {
 				}
 
 				//Send emails
-				foreach (string email in condition.recieverEmails)
-					Email.SendEmail(email, message, condition, aircraftwithtrails, receiver, emailPropertyInfo, isFirst);
+				foreach (string email in condition.recieverEmails) {
+					new Thread(() => {
+						Email.SendEmail(email, message, condition, aircraftwithtrails, receiver, emailPropertyInfo, isFirst);
+					}).Start();
+				}	
 			}
 			
 			if (condition.twitterEnabled) {
@@ -445,8 +430,6 @@ namespace PlaneAlerter {
 		}
 
 		public static Core.Aircraft GetAircraftWithTrails(Core.Aircraft inputaircraft) {
-			Core.UI.updateStatusLabel("Downloading Aircraft Trails for " + inputaircraft.GetProperty("Reg") + " (" + inputaircraft.ICAO + ")...");
-
 			//Generate aircraftlist.json url
 			string url = Settings.acListUrl;
 			url += Settings.acListUrl.Contains("?") ? "&" : "?";

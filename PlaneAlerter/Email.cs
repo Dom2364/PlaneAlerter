@@ -13,11 +13,6 @@ namespace PlaneAlerter {
 	/// </summary>
 	static class Email {
 		/// <summary>
-		/// SMTP client used for sending emails
-		/// </summary>
-		public static SmtpClient mailClient;
-
-		/// <summary>
 		/// Send alert email
 		/// </summary>
 		/// <param name="emailaddress">Email address to send to</param>
@@ -28,8 +23,13 @@ namespace PlaneAlerter {
 		/// <param name="emailPropertyInfo">String for displaying email property value</param>
 		/// <param name="isDetection">Is this a detection, not a removal?</param>
 		public static void SendEmail(string emailaddress, MailMessage message, Core.Condition condition, Core.Aircraft aircraft, string recieverName, string emailPropertyInfo, bool isDetection) {
-			//Array to store position trail
-			Dictionary<int, string[]> pathArray = new Dictionary<int, string[]>();
+            SmtpClient mailClient = new SmtpClient(Settings.SMTPHost);
+            mailClient.Port = Settings.SMTPPort;
+            mailClient.Credentials = new NetworkCredential(Settings.SMTPUsr, Settings.SMTPPwd);
+            mailClient.EnableSsl = Settings.SMTPSSL;
+
+            //Array to store position trail
+            Dictionary<int, string[]> pathArray = new Dictionary<int, string[]>();
 			//Google maps url
 			string googleMapsUrl = "";
 			//Transponder type from aircraft info

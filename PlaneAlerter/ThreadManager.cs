@@ -100,7 +100,6 @@ namespace PlaneAlerter {
 
 					//Clear matches
 					Core.activeMatches.Clear();
-					Core.waitingMatches.Clear();
 
 					Stats.updateStats();
 

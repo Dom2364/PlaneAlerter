@@ -241,12 +241,6 @@ namespace PlaneAlerter {
 				Core.UI.writeToConsole("Reloading Settings...", Color.White);
 			VRSAuthenticate = (VRSUsr != "");
 
-			//Update mail client info
-			Email.mailClient = new SmtpClient(SMTPHost);
-			Email.mailClient.Port = SMTPPort;
-			Email.mailClient.Credentials = new NetworkCredential(SMTPUsr, SMTPPwd);
-			Email.mailClient.EnableSsl = SMTPSSL;
-
 			//Update UI
 			foreach (TreeNode settingsGroupNode in Core.UI.conditionTreeView.Nodes[1].Nodes)
 				settingsGroupNode.Nodes.Clear();
@@ -342,6 +336,7 @@ namespace PlaneAlerter {
 				VRSAuthenticate = (VRSUsr != "");
 				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
 				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 60;
+				if (refreshRate < 1) refreshRate = 1;
 				if (settingsJson["startOnStart"] != null) startOnStart = (settingsJson["startOnStart"].ToString().ToLower() == "true"); else startOnStart = true;
 				if (settingsJson["timeout"] != null && Convert.ToInt32(settingsJson["timeout"]) >= 5) timeout = Convert.ToInt32(settingsJson["timeout"]); else timeout = 5;
 				if (settingsJson["showNotifications"] != null) showNotifications = (settingsJson["showNotifications"].ToString().ToLower() == "true"); else showNotifications = true;
@@ -364,12 +359,6 @@ namespace PlaneAlerter {
 				if (settingsJson["SMTPSSL"] != null) SMTPSSL = (settingsJson["SMTPSSL"].ToString().ToLower() == "true");
 				if (settingsJson["TwitterUsers"] != null) TwitterUsers = settingsJson["TwitterUsers"].ToObject<Dictionary<string, string[]>>();
 			}
-
-			//Set mailclient info
-			Email.mailClient = new SmtpClient(SMTPHost);
-			Email.mailClient.Port = SMTPPort;
-			Email.mailClient.Credentials = new NetworkCredential(SMTPUsr, SMTPPwd);
-			Email.mailClient.EnableSsl = SMTPSSL;
 
 			//Clear settings json to hopefully save some memory
 			settingsJson.RemoveAll();
