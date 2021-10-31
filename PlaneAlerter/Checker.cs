@@ -253,9 +253,7 @@ namespace PlaneAlerter {
 
 				//Send emails
 				foreach (string email in condition.recieverEmails) {
-					new Thread(() => {
-						Email.SendEmail(email, message, condition, aircraftwithtrails, receiver, emailPropertyInfo, isFirst);
-					}).Start();
+					Email.SendEmail(email, message, condition, aircraftwithtrails, receiver, emailPropertyInfo, isFirst);
 				}	
 			}
 			
