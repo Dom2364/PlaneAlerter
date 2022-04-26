@@ -36,6 +36,11 @@ namespace PlaneAlerter {
 		public static bool ConditionsLoaded = false;
 
 		/// <summary>
+		/// How many checks ago were the trails requested
+		/// </summary>
+		private static int trailsAge = 1;
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		public static void Start() {
@@ -45,6 +50,9 @@ namespace PlaneAlerter {
 			int triggersMatching;
 			//VRS name of property
 			string propertyInternalName;
+
+			//Set culture to invariant
+			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
 			while (ThreadManager.threadStatus != ThreadManager.CheckerStatus.Stopping) {
 				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Running;
@@ -221,8 +229,6 @@ namespace PlaneAlerter {
 		}
 
 		public static void SendAlert(Core.Condition condition, Core.Aircraft aircraft, string receiver, bool isFirst) {
-			Core.Aircraft aircraftwithtrails;
-			
 			//Show notification
 			if (Settings.showNotifications) Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.conditionName}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
 
@@ -231,9 +237,6 @@ namespace PlaneAlerter {
 
 			//Log
 			Core.LogAlert(condition, aircraft, receiver, isFirst);
-
-			//Get trails
-			aircraftwithtrails = GetAircraftWithTrails(aircraft);
 
 			if (condition.emailEnabled) {
 				//Create email message
@@ -253,8 +256,8 @@ namespace PlaneAlerter {
 
 				//Send emails
 				foreach (string email in condition.recieverEmails) {
-					Email.SendEmail(email, message, condition, aircraftwithtrails, receiver, emailPropertyInfo, isFirst);
-				}	
+					Email.SendEmail(email, message, condition, aircraft, receiver, emailPropertyInfo, isFirst);
+				}
 			}
 			
 			if (condition.twitterEnabled) {
@@ -309,7 +312,7 @@ namespace PlaneAlerter {
 				}
 
 				//Get map URL if enabled
-				string mapURL = condition.tweetMap?Core.GenerateMapURL(aircraftwithtrails):"";
+				string mapURL = condition.tweetMap?Core.GenerateMapURL(aircraft) :"";
 
 				//Send tweet
 				bool success = Twitter.Tweet(creds[0], creds[1], content, mapURL).Result;
@@ -327,14 +330,27 @@ namespace PlaneAlerter {
 		/// Get latest aircraftlist.json
 		/// </summary>
 		public static void GetAircraft(bool modeSOnly, bool clearExisting) {
+			int trailsAgeThreshold = 2;
+			bool requestTrails = trailsAgeThreshold==1;
+			if (trailsAgeThreshold >= 2) {
+				if (trailsAge > trailsAgeThreshold) {
+					requestTrails = true;
+					trailsAge = 1;
+				}
+				trailsAge++;
+			}
+
+			Console.WriteLine(trailsAge + " " + requestTrails);
+
 			//Generate aircraftlist.json url
 			string url = Settings.acListUrl;
 			url += Settings.acListUrl.Contains("?") ? "&" : "?";
-			url += "lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".");
+			url += "lat=" + Settings.Lat.ToString() + "&lng=" + Settings.Long.ToString();
 			if (Settings.filterDistance && !modeSOnly) url += "&fDstU=" + Settings.ignoreDistance.ToString("#.##");
 			if (Settings.filterAltitude) url += "&fAltU=" + Settings.ignoreAltitude.ToString();
 			if (Settings.filterReceiver) url += "&feed=" + Settings.filterReceiverId.ToString();
 			if (modeSOnly) url += "&fNoPosQN=1";
+			if (requestTrails) url += "&trFmt=fa&refreshTrails=1";
 
 			try {
 				JObject responseJson;
@@ -425,90 +441,6 @@ namespace PlaneAlerter {
 			using (StreamReader reader = new StreamReader(responsestream))
 			using (JsonTextReader jsonreader = new JsonTextReader(reader))
 				return JsonSerializer.Create().Deserialize<JObject>(jsonreader);
-		}
-
-		public static Core.Aircraft GetAircraftWithTrails(Core.Aircraft inputaircraft) {
-			//Generate aircraftlist.json url
-			string url = Settings.acListUrl;
-			url += Settings.acListUrl.Contains("?") ? "&" : "?";
-			url += "trFmt=fa&refreshTrails=1&lat=" + Convert.ToString(Settings.Lat).Replace(",", ".") + "&lng=" + Convert.ToString(Settings.Long).Replace(",", ".") + "&fIcoQ=" + inputaircraft.ICAO;
-
-			try {
-				JObject responseJson;
-				try {
-					responseJson = RequestAircraftList(url);
-				}
-				catch (Exception e) {
-					Core.UI.writeToConsole("ERROR: " + e.GetType().ToString() + " while downloading AircraftList.json: " + e.Message, Color.Red);
-					return inputaircraft;
-				}
-
-				//Check if we actually got aircraft data
-				if (responseJson["acList"] == null) {
-					Core.UI.writeToConsole("ERROR: Invalid response recieved from server", Color.Red);
-					return inputaircraft;
-				}
-				//Throw error if server time was not parsed
-				if (responseJson["stm"] == null)
-					throw new JsonReaderException();
-
-				//Parse aircraft data
-				foreach (JObject a in responseJson["acList"].ToList()) {
-					//Ignore if no icao is provided
-					if (a["Icao"] == null) continue;
-
-					if (a["Icao"].ToString() == inputaircraft.ICAO) {
-						//Create new aircraft
-						Core.Aircraft aircraft = new Core.Aircraft(a["Icao"].ToString());
-
-						//Parse aircraft trail
-						if (a["Cot"] != null)
-							aircraft.Trail = new double[a["Cot"].Count()];
-						for (int i = 0; i < aircraft.Trail.Length - 1; i++)
-							if (a["Cot"][i].Value<string>() != null)
-								aircraft.Trail[i] = double.Parse(a["Cot"][i].Value<string>(), CultureInfo.InvariantCulture);
-							else
-								aircraft.Trail[i] = 0;
-
-						//Parse aircraft properties
-						List<JProperty> properties = a.Properties().ToList();
-						for (int i = 0; i < properties.Count(); i++)
-							aircraft.AddProperty(properties[i].Name, properties[i].Value.ToString());
-						properties = null;
-
-						return aircraft;
-					}
-				}
-				
-				
-				//Try to clean up json parsing
-				responseJson.RemoveAll();
-				responseJson = null;
-				GC.Collect(2, GCCollectionMode.Forced);
-			}
-			catch (UriFormatException)
-			{
-				Core.UI.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.acListUrl + ")", Color.Red);
-				return inputaircraft;
-			}
-			catch (InvalidDataException)
-			{
-				Core.UI.writeToConsole("ERROR: Data returned from " + Settings.acListUrl + " was not gzip compressed", Color.Red);
-				return inputaircraft;
-			}
-			catch (WebException e)
-			{
-				Core.UI.writeToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
-				return inputaircraft;
-			}
-			catch (JsonReaderException e)
-			{
-				Core.UI.writeToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
-				return inputaircraft;
-			}
-
-			// If we've fallen out the bottom then just return the original aircraft
-			return inputaircraft;
 		}
 
 		public static Dictionary<string, string> GetReceivers() {

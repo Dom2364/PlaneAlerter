@@ -52,6 +52,9 @@ namespace PlaneAlerter
 			//This is probably not a good thing but I'm too lazy
 			CheckForIllegalCrossThreadCalls = false;
 
+			//Set culture to invariant
+			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
 			//Initialise UI components
 			InitializeComponent();
 
