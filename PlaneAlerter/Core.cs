@@ -92,6 +92,16 @@ namespace PlaneAlerter {
 			}
 
 			/// <summary>
+			/// Set property value
+			/// </summary>
+			/// <param name="key">Property name</param>
+			/// <param name="value">Value</param>
+			public void SetProperty(string key, string value) {
+				if (Properties.ContainsKey(key))
+					Properties[key] = value;
+			}
+
+			/// <summary>
 			/// Add a property to the list
 			/// </summary>
 			/// <param name="key">Key of property</param>
@@ -559,7 +569,7 @@ namespace PlaneAlerter {
 					staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + Settings.Lat + "," + Settings.Long + "&size=800x800&zoom=8&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
 				}
 					//Process aircraft trail
-					for (int i = 0; i < aircraft.Trail.Count() / 4; i++) {
+			for (int i = (aircraft.Trail.Count() / 4) - 1; i >= 0; i--) {
 				//Get coordinate
 				string[] coord = new string[] {
 						aircraft.Trail[i * 4].ToString("#.####"),

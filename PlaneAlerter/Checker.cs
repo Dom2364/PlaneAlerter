@@ -73,6 +73,8 @@ namespace PlaneAlerter {
 					Core.Condition condition;
 					//Ignore following conditions for an aircraft
 					bool ignorefollowing = false;
+					//Updated trails are available, this check contains the first match in a while
+					bool updatedtrailsavailable = false;
 					foreach (Core.Aircraft aircraft in Core.aircraftlist.ToList()) {
 						//Update UI with aircraft being checked
 						Core.UI.updateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " + Core.aircraftlist.Count());
@@ -154,6 +156,25 @@ namespace PlaneAlerter {
 								//Cancel checking for conditions for this aircraft
 								ignorefollowing = condition.ignoreFollowing;
 
+								//Get trails if they haven't been requested due to no matches
+								if (Core.activeMatches.Count == 1) {
+									GetAircraft(false, true, true);
+									if (Settings.filterDistance && !Settings.ignoreModeS) GetAircraft(true, false, true);
+									updatedtrailsavailable = true;
+								}
+
+								//If updated trails are available, update trail and position
+								if (updatedtrailsavailable) {
+									foreach (Core.Aircraft updatedac in Core.aircraftlist.ToList()) {
+										if (updatedac.ICAO == aircraft.ICAO) {
+											aircraft.Trail = updatedac.Trail;
+											aircraft.SetProperty("Lat", updatedac.GetProperty("Lat"));
+											aircraft.SetProperty("Long", updatedac.GetProperty("Long"));
+											break;
+										}
+									}
+								}
+
 								//Update stats and log to console
 								Stats.updateStats();
 								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightGreen);
@@ -176,7 +197,7 @@ namespace PlaneAlerter {
 						//Iterate match conditions
 						foreach (Core.MatchedCondition c in match.Conditions) {
 							//Check if signal has been lost for more than the removal timeout
-							if (match.SignalLostTime != DateTime.MinValue && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.removalTimeout - (Settings.removalTimeout * 2)))) < 0) {
+							if (match.SignalLost && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.removalTimeout - (Settings.removalTimeout * 2)))) < 0) {
 								//Remove from active matches
 								Core.activeMatches.Remove(match.Icao);
 								//Update stats and log to console
@@ -329,18 +350,26 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Get latest aircraftlist.json
 		/// </summary>
-		public static void GetAircraft(bool modeSOnly, bool clearExisting) {
-			int trailsAgeThreshold = 2;
+		public static void GetAircraft(bool modeSOnly, bool clearExisting, bool forceRequestTrails = false) {
+			int trailsAgeThreshold = 6;
 			bool requestTrails = trailsAgeThreshold==1;
-			if (trailsAgeThreshold >= 2) {
-				if (trailsAge > trailsAgeThreshold) {
+
+			//Force request trails
+			if (forceRequestTrails && trailsAgeThreshold != 0) {
+				requestTrails = true;
+			}
+			//No matches so we don't need trails
+			else if (Core.activeMatches.Count == 0) {
+				requestTrails = false;
+			}
+			//Threshold enabled
+			else if (trailsAgeThreshold >= 2) {
+				if (trailsAge >= trailsAgeThreshold) {
 					requestTrails = true;
-					trailsAge = 1;
+					trailsAge = 0;
 				}
 				trailsAge++;
 			}
-
-			Console.WriteLine(trailsAge + " " + requestTrails);
 
 			//Generate aircraftlist.json url
 			string url = Settings.acListUrl;
@@ -372,6 +401,10 @@ namespace PlaneAlerter {
 				if (responseJson["stm"] == null)
 					throw new JsonReaderException();
 
+				//Save old trails if not requesting new ones
+				Dictionary<string, double[]> oldTrails = null;
+				if (!requestTrails) oldTrails = Core.aircraftlist.ToDictionary(x => x.ICAO, x => x.Trail);
+
 				//Parse aircraft data
 				if (clearExisting) Core.aircraftlist.Clear();
 				foreach (JObject a in responseJson["acList"].ToList()) {
@@ -379,14 +412,21 @@ namespace PlaneAlerter {
 					if (a["Icao"] == null) continue;
 					//Create new aircraft
 					Core.Aircraft aircraft = new Core.Aircraft(a["Icao"].ToString());
+
 					//Parse aircraft trail
-					if (a["Cot"] != null)
-						aircraft.Trail = new double[a["Cot"].Count()];
-					for (int i = 0;i < aircraft.Trail.Length - 1;i++)
-						if (a["Cot"][i].Value<string>() != null)
-							aircraft.Trail[i] = double.Parse(a["Cot"][i].Value<string>(), CultureInfo.InvariantCulture);
-						else
-							aircraft.Trail[i] = 0;
+					if (requestTrails) {
+						if (a["Cot"] != null)
+							aircraft.Trail = new double[a["Cot"].Count()];
+						for (int i = 0; i < aircraft.Trail.Length - 1; i++)
+							if (a["Cot"][i].Value<string>() != null)
+								aircraft.Trail[i] = double.Parse(a["Cot"][i].Value<string>(), CultureInfo.InvariantCulture);
+							else
+								aircraft.Trail[i] = 0;
+					}
+					else {
+						if (oldTrails != null && oldTrails.ContainsKey(aircraft.ICAO)) aircraft.Trail = oldTrails[aircraft.ICAO];
+					}
+
 					//Parse aircraft properties
 					List<JProperty> properties = a.Properties().ToList();
 					for (int i = 0;i < properties.Count();i++)
