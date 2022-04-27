@@ -125,6 +125,11 @@ namespace PlaneAlerter {
 		public static int filterReceiverId;
 
 		/// <summary>
+		/// Number of checks between trail updates
+		/// </summary>
+		public static int trailsUpdateFrequency;
+
+		/// <summary>
 		/// SMTP Host
 		/// </summary>
 		public static string SMTPHost;
@@ -203,6 +208,7 @@ namespace PlaneAlerter {
 			settingsDictionary.Add("ignoreModeS", ignoreModeS);
 			settingsDictionary.Add("filterReceiver", filterReceiver);
 			settingsDictionary.Add("filterReceiverId", filterReceiverId);
+			settingsDictionary.Add("trailsUpdateFrequency", trailsUpdateFrequency);
 			settingsDictionary.Add("centreMapOnAircraft", centreMapOnAircraft);
 			settingsDictionary.Add("SMTPHost", SMTPHost);
 			settingsDictionary.Add("SMTPPort", SMTPPort);
@@ -324,6 +330,7 @@ namespace PlaneAlerter {
 					acListUrl = "http://" + acListUrl;
 				if (settingsJson["VRSUsr"] != null) VRSUsr = settingsJson["VRSUsr"].ToString();
 				if (settingsJson["VRSPwd"] != null) VRSPwd = settingsJson["VRSPwd"].ToString();
+				VRSAuthenticate = (VRSUsr != "");
 				if (settingsJson["Lat"] != null) Lat = Convert.ToDecimal(settingsJson["Lat"]);
 				if (settingsJson["Long"] != null) Long = Convert.ToDecimal(settingsJson["Long"]);
 				if (settingsJson["filterDistance"] != null) filterDistance = (settingsJson["filterDistance"].ToString().ToLower() == "true"); else filterDistance = false;
@@ -333,7 +340,7 @@ namespace PlaneAlerter {
 				if (settingsJson["ignoreAltitude"] != null) ignoreAltitude = Convert.ToInt32(settingsJson["ignoreAltitude"]); else ignoreAltitude = 100000;
 				if (settingsJson["filterReceiver"] != null) filterReceiver = (settingsJson["filterReceiver"].ToString().ToLower() == "true"); else filterReceiver = false;
 				if (settingsJson["filterReceiverId"] != null) filterReceiverId = Convert.ToInt32(settingsJson["filterReceiverId"]); else filterReceiverId = 1;
-				VRSAuthenticate = (VRSUsr != "");
+				if (settingsJson["trailsUpdateFrequency"] != null) trailsUpdateFrequency = Convert.ToInt32(settingsJson["trailsUpdateFrequency"]); else trailsUpdateFrequency = 1;
 				if (settingsJson["timeoutLength"] != null) removalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else removalTimeout = 60;
 				if (settingsJson["refreshRate"] != null) refreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else refreshRate = 60;
 				if (refreshRate < 1) refreshRate = 1;

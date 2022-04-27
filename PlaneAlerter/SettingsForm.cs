@@ -67,6 +67,7 @@ namespace PlaneAlerter {
 			ignoreAltTextBox.Value = Settings.ignoreAltitude;
 			if (filterReceiverCheckBox.Checked) filterReceiverCheckBox.Checked = Settings.filterReceiver; //Will be unchecked if there was an error getting receivers
 			filterReceiverCheckBox_CheckedChanged(this, new EventArgs());
+			trailsAgeNumericUpDown.Value = Settings.trailsUpdateFrequency;
 		}
 
 		private async void UpdateReceivers() {
@@ -139,6 +140,7 @@ namespace PlaneAlerter {
 			Settings.ignoreDistance = Convert.ToDouble(ignoreDistTextBox.Value);
 			Settings.filterReceiver = filterReceiverCheckBox.Checked;
 			Settings.filterReceiverId = Convert.ToInt32(receiverComboBox.SelectedValue);
+			Settings.trailsUpdateFrequency = Convert.ToInt32(trailsAgeNumericUpDown.Value);
 			Settings.Save();
 		}
 

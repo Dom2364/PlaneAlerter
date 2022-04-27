@@ -75,6 +75,8 @@
 			this.centreLatLngRadioButton = new System.Windows.Forms.RadioButton();
 			this.centreAircraftRadioButton = new System.Windows.Forms.RadioButton();
 			this.refreshTextBox = new System.Windows.Forms.NumericUpDown();
+			this.trailsAgeNumericUpDown = new System.Windows.Forms.NumericUpDown();
+			this.label12 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.removalTimeoutTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.smtpHostPortTextBox)).BeginInit();
 			this.emailGroupBox.SuspendLayout();
@@ -86,6 +88,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.timeoutTextBox)).BeginInit();
 			this.programGroupBox.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.refreshTextBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.trailsAgeNumericUpDown)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// senderEmailTextBox
@@ -448,7 +451,7 @@
 			this.filterReceiverCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.filterReceiverCheckBox.Checked = true;
 			this.filterReceiverCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.filterReceiverCheckBox.Location = new System.Drawing.Point(6, 254);
+			this.filterReceiverCheckBox.Location = new System.Drawing.Point(6, 255);
 			this.filterReceiverCheckBox.Name = "filterReceiverCheckBox";
 			this.filterReceiverCheckBox.Size = new System.Drawing.Size(103, 17);
 			this.filterReceiverCheckBox.TabIndex = 34;
@@ -461,7 +464,7 @@
 			// saveSettingsButton
 			// 
 			this.saveSettingsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.saveSettingsButton.Location = new System.Drawing.Point(573, 319);
+			this.saveSettingsButton.Location = new System.Drawing.Point(573, 351);
 			this.saveSettingsButton.Name = "saveSettingsButton";
 			this.saveSettingsButton.Size = new System.Drawing.Size(103, 23);
 			this.saveSettingsButton.TabIndex = 20;
@@ -492,6 +495,8 @@
 			// 
 			// radarGroupBox
 			// 
+			this.radarGroupBox.Controls.Add(this.label12);
+			this.radarGroupBox.Controls.Add(this.trailsAgeNumericUpDown);
 			this.radarGroupBox.Controls.Add(this.refreshReceiversButton);
 			this.radarGroupBox.Controls.Add(this.filterReceiverCheckBox);
 			this.radarGroupBox.Controls.Add(this.receiverComboBox);
@@ -516,15 +521,14 @@
 			this.radarGroupBox.Controls.Add(this.label11);
 			this.radarGroupBox.Location = new System.Drawing.Point(347, 12);
 			this.radarGroupBox.Name = "radarGroupBox";
-			this.radarGroupBox.Size = new System.Drawing.Size(329, 301);
+			this.radarGroupBox.Size = new System.Drawing.Size(329, 332);
 			this.radarGroupBox.TabIndex = 23;
 			this.radarGroupBox.TabStop = false;
 			this.radarGroupBox.Text = "Radar";
 			// 
 			// refreshReceiversButton
 			// 
-			this.refreshReceiversButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.refreshReceiversButton.Location = new System.Drawing.Point(129, 251);
+			this.refreshReceiversButton.Location = new System.Drawing.Point(126, 251);
 			this.refreshReceiversButton.Name = "refreshReceiversButton";
 			this.refreshReceiversButton.Size = new System.Drawing.Size(56, 23);
 			this.refreshReceiversButton.TabIndex = 35;
@@ -705,11 +709,38 @@
             0,
             0});
 			// 
+			// trailsAgeNumericUpDown
+			// 
+			this.trailsAgeNumericUpDown.Location = new System.Drawing.Point(245, 279);
+			this.trailsAgeNumericUpDown.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+			this.trailsAgeNumericUpDown.Name = "trailsAgeNumericUpDown";
+			this.trailsAgeNumericUpDown.Size = new System.Drawing.Size(75, 20);
+			this.trailsAgeNumericUpDown.TabIndex = 36;
+			this.trailsAgeNumericUpDown.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			// 
+			// label12
+			// 
+			this.label12.AutoSize = true;
+			this.label12.Location = new System.Drawing.Point(6, 281);
+			this.label12.Name = "label12";
+			this.label12.Size = new System.Drawing.Size(192, 13);
+			this.label12.TabIndex = 37;
+			this.label12.Text = "Trail Update Frequency (no. of checks)";
+			this.toolTip.SetToolTip(this.label12, resources.GetString("label12.ToolTip"));
+			// 
 			// SettingsForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(688, 354);
+			this.ClientSize = new System.Drawing.Size(688, 386);
 			this.Controls.Add(this.programGroupBox);
 			this.Controls.Add(this.radarGroupBox);
 			this.Controls.Add(this.emailGroupBox);
@@ -734,6 +765,7 @@
 			this.programGroupBox.ResumeLayout(false);
 			this.programGroupBox.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.refreshTextBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.trailsAgeNumericUpDown)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -790,5 +822,7 @@
 		private System.Windows.Forms.ComboBox receiverComboBox;
 		private System.Windows.Forms.CheckBox filterReceiverCheckBox;
 		private System.Windows.Forms.Button refreshReceiversButton;
+		private System.Windows.Forms.Label label12;
+		private System.Windows.Forms.NumericUpDown trailsAgeNumericUpDown;
 	}
 }

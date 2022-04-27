@@ -157,7 +157,7 @@ namespace PlaneAlerter {
 								ignorefollowing = condition.ignoreFollowing;
 
 								//Get trails if they haven't been requested due to no matches
-								if (Core.activeMatches.Count == 1) {
+								if (Core.activeMatches.Count == 1 && Settings.trailsUpdateFrequency != 0) {
 									GetAircraft(false, true, true);
 									if (Settings.filterDistance && !Settings.ignoreModeS) GetAircraft(true, false, true);
 									updatedtrailsavailable = true;
@@ -189,6 +189,10 @@ namespace PlaneAlerter {
 						if (Core.activeMatches.ContainsKey(aircraft.ICAO))
 							foreach (Core.MatchedCondition c in Core.activeMatches[aircraft.ICAO].Conditions)
 								c.AircraftInfo = aircraft;
+
+						//Cancel if thread is supposed to stop
+						if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Stopping)
+							return;
 					}
 					//Check if aircraft have lost signal and remove aircraft that have timed out
 					Core.UI.updateStatusLabel("Checking aircraft are still on radar...");
@@ -351,11 +355,10 @@ namespace PlaneAlerter {
 		/// Get latest aircraftlist.json
 		/// </summary>
 		public static void GetAircraft(bool modeSOnly, bool clearExisting, bool forceRequestTrails = false) {
-			int trailsAgeThreshold = 6;
-			bool requestTrails = trailsAgeThreshold==1;
+			bool requestTrails = Settings.trailsUpdateFrequency==1;
 
 			//Force request trails
-			if (forceRequestTrails && trailsAgeThreshold != 0) {
+			if (forceRequestTrails) {
 				requestTrails = true;
 			}
 			//No matches so we don't need trails
@@ -363,8 +366,8 @@ namespace PlaneAlerter {
 				requestTrails = false;
 			}
 			//Threshold enabled
-			else if (trailsAgeThreshold >= 2) {
-				if (trailsAge >= trailsAgeThreshold) {
+			else if (Settings.trailsUpdateFrequency >= 2) {
+				if (trailsAge >= Settings.trailsUpdateFrequency) {
 					requestTrails = true;
 					trailsAge = 0;
 				}
