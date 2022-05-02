@@ -7,8 +7,8 @@ using System.Windows.Forms;
 using System.IO;
 using Tweetinvi;
 using Tweetinvi.Models;
-using Tweetinvi.Parameters;
 using Tweetinvi.Exceptions;
+using Newtonsoft.Json;
 
 
 namespace PlaneAlerter {
@@ -35,7 +35,8 @@ namespace PlaneAlerter {
 			//Set credentials
 			TwitterClient twitterClient = new TwitterClient(ConsumerKey, ConsumerSecretKey, token, tokensecret);
 
-			PublishTweetParameters parameters = new PublishTweetParameters(content);
+			//Media ID of attached image
+			long? mediaid = null;
 
 			//Upload map image if required
 			if (mediaURL != "") {
@@ -60,7 +61,7 @@ namespace PlaneAlerter {
 					ms.Dispose();
 
 					//Check if it was uploaded properly
-					if (media.HasBeenUploaded) parameters.Medias.Add(media);
+					if (media.HasBeenUploaded) mediaid = media.Id;
 					else Core.UI.writeToConsole("ERROR: Error uploading map", System.Drawing.Color.Red);
 				}
 				catch (TwitterException e) {
@@ -70,12 +71,31 @@ namespace PlaneAlerter {
 					Core.UI.writeToConsole($"ERROR: {e.GetType()} error uploading map image to Twitter: {e.Message}", System.Drawing.Color.Red);
 				}
 			}
+
 			//Publish tweet
 			try {
-				var tweet = twitterClient.Tweets.PublishTweetAsync(parameters);
+				string requestbody = null;
+				if (mediaid != null) {
+					requestbody = $@"{{""text"": ""{content}"", ""media"": {{""media_ids"": [""{mediaid}""]}}}}";
+				}
+				else {
+					requestbody = $@"{{""text"": ""{content}""}}";
+				}
+				var tweet = await twitterClient.Execute.RequestAsync(request =>
+				{
+					request.Url = "https://api.twitter.com/2/tweets";
+					request.HttpMethod = HttpMethod.POST;
+					request.HttpContent = new System.Net.Http.StringContent(requestbody, Encoding.ASCII, "application/json");
+				});
 			}
 			catch (TwitterException e) {
-				Core.UI.writeToConsole($"ERROR: Error publishing tweet: {e.ToString()}", System.Drawing.Color.Red);
+				string detailedcontent = null;
+				if (e.Content != null) {
+					Newtonsoft.Json.Linq.JObject contentjson = JsonSerializer.Create().Deserialize<Newtonsoft.Json.Linq.JObject>(new JsonTextReader(new StringReader(e.Content)));
+					detailedcontent = contentjson["detail"]!=null? contentjson["detail"].ToString() : null;
+				}
+
+				Core.UI.writeToConsole($"ERROR: Error publishing tweet: {(detailedcontent!=null?detailedcontent + Environment.NewLine:"")}{e.ToString()}", System.Drawing.Color.Red);
 				return false;
 			}
 			catch (Exception e) {
