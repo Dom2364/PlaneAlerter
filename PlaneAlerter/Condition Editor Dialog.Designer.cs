@@ -43,6 +43,8 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.emailLastFormatTextBox = new System.Windows.Forms.TextBox();
+			this.tweetLastFormatTextBox = new System.Windows.Forms.RichTextBox();
+			this.tweetFirstFormatTextBox = new System.Windows.Forms.RichTextBox();
 			this.ignoreFollowingCheckbox = new System.Windows.Forms.CheckBox();
 			this.tabControl = new System.Windows.Forms.TabControl();
 			this.triggersTabPage = new System.Windows.Forms.TabPage();
@@ -51,11 +53,9 @@
 			this.twitterTabPage = new System.Windows.Forms.TabPage();
 			this.tweetMapCheckBox = new System.Windows.Forms.CheckBox();
 			this.tweetLastFormatLabel = new System.Windows.Forms.Label();
-			this.tweetLastFormatTextBox = new System.Windows.Forms.RichTextBox();
 			this.twitterLinkLabel = new System.Windows.Forms.Label();
 			this.tweetLinkComboBox = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
-			this.tweetFirstFormatTextBox = new System.Windows.Forms.RichTextBox();
 			this.tweetFirstFormatLabel = new System.Windows.Forms.Label();
 			this.twitterAccountComboBox = new System.Windows.Forms.ComboBox();
 			this.twitterAccountLabel = new System.Windows.Forms.Label();
@@ -243,6 +243,24 @@
 			this.emailLastFormatTextBox.TabIndex = 13;
 			this.toolTip.SetToolTip(this.emailLastFormatTextBox, resources.GetString("emailLastFormatTextBox.ToolTip"));
 			// 
+			// tweetLastFormatTextBox
+			// 
+			this.tweetLastFormatTextBox.Location = new System.Drawing.Point(249, 77);
+			this.tweetLastFormatTextBox.Name = "tweetLastFormatTextBox";
+			this.tweetLastFormatTextBox.Size = new System.Drawing.Size(240, 87);
+			this.tweetLastFormatTextBox.TabIndex = 21;
+			this.tweetLastFormatTextBox.Text = "";
+			this.toolTip.SetToolTip(this.tweetLastFormatTextBox, resources.GetString("tweetLastFormatTextBox.ToolTip"));
+			// 
+			// tweetFirstFormatTextBox
+			// 
+			this.tweetFirstFormatTextBox.Location = new System.Drawing.Point(6, 77);
+			this.tweetFirstFormatTextBox.Name = "tweetFirstFormatTextBox";
+			this.tweetFirstFormatTextBox.Size = new System.Drawing.Size(240, 87);
+			this.tweetFirstFormatTextBox.TabIndex = 17;
+			this.tweetFirstFormatTextBox.Text = "";
+			this.toolTip.SetToolTip(this.tweetFirstFormatTextBox, resources.GetString("tweetFirstFormatTextBox.ToolTip"));
+			// 
 			// ignoreFollowingCheckbox
 			// 
 			this.ignoreFollowingCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -347,15 +365,6 @@
 			this.tweetLastFormatLabel.TabIndex = 22;
 			this.tweetLastFormatLabel.Text = "Last Contact Tweet Format:";
 			// 
-			// tweetLastFormatTextBox
-			// 
-			this.tweetLastFormatTextBox.Location = new System.Drawing.Point(249, 77);
-			this.tweetLastFormatTextBox.Name = "tweetLastFormatTextBox";
-			this.tweetLastFormatTextBox.Size = new System.Drawing.Size(240, 87);
-			this.tweetLastFormatTextBox.TabIndex = 21;
-			this.tweetLastFormatTextBox.Text = "";
-			this.toolTip.SetToolTip(this.tweetLastFormatTextBox, resources.GetString("tweetLastFormatTextBox.ToolTip"));
-			// 
 			// twitterLinkLabel
 			// 
 			this.twitterLinkLabel.AutoSize = true;
@@ -384,15 +393,6 @@
 			this.label3.Text = "Keep in mind if the character count is over 280, the tweet content will be cut of" +
     "f. There is also a limit of 200 tweets within 15 minutes and 300 tweets within 3" +
     " hours per account.";
-			// 
-			// tweetFirstFormatTextBox
-			// 
-			this.tweetFirstFormatTextBox.Location = new System.Drawing.Point(6, 77);
-			this.tweetFirstFormatTextBox.Name = "tweetFirstFormatTextBox";
-			this.tweetFirstFormatTextBox.Size = new System.Drawing.Size(240, 87);
-			this.tweetFirstFormatTextBox.TabIndex = 17;
-			this.tweetFirstFormatTextBox.Text = "";
-			this.toolTip.SetToolTip(this.tweetFirstFormatTextBox, resources.GetString("tweetFirstFormatTextBox.ToolTip"));
 			// 
 			// tweetFirstFormatLabel
 			// 

@@ -289,7 +289,7 @@ namespace PlaneAlerter {
 				string[] creds = Settings.TwitterUsers[condition.twitterAccount];
 
 				//Replace keywords in content
-				content = Core.ParseCustomFormatString(content, aircraft);
+				content = Core.ParseCustomFormatString(content, aircraft, condition);
 				if (content.Length > 250) {
 					int charsover = content.Length - 250;
 					content = content.Substring(0, 250) + "...";

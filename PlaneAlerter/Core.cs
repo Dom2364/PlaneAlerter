@@ -535,7 +535,22 @@ namespace PlaneAlerter {
 		/// Parse a custom format string to replace property names with values
 		/// </summary>
 		/// <returns>Parsed string</returns>
-		public static string ParseCustomFormatString(string format, Aircraft aircraft) {
+		public static string ParseCustomFormatString(string format, Aircraft aircraft, Condition condition) {
+			Dictionary<string, string> variables = new Dictionary<string, string> {
+				{ "ConditionName", condition.conditionName },
+				{ "Date", DateTime.Now.ToString("d") },
+				{ "Time", DateTime.Now.ToString("t") },
+			};
+
+			//Iterate variables
+			foreach (string varkey in variables.Keys) {
+				//Check if content contains keyword
+				if (format.ToLower().Contains(@"[" + varkey.ToLower() + @"]")) {
+					//Replace keyword with value
+					format = Regex.Replace(format, @"\[" + varkey + @"\]", variables[varkey], RegexOptions.IgnoreCase);
+				}
+			}
+
 			//Iterate properties
 			foreach (string[] info in vrsPropertyData.Values) {
 				//Check if content contains keyword
@@ -547,6 +562,7 @@ namespace PlaneAlerter {
 					format = Regex.Replace(format, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);
 				}
 			}
+
 			return format;
 		}
 

@@ -69,7 +69,7 @@ namespace PlaneAlerter {
 			}
 
             //Set subject
-            message.Subject = Core.ParseCustomFormatString(isDetection ? condition.emailFirstFormat : condition.emailLastFormat, aircraft);
+            message.Subject = Core.ParseCustomFormatString(isDetection ? condition.emailFirstFormat : condition.emailLastFormat, aircraft, condition);
 
             if (Settings.EmailContentConfig.TwitterOptimised) {
                 string typestring = "First Contact";

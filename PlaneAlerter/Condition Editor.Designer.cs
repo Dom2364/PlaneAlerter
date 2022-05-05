@@ -39,6 +39,7 @@
 			this.conditionEditorTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.conditionEditorTreeView.HideSelection = false;
 			this.conditionEditorTreeView.Location = new System.Drawing.Point(0, 43);
 			this.conditionEditorTreeView.Name = "conditionEditorTreeView";
 			treeNode1.Name = "conditionsNode";
@@ -47,7 +48,7 @@
             treeNode1});
 			this.conditionEditorTreeView.Size = new System.Drawing.Size(479, 198);
 			this.conditionEditorTreeView.TabIndex = 0;
-			this.conditionEditorTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.conditionEditorTreeView_NodeMouseClick);
+			this.conditionEditorTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.conditionEditorTreeView_AfterSelect);
 			// 
 			// addConditionButton
 			// 
@@ -66,7 +67,7 @@
 			this.exitButton.Margin = new System.Windows.Forms.Padding(2);
 			this.exitButton.Name = "exitButton";
 			this.exitButton.Size = new System.Drawing.Size(85, 23);
-			this.exitButton.TabIndex = 2;
+			this.exitButton.TabIndex = 6;
 			this.exitButton.Text = "Save and Exit";
 			this.exitButton.UseVisualStyleBackColor = true;
 			this.exitButton.Click += new System.EventHandler(this.ExitButtonClick);
@@ -77,7 +78,7 @@
 			this.removeConditionButton.Margin = new System.Windows.Forms.Padding(2);
 			this.removeConditionButton.Name = "removeConditionButton";
 			this.removeConditionButton.Size = new System.Drawing.Size(68, 23);
-			this.removeConditionButton.TabIndex = 3;
+			this.removeConditionButton.TabIndex = 2;
 			this.removeConditionButton.Text = "Remove";
 			this.removeConditionButton.UseVisualStyleBackColor = true;
 			this.removeConditionButton.Click += new System.EventHandler(this.RemoveConditionButtonClick);
@@ -109,7 +110,7 @@
 			this.editButton.Location = new System.Drawing.Point(144, 11);
 			this.editButton.Name = "editButton";
 			this.editButton.Size = new System.Drawing.Size(59, 23);
-			this.editButton.TabIndex = 6;
+			this.editButton.TabIndex = 3;
 			this.editButton.Text = "Edit";
 			this.editButton.UseVisualStyleBackColor = true;
 			this.editButton.Click += new System.EventHandler(this.editButton_Click);

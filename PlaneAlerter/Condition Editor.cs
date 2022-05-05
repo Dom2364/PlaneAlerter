@@ -78,6 +78,8 @@ namespace PlaneAlerter {
 				foreach (Core.Trigger trigger in condition.triggers.Values)
 					triggersNode.Nodes.Add(trigger.Property.ToString() + " " + trigger.ComparisonType + " " + trigger.Value);
 			}
+			conditionEditorTreeView.SelectedNode = conditionEditorTreeView.Nodes[0];
+			updateUIState();
 		}
 
 		/// <summary>
@@ -97,8 +99,7 @@ namespace PlaneAlerter {
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		void ExitButtonClick(object sender, EventArgs e)
-		{
+		void ExitButtonClick(object sender, EventArgs e) {
 			//Save conditions to file then close
 			string conditionsJson = JsonConvert.SerializeObject(EditorConditionsList.conditions, Formatting.Indented);
 			File.WriteAllText("conditions.json", conditionsJson);
@@ -110,8 +111,7 @@ namespace PlaneAlerter {
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event viewer</param>
-		void RemoveConditionButtonClick(object sender, EventArgs e)
-		{
+		void RemoveConditionButtonClick(object sender, EventArgs e) {
 			//Cancel if selected node is invalid
 			if (conditionEditorTreeView.SelectedNode == null || conditionEditorTreeView.SelectedNode.Tag == null || conditionEditorTreeView.SelectedNode.Tag.ToString() == "")
 				return;
@@ -186,12 +186,20 @@ namespace PlaneAlerter {
 		}
 
 		/// <summary>
-		/// Node mouse click
+		/// Update buttons enabled state
 		/// </summary>
-		private void conditionEditorTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e) {
-			//If node is valid, enable edit button
-			TreeNode node = e.Node;
-			editButton.Enabled = (node != null && node.Tag != null && node.Tag.ToString() != "");
+		private void updateUIState() {
+			//If node is valid, enable buttons
+			TreeNode node = conditionEditorTreeView.SelectedNode;
+			bool conditionselected = node != null && node.Tag != null && node.Tag.ToString() != "";
+			removeConditionButton.Enabled = conditionselected;
+			editButton.Enabled = conditionselected;
+			moveUpButton.Enabled = conditionselected;
+			moveDownButton.Enabled = conditionselected;
+		}
+
+		private void conditionEditorTreeView_AfterSelect(object sender, TreeViewEventArgs e) {
+			updateUIState();
 		}
 	}
 
