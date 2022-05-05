@@ -27,8 +27,6 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Condition_Editor));
 			this.conditionNameTextBox = new System.Windows.Forms.TextBox();
 			this.conditionNameLabel = new System.Windows.Forms.Label();
-			this.emailPropertyLabel = new System.Windows.Forms.Label();
-			this.emailPropertyComboBox = new System.Windows.Forms.ComboBox();
 			this.triggerDataGridView = new System.Windows.Forms.DataGridView();
 			this.propertyColumn = new System.Windows.Forms.DataGridViewComboBoxColumn();
 			this.comparisonTypeColumn = new System.Windows.Forms.DataGridViewComboBoxColumn();
@@ -41,6 +39,10 @@
 			this.propertyInfoButton = new System.Windows.Forms.Button();
 			this.helpLabel = new System.Windows.Forms.Label();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+			this.emailFirstFormatTextBox = new System.Windows.Forms.TextBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.emailLastFormatTextBox = new System.Windows.Forms.TextBox();
 			this.ignoreFollowingCheckbox = new System.Windows.Forms.CheckBox();
 			this.tabControl = new System.Windows.Forms.TabControl();
 			this.triggersTabPage = new System.Windows.Forms.TabPage();
@@ -81,25 +83,6 @@
 			this.conditionNameLabel.TabIndex = 1;
 			this.conditionNameLabel.Text = "Condition Name:";
 			this.toolTip.SetToolTip(this.conditionNameLabel, "The name for the condition");
-			// 
-			// emailPropertyLabel
-			// 
-			this.emailPropertyLabel.AutoSize = true;
-			this.emailPropertyLabel.Location = new System.Drawing.Point(196, 35);
-			this.emailPropertyLabel.Name = "emailPropertyLabel";
-			this.emailPropertyLabel.Size = new System.Drawing.Size(137, 13);
-			this.emailPropertyLabel.TabIndex = 2;
-			this.emailPropertyLabel.Text = "Property to show in subject:";
-			this.toolTip.SetToolTip(this.emailPropertyLabel, "The property that will show in the email subject");
-			// 
-			// emailPropertyComboBox
-			// 
-			this.emailPropertyComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.emailPropertyComboBox.FormattingEnabled = true;
-			this.emailPropertyComboBox.Location = new System.Drawing.Point(338, 32);
-			this.emailPropertyComboBox.Name = "emailPropertyComboBox";
-			this.emailPropertyComboBox.Size = new System.Drawing.Size(152, 21);
-			this.emailPropertyComboBox.TabIndex = 2;
 			// 
 			// triggerDataGridView
 			// 
@@ -173,10 +156,11 @@
 			this.alertTypeComboBox.Name = "alertTypeComboBox";
 			this.alertTypeComboBox.Size = new System.Drawing.Size(210, 21);
 			this.alertTypeComboBox.TabIndex = 3;
+			this.alertTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.alertTypeComboBox_SelectedIndexChanged);
 			// 
 			// emailToSendToLabel
 			// 
-			this.emailToSendToLabel.Location = new System.Drawing.Point(4, 35);
+			this.emailToSendToLabel.Location = new System.Drawing.Point(4, 114);
 			this.emailToSendToLabel.Name = "emailToSendToLabel";
 			this.emailToSendToLabel.Size = new System.Drawing.Size(179, 16);
 			this.emailToSendToLabel.TabIndex = 9;
@@ -188,10 +172,10 @@
 			this.recieverEmailTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.recieverEmailTextBox.Location = new System.Drawing.Point(6, 54);
+			this.recieverEmailTextBox.Location = new System.Drawing.Point(6, 131);
 			this.recieverEmailTextBox.Multiline = true;
 			this.recieverEmailTextBox.Name = "recieverEmailTextBox";
-			this.recieverEmailTextBox.Size = new System.Drawing.Size(484, 140);
+			this.recieverEmailTextBox.Size = new System.Drawing.Size(484, 63);
 			this.recieverEmailTextBox.TabIndex = 1;
 			// 
 			// propertyInfoButton
@@ -224,6 +208,40 @@
 			this.toolTip.ReshowDelay = 100;
 			this.toolTip.UseAnimation = false;
 			this.toolTip.UseFading = false;
+			// 
+			// emailFirstFormatTextBox
+			// 
+			this.emailFirstFormatTextBox.Location = new System.Drawing.Point(6, 45);
+			this.emailFirstFormatTextBox.Name = "emailFirstFormatTextBox";
+			this.emailFirstFormatTextBox.Size = new System.Drawing.Size(484, 20);
+			this.emailFirstFormatTextBox.TabIndex = 11;
+			this.toolTip.SetToolTip(this.emailFirstFormatTextBox, resources.GetString("emailFirstFormatTextBox.ToolTip"));
+			// 
+			// label1
+			// 
+			this.label1.Location = new System.Drawing.Point(4, 29);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(179, 16);
+			this.label1.TabIndex = 12;
+			this.label1.Text = "First Contact Subject Format:";
+			this.toolTip.SetToolTip(this.label1, "Format for first contact alert emails");
+			// 
+			// label2
+			// 
+			this.label2.Location = new System.Drawing.Point(4, 71);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(179, 16);
+			this.label2.TabIndex = 14;
+			this.label2.Text = "Last Contact Subject Format:";
+			this.toolTip.SetToolTip(this.label2, "Format for first contact alert emails");
+			// 
+			// emailLastFormatTextBox
+			// 
+			this.emailLastFormatTextBox.Location = new System.Drawing.Point(6, 87);
+			this.emailLastFormatTextBox.Name = "emailLastFormatTextBox";
+			this.emailLastFormatTextBox.Size = new System.Drawing.Size(484, 20);
+			this.emailLastFormatTextBox.TabIndex = 13;
+			this.toolTip.SetToolTip(this.emailLastFormatTextBox, resources.GetString("emailLastFormatTextBox.ToolTip"));
 			// 
 			// ignoreFollowingCheckbox
 			// 
@@ -264,11 +282,13 @@
 			// 
 			// emailTabPage
 			// 
+			this.emailTabPage.Controls.Add(this.label2);
+			this.emailTabPage.Controls.Add(this.emailLastFormatTextBox);
+			this.emailTabPage.Controls.Add(this.label1);
+			this.emailTabPage.Controls.Add(this.emailFirstFormatTextBox);
 			this.emailTabPage.Controls.Add(this.emailCheckBox);
 			this.emailTabPage.Controls.Add(this.recieverEmailTextBox);
 			this.emailTabPage.Controls.Add(this.emailToSendToLabel);
-			this.emailTabPage.Controls.Add(this.emailPropertyComboBox);
-			this.emailTabPage.Controls.Add(this.emailPropertyLabel);
 			this.emailTabPage.Location = new System.Drawing.Point(4, 22);
 			this.emailTabPage.Name = "emailTabPage";
 			this.emailTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -321,7 +341,7 @@
 			// tweetLastFormatLabel
 			// 
 			this.tweetLastFormatLabel.AutoSize = true;
-			this.tweetLastFormatLabel.Location = new System.Drawing.Point(246, 53);
+			this.tweetLastFormatLabel.Location = new System.Drawing.Point(246, 59);
 			this.tweetLastFormatLabel.Name = "tweetLastFormatLabel";
 			this.tweetLastFormatLabel.Size = new System.Drawing.Size(138, 13);
 			this.tweetLastFormatLabel.TabIndex = 22;
@@ -329,16 +349,17 @@
 			// 
 			// tweetLastFormatTextBox
 			// 
-			this.tweetLastFormatTextBox.Location = new System.Drawing.Point(249, 70);
+			this.tweetLastFormatTextBox.Location = new System.Drawing.Point(249, 77);
 			this.tweetLastFormatTextBox.Name = "tweetLastFormatTextBox";
-			this.tweetLastFormatTextBox.Size = new System.Drawing.Size(240, 72);
+			this.tweetLastFormatTextBox.Size = new System.Drawing.Size(240, 87);
 			this.tweetLastFormatTextBox.TabIndex = 21;
 			this.tweetLastFormatTextBox.Text = "";
+			this.toolTip.SetToolTip(this.tweetLastFormatTextBox, resources.GetString("tweetLastFormatTextBox.ToolTip"));
 			// 
 			// twitterLinkLabel
 			// 
 			this.twitterLinkLabel.AutoSize = true;
-			this.twitterLinkLabel.Location = new System.Drawing.Point(256, 32);
+			this.twitterLinkLabel.Location = new System.Drawing.Point(256, 33);
 			this.twitterLinkLabel.Name = "twitterLinkLabel";
 			this.twitterLinkLabel.Size = new System.Drawing.Size(76, 13);
 			this.twitterLinkLabel.TabIndex = 20;
@@ -348,7 +369,7 @@
 			// 
 			this.tweetLinkComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.tweetLinkComboBox.FormattingEnabled = true;
-			this.tweetLinkComboBox.Location = new System.Drawing.Point(338, 29);
+			this.tweetLinkComboBox.Location = new System.Drawing.Point(338, 30);
 			this.tweetLinkComboBox.Name = "tweetLinkComboBox";
 			this.tweetLinkComboBox.Size = new System.Drawing.Size(152, 21);
 			this.tweetLinkComboBox.TabIndex = 19;
@@ -356,24 +377,27 @@
 			// label3
 			// 
 			this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label3.Location = new System.Drawing.Point(4, 145);
+			this.label3.Location = new System.Drawing.Point(4, 167);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(483, 55);
+			this.label3.Size = new System.Drawing.Size(483, 33);
 			this.label3.TabIndex = 18;
-			this.label3.Text = resources.GetString("label3.Text");
+			this.label3.Text = "Keep in mind if the character count is over 280, the tweet content will be cut of" +
+    "f. There is also a limit of 200 tweets within 15 minutes and 300 tweets within 3" +
+    " hours per account.";
 			// 
 			// tweetFirstFormatTextBox
 			// 
-			this.tweetFirstFormatTextBox.Location = new System.Drawing.Point(6, 70);
+			this.tweetFirstFormatTextBox.Location = new System.Drawing.Point(6, 77);
 			this.tweetFirstFormatTextBox.Name = "tweetFirstFormatTextBox";
-			this.tweetFirstFormatTextBox.Size = new System.Drawing.Size(240, 72);
+			this.tweetFirstFormatTextBox.Size = new System.Drawing.Size(240, 87);
 			this.tweetFirstFormatTextBox.TabIndex = 17;
 			this.tweetFirstFormatTextBox.Text = "";
+			this.toolTip.SetToolTip(this.tweetFirstFormatTextBox, resources.GetString("tweetFirstFormatTextBox.ToolTip"));
 			// 
 			// tweetFirstFormatLabel
 			// 
 			this.tweetFirstFormatLabel.AutoSize = true;
-			this.tweetFirstFormatLabel.Location = new System.Drawing.Point(4, 53);
+			this.tweetFirstFormatLabel.Location = new System.Drawing.Point(4, 59);
 			this.tweetFirstFormatLabel.Name = "tweetFirstFormatLabel";
 			this.tweetFirstFormatLabel.Size = new System.Drawing.Size(137, 13);
 			this.tweetFirstFormatLabel.TabIndex = 16;
@@ -383,7 +407,7 @@
 			// 
 			this.twitterAccountComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.twitterAccountComboBox.FormattingEnabled = true;
-			this.twitterAccountComboBox.Location = new System.Drawing.Point(60, 29);
+			this.twitterAccountComboBox.Location = new System.Drawing.Point(60, 30);
 			this.twitterAccountComboBox.Name = "twitterAccountComboBox";
 			this.twitterAccountComboBox.Size = new System.Drawing.Size(127, 21);
 			this.twitterAccountComboBox.TabIndex = 14;
@@ -392,7 +416,7 @@
 			// twitterAccountLabel
 			// 
 			this.twitterAccountLabel.AutoSize = true;
-			this.twitterAccountLabel.Location = new System.Drawing.Point(4, 32);
+			this.twitterAccountLabel.Location = new System.Drawing.Point(4, 33);
 			this.twitterAccountLabel.Name = "twitterAccountLabel";
 			this.twitterAccountLabel.Size = new System.Drawing.Size(50, 13);
 			this.twitterAccountLabel.TabIndex = 13;
@@ -446,8 +470,6 @@
 
 		private System.Windows.Forms.TextBox conditionNameTextBox;
 		private System.Windows.Forms.Label conditionNameLabel;
-		private System.Windows.Forms.Label emailPropertyLabel;
-		private System.Windows.Forms.ComboBox emailPropertyComboBox;
 		private System.Windows.Forms.DataGridView triggerDataGridView;
 		private System.Windows.Forms.Label alertTypeLabel;
 		private System.Windows.Forms.DataGridViewComboBoxColumn propertyColumn;
@@ -476,5 +498,9 @@
 		private System.Windows.Forms.Label tweetLastFormatLabel;
 		private System.Windows.Forms.RichTextBox tweetLastFormatTextBox;
 		private System.Windows.Forms.CheckBox tweetMapCheckBox;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.TextBox emailLastFormatTextBox;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox emailFirstFormatTextBox;
 	}
 }

@@ -29,15 +29,23 @@ namespace PlaneAlerter {
 							conditionName = condition["conditionName"].ToString(),
 							alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
 							ignoreFollowing = (bool)condition["ignoreFollowing"],
-							emailEnabled = (bool)condition["emailEnabled"],
-							twitterEnabled = (bool)condition["twitterEnabled"],
-							twitterAccount = condition["twitterAccount"].ToString(),
-							tweetFirstFormat = condition["tweetFirstFormat"].ToString(),
-							tweetLastFormat = condition["tweetLastFormat"].ToString(),
+							emailEnabled = (bool)(condition["emailEnabled"] ?? true),
+							emailFirstFormat = (condition["emailFirstFormat"] ?? "").ToString(),
+							emailLastFormat = (condition["emailLastFormat"] ?? "").ToString(),
+							twitterEnabled = (bool)(condition["twitterEnabled"] ?? false),
+							twitterAccount = (condition["twitterAccount"] ?? "").ToString(),
+							tweetFirstFormat = (condition["tweetFirstFormat"] ?? "").ToString(),
+							tweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
 							tweetMap = (bool)(condition["tweetMap"] ?? true),
-							tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), condition["tweetLink"].ToString()),
-							emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition["emailProperty"].ToString())
+							tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), (condition["tweetLink"] ?? Core.TweetLink.None.ToString()).ToString())
 						};
+
+						if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString())) {
+							Core.vrsProperty emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"] ?? Core.vrsProperty.Registration.ToString()).ToString());
+							newCondition.emailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.vrsPropertyData[emailProperty][2] + "]";
+							newCondition.emailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.vrsPropertyData[emailProperty][2] + "]";
+						}
+
 						List<string> emailsArray = new List<string>();
 						foreach (JToken email in condition["recieverEmails"])
 							emailsArray.Add(email.ToString());

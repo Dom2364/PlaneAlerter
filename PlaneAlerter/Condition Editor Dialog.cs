@@ -35,7 +35,8 @@ namespace PlaneAlerter {
 			conditionNameTextBox.Text = c.conditionName;
 			ignoreFollowingCheckbox.Checked = c.ignoreFollowing;
 			emailCheckBox.Checked = c.emailEnabled;
-			emailPropertyComboBox.Text = c.emailProperty.ToString().Replace('_', ' ');
+			emailFirstFormatTextBox.Text = c.emailFirstFormat;
+			emailLastFormatTextBox.Text = c.emailLastFormat;
 			recieverEmailTextBox.Text = string.Join(Environment.NewLine, c.recieverEmails.ToArray());
 			twitterCheckBox.Checked = c.twitterEnabled;
 			twitterAccountComboBox.Text = c.twitterAccount;
@@ -54,11 +55,6 @@ namespace PlaneAlerter {
 				newRow.Cells[1].Value = trigger.ComparisonType;
 				newRow.Cells[2].Value = trigger.Value;
 			}
-
-			emailPropertyComboBox.Enabled = emailCheckBox.Checked;
-			recieverEmailTextBox.Enabled = emailCheckBox.Checked;
-			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
-			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked;
 		}
 		
 		/// <summary>
@@ -71,7 +67,8 @@ namespace PlaneAlerter {
 			conditionNameTextBox.Text = "New Condition";
 			tweetFirstFormatTextBox.Text = "";
 			emailCheckBox.Checked = false;
-			emailPropertyComboBox.Text = "Registration";
+			emailFirstFormatTextBox.Text = "First Contact Alert! [conditionname]: [reg]";
+			emailLastFormatTextBox.Text = "Last Contact Alert! [conditionname]: [reg]";
 			twitterCheckBox.Checked = false;
 			twitterAccountComboBox.Text = "";
 			tweetLinkComboBox.SelectedIndex = 0;
@@ -95,9 +92,6 @@ namespace PlaneAlerter {
 					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
 			}
 
-			//Add vrs properties to combobox
-			foreach(Core.vrsProperty property in Enum.GetValues(typeof(Core.vrsProperty)))
-				emailPropertyComboBox.Items.Add(property.ToString().Replace('_', ' '));
 			//Add alert types to combobox
 			foreach(Core.AlertType property in Enum.GetValues(typeof(Core.AlertType)))
 				alertTypeComboBox.Items.Add(property.ToString().Replace('_', ' '));
@@ -204,14 +198,24 @@ namespace PlaneAlerter {
 			else {
 				conditionNameLabel.ForeColor = SystemColors.ControlText;
 			}
-			if (emailPropertyComboBox.Text == "") {
-				emailPropertyLabel.ForeColor = Color.Red;
-				cancelSave = true;
-			}
-			else {
-				emailPropertyLabel.ForeColor = SystemColors.ControlText;
-			}
+
 			if (emailCheckBox.Checked) {
+				if (emailFirstFormatTextBox.Text == "") {
+					emailFirstFormatTextBox.ForeColor = Color.Red;
+					cancelSave = true;
+				}
+				else {
+					emailFirstFormatTextBox.ForeColor = SystemColors.ControlText;
+				}
+
+				if (emailLastFormatTextBox.Text == "") {
+					emailLastFormatTextBox.ForeColor = Color.Red;
+					cancelSave = true;
+				}
+				else {
+					emailLastFormatTextBox.ForeColor = SystemColors.ControlText;
+				}
+
 				if (recieverEmailTextBox.Text == "") {
 					emailToSendToLabel.ForeColor = Color.Red;
 					cancelSave = true;
@@ -220,6 +224,7 @@ namespace PlaneAlerter {
 					emailToSendToLabel.ForeColor = SystemColors.ControlText;
 				}
 			}
+
 			if (twitterCheckBox.Checked) {
 				if (twitterAccountComboBox.Text == "") {
 					twitterAccountLabel.ForeColor = Color.Red;
@@ -255,14 +260,14 @@ namespace PlaneAlerter {
 					else tweetLastFormatLabel.ForeColor = SystemColors.ControlText;
 				}
 			}
-			if(alertTypeComboBox.Text == "") {
+			if (alertTypeComboBox.Text == "") {
 				alertTypeLabel.ForeColor = Color.Red;
 				cancelSave = true;
 			}
 			else {
 				alertTypeLabel.ForeColor = SystemColors.ControlText;
 			}
-			if(triggerDataGridView.Rows.Count == 1) {
+			if (triggerDataGridView.Rows.Count == 1) {
 				triggerDataGridView.BackgroundColor = Color.Red;
 				cancelSave = true;
 			}
@@ -305,7 +310,8 @@ namespace PlaneAlerter {
 				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
 				ignoreFollowing = ignoreFollowingCheckbox.Checked,
 				emailEnabled = emailCheckBox.Checked,
-				emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), emailPropertyComboBox.Text.Replace(' ', '_')),
+				emailFirstFormat = emailFirstFormatTextBox.Text,
+				emailLastFormat = emailLastFormatTextBox.Text,
 				recieverEmails = recieverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
 				twitterEnabled = twitterCheckBox.Checked,
 				twitterAccount = twitterAccountComboBox.Text,
@@ -344,17 +350,14 @@ namespace PlaneAlerter {
 		/// Update controls when email checkbox is toggled
 		/// </summary>
 		private void emailCheckBox_CheckedChanged(object sender, EventArgs e) {
-			emailPropertyComboBox.Enabled = emailCheckBox.Checked;
-			recieverEmailTextBox.Enabled = emailCheckBox.Checked;
+			UpdateUIState();
 		}
 
 		/// <summary>
 		/// Update controls when twitter checkbox is toggled
 		/// </summary>
 		private void twitterCheckBox_CheckedChanged(object sender, EventArgs e) {
-			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
-			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked;
-			tweetLastFormatTextBox.Enabled = twitterCheckBox.Checked;
+			UpdateUIState();
 		}
 		
 		//Show add account dialog if add account is selected
@@ -385,6 +388,28 @@ namespace PlaneAlerter {
 				DataGridViewComboBoxEditingControl editingControl = (DataGridViewComboBoxEditingControl)triggerDataGridView.EditingControl;
 				editingControl.DroppedDown = true;
 			}
+		}
+
+		/// <summary>
+		/// Update enabled state and styling of UI based on settings
+		/// </summary>
+		private void UpdateUIState() {
+			Core.AlertType alertType = Core.AlertType.First_and_Last_Contact;
+			if (!string.IsNullOrEmpty(alertTypeComboBox.Text)) {
+				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text.Replace(' ', '_'));
+			}
+			
+			emailFirstFormatTextBox.Enabled = emailCheckBox.Checked && (alertType != Core.AlertType.Last_Contact);
+			emailLastFormatTextBox.Enabled = emailCheckBox.Checked && (alertType != Core.AlertType.First_Contact);
+			recieverEmailTextBox.Enabled = emailCheckBox.Checked;
+
+			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
+			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked && (alertType != Core.AlertType.Last_Contact);
+			tweetLastFormatTextBox.Enabled = twitterCheckBox.Checked && (alertType != Core.AlertType.First_Contact);
+		}
+
+		private void alertTypeComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+			UpdateUIState();
 		}
 	}
 }

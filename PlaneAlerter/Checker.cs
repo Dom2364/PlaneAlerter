@@ -9,10 +9,8 @@ using System.IO;
 using System.Drawing;
 using System.Net;
 using System.Net.Mail;
-using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
-using System.Text.RegularExpressions;
 using System.Globalization;
 
 namespace PlaneAlerter {
@@ -264,24 +262,9 @@ namespace PlaneAlerter {
 			Core.LogAlert(condition, aircraft, receiver, isFirst);
 
 			if (condition.emailEnabled) {
-				//Create email message
-				MailMessage message = new MailMessage();
-				string firstlast = isFirst ? "First" : "Last";
-
-				//Set subject and email property info
-				string emailPropertyInfo;
-				if (aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString()) == null) {
-					message.Subject = firstlast + " Contact Alert! " + condition.conditionName;
-					emailPropertyInfo = condition.emailProperty.ToString() + ": No Value";
-				}
-				else {
-					message.Subject = firstlast + " Contact Alert! " + condition.conditionName + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
-					emailPropertyInfo = condition.emailProperty.ToString() + ": " + aircraft.GetProperty(Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), condition.emailProperty.ToString())][2].ToString());
-				}
-
 				//Send emails
 				foreach (string email in condition.recieverEmails) {
-					Email.SendEmail(email, message, condition, aircraft, receiver, emailPropertyInfo, isFirst);
+					Email.SendEmail(email, condition, aircraft, receiver, isFirst);
 				}
 			}
 			
@@ -306,15 +289,7 @@ namespace PlaneAlerter {
 				string[] creds = Settings.TwitterUsers[condition.twitterAccount];
 
 				//Replace keywords in content
-				foreach(string[] info in Core.vrsPropertyData.Values) {
-					//Check if content contains keyword
-					if (content.ToLower().Contains(@"[" + info[2].ToLower() + @"]")) {
-						//Replace keyword with value
-						string value = aircraft.GetProperty(info[2]);
-						if (string.IsNullOrEmpty(value)) value = "Unknown";
-						content = Regex.Replace(content, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);
-					}
-				}
+				content = Core.ParseCustomFormatString(content, aircraft);
 				if (content.Length > 250) {
 					int charsover = content.Length - 250;
 					content = content.Substring(0, 250) + "...";
@@ -565,14 +540,22 @@ namespace PlaneAlerter {
 						alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
 						ignoreFollowing = (bool)condition["ignoreFollowing"],
 						emailEnabled = (bool)(condition["emailEnabled"]??true),
+						emailFirstFormat = (condition["emailFirstFormat"] ?? "").ToString(),
+						emailLastFormat = (condition["emailLastFormat"] ?? "").ToString(),
 						twitterEnabled = (bool)(condition["twitterEnabled"]??false),
 						twitterAccount = (condition["twitterAccount"]??"").ToString(),
 						tweetFirstFormat = (condition["tweetFirstFormat"]??"").ToString(),
 						tweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
 						tweetMap = (bool)(condition["tweetMap"] ?? true),
-						tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), (condition["tweetLink"]??Core.TweetLink.None.ToString()).ToString()),
-						emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"]??Core.vrsProperty.Registration.ToString()).ToString())
+						tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), (condition["tweetLink"]??Core.TweetLink.None.ToString()).ToString())
 					};
+
+					if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString())) {
+						Core.vrsProperty emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"] ?? Core.vrsProperty.Registration.ToString()).ToString());
+						newCondition.emailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.vrsPropertyData[emailProperty][2] + "]";
+						newCondition.emailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.vrsPropertyData[emailProperty][2] + "]";
+					}
+
 					List<string> emailsArray = new List<string>();
 					foreach (JToken email in condition["recieverEmails"])
 						emailsArray.Add(email.ToString());

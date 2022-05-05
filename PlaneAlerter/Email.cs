@@ -20,9 +20,8 @@ namespace PlaneAlerter {
 		/// <param name="condition">Condition that triggered alert</param>
 		/// <param name="aircraft">Aircraft information for matched aircraft</param>
 		/// <param name="recieverName">Name of receiver that got the last aircraft information</param>
-		/// <param name="emailPropertyInfo">String for displaying email property value</param>
 		/// <param name="isDetection">Is this a detection, not a removal?</param>
-		public static void SendEmail(string emailaddress, MailMessage message, Core.Condition condition, Core.Aircraft aircraft, string recieverName, string emailPropertyInfo, bool isDetection) {
+		public static void SendEmail(string emailaddress, Core.Condition condition, Core.Aircraft aircraft, string recieverName, bool isDetection) {
             SmtpClient mailClient = new SmtpClient(Settings.SMTPHost);
             mailClient.Port = Settings.SMTPPort;
             mailClient.Credentials = new NetworkCredential(Settings.SMTPUsr, Settings.SMTPPwd);
@@ -44,6 +43,8 @@ namespace PlaneAlerter {
 			string imageHTML = "";
 			//Airframes.org url
 			string airframesUrl = "";
+
+            MailMessage message = new MailMessage();
 
 			//Set message type to html
 			message.IsBodyHtml = true;
@@ -67,12 +68,14 @@ namespace PlaneAlerter {
 				return;
 			}
 
+            //Set subject
+            message.Subject = Core.ParseCustomFormatString(isDetection ? condition.emailFirstFormat : condition.emailLastFormat, aircraft);
+
             if (Settings.EmailContentConfig.TwitterOptimised) {
                 string typestring = "First Contact";
                 string regostring = "No rego, ";
                 string callsignstring = "No callsign, ";
 				string operatorstring = "No operator, ";
-				string emailpropertystring = "No " + condition.emailProperty.ToString();
                 if (!isDetection) {
                     typestring = "Last Contact";
                 }
@@ -85,11 +88,7 @@ namespace PlaneAlerter {
 				if(aircraft.GetProperty("OpIcao") != null) {
 					operatorstring = aircraft.GetProperty("OpIcao") + ", ";
 				}
-				string emailpropertyvalue = aircraft.GetProperty(Core.vrsPropertyData[condition.emailProperty][2]);
-                if (emailpropertyvalue != null) {
-                    emailpropertystring = emailpropertyvalue;
-                }
-                message.Body = "[" + typestring + "] " + condition.conditionName + " (" + emailpropertystring + "), " + regostring + operatorstring + aircraft.GetProperty("Type") + ", " + callsignstring + Settings.radarUrl;
+                message.Body = "[" + typestring + "] " + condition.conditionName + ", " + regostring + operatorstring + aircraft.GetProperty("Type") + ", " + callsignstring + Settings.radarUrl;
                 //[Last Contact] USAF (RCH9701), 79-1951, RCH, DC10, RCH9701 http://seqldradar.net
             }
             else {
@@ -137,7 +136,7 @@ namespace PlaneAlerter {
                 transponderName = transponderTypes[Convert.ToInt32(aircraft.GetProperty("Trt")) - 1];
 
 				//Write to UI
-                Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.ICAO + " | " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);
+                Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.ICAO + " | " + message.Subject, Color.LightBlue);
 
                 //Generate aircraft property value table
                 bool isAlternateStyle = false;
@@ -223,7 +222,7 @@ namespace PlaneAlerter {
                     message.Body += "<h1>Plane Alert - Last Contact</h1>";
 
                 //Condition name + email property
-                message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;margin-left: 10px;'>Condition: " + condition.conditionName + " (" + emailPropertyInfo + ")</h2>";
+                message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;margin-left: 10px;'>Condition: " + condition.conditionName + "</h2>";
                 //Receiver name
                 if (Settings.EmailContentConfig.ReceiverName)
                     message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;margin-left: 10px;'>Reciever: " + recieverName + "</h2>";
@@ -283,7 +282,7 @@ namespace PlaneAlerter {
 			}
 
 			//Log to UI
-			Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.ICAO + " | " + condition.conditionName + " (" + emailPropertyInfo + ")", Color.LightBlue);
+			Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.ICAO + " | " + message.Subject, Color.LightBlue);
 		}
 	}
 }

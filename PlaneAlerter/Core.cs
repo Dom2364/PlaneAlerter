@@ -4,6 +4,7 @@ using System.Threading;
 using System.IO;
 using System.Drawing;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -281,6 +282,16 @@ namespace PlaneAlerter {
 			public List<string> recieverEmails = new List<string>();
 
 			/// <summary>
+			/// Email first contact alert format
+			/// </summary>
+			public string emailFirstFormat;
+
+			/// <summary>
+			/// Email last contact alert format
+			/// </summary>
+			public string emailLastFormat;
+
+			/// <summary>
 			/// Send tweets?
 			/// </summary>
 			public bool twitterEnabled;
@@ -314,11 +325,6 @@ namespace PlaneAlerter {
 			/// Type of alert
 			/// </summary>
 			public AlertType alertType;
-
-			/// <summary>
-			/// Property to show in alert email
-			/// </summary>
-			public vrsProperty emailProperty;
 
 			/// <summary>
 			/// List of triggers
@@ -523,6 +529,25 @@ namespace PlaneAlerter {
 			catch (Exception e) {
 				UI.writeToConsole("ERROR: Error writing to alerts.log file: " + e.Message, Color.Red);
 			}
+		}
+
+		/// <summary>
+		/// Parse a custom format string to replace property names with values
+		/// </summary>
+		/// <returns>Parsed string</returns>
+		public static string ParseCustomFormatString(string format, Aircraft aircraft) {
+			//Iterate properties
+			foreach (string[] info in vrsPropertyData.Values) {
+				//Check if content contains keyword
+				if (format.ToLower().Contains(@"[" + info[2].ToLower() + @"]")) {
+					//Replace keyword with value
+					string value = aircraft.GetProperty(info[2]);
+					if (string.IsNullOrEmpty(value)) value = "Unknown";
+
+					format = Regex.Replace(format, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);
+				}
+			}
+			return format;
 		}
 
 		/// <summary>
