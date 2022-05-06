@@ -78,7 +78,7 @@ namespace PlaneAlerter {
 				foreach (Core.Trigger trigger in condition.triggers.Values)
 					triggersNode.Nodes.Add(trigger.Property.ToString() + " " + trigger.ComparisonType + " " + trigger.Value);
 			}
-			conditionEditorTreeView.SelectedNode = conditionEditorTreeView.Nodes[0];
+			if (conditionEditorTreeView.Nodes.Count != 0) conditionEditorTreeView.SelectedNode = conditionEditorTreeView.Nodes[0];
 			updateUIState();
 		}
 
