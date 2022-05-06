@@ -538,6 +538,7 @@ namespace PlaneAlerter {
 		public static string ParseCustomFormatString(string format, Aircraft aircraft, Condition condition) {
 			Dictionary<string, string> variables = new Dictionary<string, string> {
 				{ "ConditionName", condition.conditionName },
+				{ "RcvrName", receivers.ContainsKey(aircraft.GetProperty("Rcvr")) ? receivers[aircraft.GetProperty("Rcvr")] : "" },
 				{ "Date", DateTime.Now.ToString("d") },
 				{ "Time", DateTime.Now.ToString("t") },
 			};
@@ -556,8 +557,7 @@ namespace PlaneAlerter {
 				//Check if content contains keyword
 				if (format.ToLower().Contains(@"[" + info[2].ToLower() + @"]")) {
 					//Replace keyword with value
-					string value = aircraft.GetProperty(info[2]);
-					if (string.IsNullOrEmpty(value)) value = "Unknown";
+					string value = aircraft.GetProperty(info[2]) ?? "";
 
 					format = Regex.Replace(format, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);
 				}

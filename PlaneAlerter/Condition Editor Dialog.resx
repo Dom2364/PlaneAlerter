@@ -132,22 +132,22 @@
   <data name="emailFirstFormatTextBox.ToolTip" xml:space="preserve">
     <value>To add property values, add square brackets around the internal name of a property in the property info window.
 For example you could add [alt] to add the aircraft's altitude at the time of the alert.
-Other options: [conditionname], [date], [time]</value>
+Other options: [conditionname], [date], [time], [rcvrname]</value>
   </data>
   <data name="emailLastFormatTextBox.ToolTip" xml:space="preserve">
     <value>To add property values, add square brackets around the internal name of a property in the property info window.
 For example you could add [alt] to add the aircraft's altitude at the time of the alert.
-Other options: [conditionname], [date], [time]</value>
+Other options: [conditionname], [date], [time], [rcvrname]</value>
   </data>
   <data name="tweetLastFormatTextBox.ToolTip" xml:space="preserve">
     <value>To add property values, add square brackets around the internal name of a property in the property info window.
 For example you could add [alt] to add the aircraft's altitude at the time of the alert.
-Other options: [conditionname], [date], [time]</value>
+Other options: [conditionname], [date], [time], [rcvrname]</value>
   </data>
   <data name="tweetFirstFormatTextBox.ToolTip" xml:space="preserve">
     <value>To add property values, add square brackets around the internal name of a property in the property info window.
 For example you could add [alt] to add the aircraft's altitude at the time of the alert.
-Other options: [conditionname], [date], [time]</value>
+Other options: [conditionname], [date], [time], [rcvrname]</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

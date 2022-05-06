@@ -199,14 +199,14 @@ namespace PlaneAlerter {
                             }
                         }
                         if (parameter == "UNKNOWN_PARAMETER")
-                            continue;
+                            parameter = child.ToString();
                     }
                     //Add html for property
                     if (isAlternateStyle)
                         aircraftTable += "<tr style='background-color:#CCC'>";
                     else
                         aircraftTable += "<tr>";
-                    aircraftTable += "<td style='padding: 3px;font-weight:bold;'>" + parameter + "</td>";
+                    aircraftTable += "<td style='padding: 3px;font-weight:bold;'>" + parameter.Replace('_', ' ') + "</td>";
                     aircraftTable += "<td style='padding: 3px'>" + aircraft.GetProperty(child) + "</td>";
                     aircraftTable += "</tr>";
                     isAlternateStyle = !isAlternateStyle;
