@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net.Mail;
 using System.Net;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Drawing;
@@ -36,7 +37,7 @@ namespace PlaneAlerter {
 			//Aircraft image urls
 			string[] imageLinks = new string[2];
 			//Table for displaying aircraft property values
-			string aircraftTable = "<table style='border: 2px solid;border-radius: 10px;border-spacing: 0px;' id='acTable'>";
+			string aircraftTable = "<table style='border: 2px solid #444;border-spacing: 0px;border-collapse: collapse;' id='acTable'>";
 			//HTML for aircraft images
 			string imageHTML = "";
 			//Airframes.org url
@@ -116,8 +117,8 @@ namespace PlaneAlerter {
                     //If status is not 404, add images to image HTML
                     if (imageResponseJson["status"].ToString() != "404")
                         foreach (JObject image in imageResponseJson["data"])
-                            imageHTML += "<img style='margin: 5px;border: 2px solid;border-radius: 10px;' src='" + image["image"].Value<string>() + "' />";
-                    imageHTML += "<br>";
+                            imageHTML += "<img style='margin: 0px 5px 5px 0px;border: 2px solid #444;' src='" + image["image"].Value<string>() + "' />";
+                    imageHTML += "<br><br>";
                 }
                 catch (Exception) {
 
@@ -139,8 +140,8 @@ namespace PlaneAlerter {
                 Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.ICAO + " | " + message.Subject, Color.LightBlue);
 
                 //Generate aircraft property value table
-                bool isAlternateStyle = false;
-                foreach (string propertykey in aircraft.GetPropertyKeys()) {
+                Dictionary<string, string>.KeyCollection aircraftPropertyKeys = aircraft.GetPropertyKeys();
+                foreach (string propertykey in aircraftPropertyKeys) {
                     //TODO ADD TO VRSPROPERTIES
                     string parameter = "UNKNOWN_PARAMETER";
                     //Set parameter to a readable name if it's not included in vrs property info
@@ -184,16 +185,19 @@ namespace PlaneAlerter {
                     if (Enums.TryGetConvertedValue(propertykey, value, out string convertedvalue)) {
                         value += " (" + convertedvalue + ")";
 					}
+                    //If rcvr, add receiver name
+                    if (propertykey == "Rcvr") {
+                        value += " (" + recieverName + ")";
+					}
 
                     //Add html for property
-                    if (isAlternateStyle)
-                        aircraftTable += "<tr style='background-color:#CCC'>";
+                    if (propertykey != aircraftPropertyKeys.Last())
+                        aircraftTable += "<tr style='border-bottom: 1px dashed #999;'>";
                     else
                         aircraftTable += "<tr>";
-                    aircraftTable += "<td style='padding: 3px;font-weight:bold;'>" + parameter.Replace('_', ' ') + "</td>";
-                    aircraftTable += "<td style='padding: 3px'>" + value + "</td>";
+                    aircraftTable += "<td style='padding: 3px 6px;font-weight:bold;'>" + parameter.Replace('_', ' ') + "</td>";
+                    aircraftTable += "<td style='padding: 3px 6px;'>" + value + "</td>";
                     aircraftTable += "</tr>";
-                    isAlternateStyle = !isAlternateStyle;
                 }
                 aircraftTable += "</table>";
 
@@ -205,14 +209,14 @@ namespace PlaneAlerter {
                 else
                     message.Body += "<h1>Plane Alert - Last Contact</h1>";
 
-                //Condition name + email property
-                message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;margin-left: 10px;'>Condition: " + condition.conditionName + "</h2>";
+                //Condition name
+                message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Condition: " + condition.conditionName + "</h2>";
                 //Receiver name
                 if (Settings.EmailContentConfig.ReceiverName)
-                    message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;margin-left: 10px;'>Reciever: " + recieverName + "</h2>";
+                    message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Reciever: " + recieverName + "</h2>";
                 //Transponder type
                 if (Settings.EmailContentConfig.TransponderType)
-                    message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;margin-left: 10px;'>Transponder: " + transponderName + "</h2>";
+                    message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Transponder: " + transponderName + "</h2>";
                 //Radar url
                 if (Settings.EmailContentConfig.RadarLink)
                     message.Body += $"<h3><a style='text-decoration: none;' href='{Settings.radarUrl}?icao={aircraft.ICAO}'>Goto Radar</a></h3>";
@@ -227,14 +231,14 @@ namespace PlaneAlerter {
                 //Property list
                 if (Settings.EmailContentConfig.PropertyList != Core.PropertyListType.Hidden)
                     message.Body += aircraftTable;
-                message.Body += "</td><td style='padding: 10px;vertical-align: top;'>";
+                message.Body += "</td><td style='padding-left: 10px;vertical-align: top;'>";
                 //Aircraft photos
                 if (Settings.EmailContentConfig.AircraftPhotos)
                     message.Body += imageHTML;
                 //Map
                 if (Settings.EmailContentConfig.Map && aircraft.GetProperty("Lat") != null) {
                     message.Body += "<h3 style='margin: 0px'><a style='text-decoration: none' href=" + googleMapsUrl + ">Open in Google Maps</a></h3><br />" +
-                    "<img style='border: 2px solid;border-radius: 10px;' alt='Loading Map...' src='" + Core.GenerateMapURL(aircraft).Replace("&", "&amp;") + "' />";
+                    "<img style='border: 2px solid #444;' alt='Loading Map...' src='" + Core.GenerateMapURL(aircraft).Replace("&", "&amp;") + "' />";
                 }
                 //KML
                 if (Settings.EmailContentConfig.KMLfile && aircraft.GetProperty("Lat") != null)
