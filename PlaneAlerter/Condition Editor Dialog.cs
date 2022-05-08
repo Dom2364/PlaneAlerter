@@ -115,7 +115,7 @@ namespace PlaneAlerter {
 					//Clear value if property is number and value is not a number
 					if (triggerDataGridView.Rows[e.RowIndex].Cells[2].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString() != "" && Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][0] == "Number") {
 						try {
-							Convert.ToInt32(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value);
+							Convert.ToDouble(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value);
 						}
 						catch (Exception) {
 							triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
@@ -378,6 +378,9 @@ namespace PlaneAlerter {
 		}
 
 		private void triggerDataGridView_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e) {
+			//Ignore if clicking column header
+			if (e.RowIndex == -1) return;
+
 			//Edit combobox on click
 			DataGridViewColumn column = triggerDataGridView.Columns[e.ColumnIndex];
 			if (column is DataGridViewComboBoxColumn) {

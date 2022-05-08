@@ -145,12 +145,6 @@ namespace PlaneAlerter {
                     string parameter = "UNKNOWN_PARAMETER";
                     //Set parameter to a readable name if it's not included in vrs property info
                     switch (propertykey) {
-                        case "CNum":
-                            parameter = "Aircraft_Serial";
-                            break;
-                        case "EngMount":
-                            parameter = "Engine_Mount";
-                            break;
                         case "FSeen":
                             parameter = "First_Seen";
                             break;
@@ -160,26 +154,8 @@ namespace PlaneAlerter {
                         case "Id":
                             parameter = "Id";
                             break;
-                        case "Lat":
-                            parameter = "Latitude";
-                            break;
-                        case "Long":
-                            parameter = "Longitude";
-                            break;
                         case "PosTime":
                             parameter = "Position_Time";
-                            break;
-                        case "Tisb":
-                            parameter = "TIS-B";
-                            break;
-                        case "Trak":
-                            parameter = "Track";
-                            break;
-                        case "TrkH":
-                            parameter = "Is_Track_Heading";
-                            break;
-                        case "Year":
-                            parameter = "Year";
                             break;
                         case "TT":
                         case "ResetTrail":
