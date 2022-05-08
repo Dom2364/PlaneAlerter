@@ -32,9 +32,7 @@ namespace PlaneAlerter {
 			//Google maps url
 			string googleMapsUrl = "";
 			//Transponder type from aircraft info
-			string transponderName = "";
-			//Types of transponders
-			string[] transponderTypes = new string[] { "Unknown", "Mode-S", "ADS-B", "ADS-Bv1", "ADS-Bv2" };
+			string transponderName = "Unknown";
 			//Aircraft image urls
 			string[] imageLinks = new string[2];
 			//Table for displaying aircraft property values
@@ -133,18 +131,20 @@ namespace PlaneAlerter {
                     airframesUrl = "<h3><a style='text-decoration: none;' href='http://www.airframes.org/reg/" + aircraft.GetProperty("Reg").Replace("-", "").ToUpper() + "'>Airframes.org Lookup</a></h3>";
 
                 //Get name of transponder type
-                transponderName = transponderTypes[Convert.ToInt32(aircraft.GetProperty("Trt")) - 1];
+                if (Enums.TryGetConvertedValue("Trt", aircraft.GetProperty("Trt"), out string convertedtrtvalue)) {
+                    transponderName = convertedtrtvalue;
+                }
 
-				//Write to UI
+                //Write to UI
                 Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.ICAO + " | " + message.Subject, Color.LightBlue);
 
                 //Generate aircraft property value table
                 bool isAlternateStyle = false;
-                foreach (string child in aircraft.GetPropertyKeys()) {
+                foreach (string propertykey in aircraft.GetPropertyKeys()) {
                     //TODO ADD TO VRSPROPERTIES
                     string parameter = "UNKNOWN_PARAMETER";
                     //Set parameter to a readable name if it's not included in vrs property info
-                    switch (child.ToString()) {
+                    switch (propertykey) {
                         case "CNum":
                             parameter = "Aircraft_Serial";
                             break;
@@ -169,9 +169,6 @@ namespace PlaneAlerter {
                         case "PosTime":
                             parameter = "Position_Time";
                             break;
-                        case "ResetTrail":
-                            parameter = "Reset_Trail";
-                            break;
                         case "Tisb":
                             parameter = "TIS-B";
                             break;
@@ -184,6 +181,9 @@ namespace PlaneAlerter {
                         case "Year":
                             parameter = "Year";
                             break;
+                        case "TT":
+                        case "ResetTrail":
+                            continue;
                     }
                     //If parameter is set (not in vrs property info list) and property list type is set to essentials, skip this property
                     if (parameter != "UNKNOWN_PARAMETER" && Settings.EmailContentConfig.PropertyList == Core.PropertyListType.Essentials)
@@ -191,7 +191,7 @@ namespace PlaneAlerter {
                     //Get parameter information from vrs property info
                     if (parameter == "UNKNOWN_PARAMETER") {
                         foreach (Core.vrsProperty property in Core.vrsPropertyData.Keys) {
-                            if (Core.vrsPropertyData[property][2] == child.ToString()) {
+                            if (Core.vrsPropertyData[property][2] == propertykey.ToString()) {
                                 //If property list type is essentials and this property is not in the list of essentials, leave this property as unknown so it can be skipped
                                 if (Settings.EmailContentConfig.PropertyList == Core.PropertyListType.Essentials && !Core.essentialProperties.Contains(property))
                                     continue;
@@ -199,15 +199,23 @@ namespace PlaneAlerter {
                             }
                         }
                         if (parameter == "UNKNOWN_PARAMETER")
-                            parameter = child.ToString();
+                            parameter = propertykey.ToString();
                     }
+
+                    //Get value
+                    string value = aircraft.GetProperty(propertykey);
+                    //Add string conversions of enum values
+                    if (Enums.TryGetConvertedValue(propertykey, value, out string convertedvalue)) {
+                        value += " (" + convertedvalue + ")";
+					}
+
                     //Add html for property
                     if (isAlternateStyle)
                         aircraftTable += "<tr style='background-color:#CCC'>";
                     else
                         aircraftTable += "<tr>";
                     aircraftTable += "<td style='padding: 3px;font-weight:bold;'>" + parameter.Replace('_', ' ') + "</td>";
-                    aircraftTable += "<td style='padding: 3px'>" + aircraft.GetProperty(child) + "</td>";
+                    aircraftTable += "<td style='padding: 3px'>" + value + "</td>";
                     aircraftTable += "</tr>";
                     isAlternateStyle = !isAlternateStyle;
                 }

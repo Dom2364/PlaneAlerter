@@ -231,6 +231,7 @@
       <DependentUpon>Email Content Config.cs</DependentUpon>
     </Compile>
     <Compile Include="Email.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="PlaneAlerter.cs">
       <SubType>Form</SubType>
     </Compile>

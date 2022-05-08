@@ -457,7 +457,7 @@ namespace PlaneAlerter {
 			vrsPropertyData.Add(vrsProperty.Altitude, new string[] { "Number", "B", "Alt", "The altitude in feet at standard pressure." });
 			vrsPropertyData.Add(vrsProperty.Altitude_AMSL, new string[] { "Number", "B", "GAlt", "The altitude adjusted for local air pressure, should be roughly the height above mean sea level." });
 			vrsPropertyData.Add(vrsProperty.Altitude_Type, new string[] { "Number", "A", "AltT", "0 = altitude is barometric, 1 = altitude is geometric. Default to barometric until told otherwise." });
-			vrsPropertyData.Add(vrsProperty.Air_Pressure, new string[] { "Number", "B", "inHg", "The air pressure in inches of mercury that was used to calculate the AMSL altitude from the standard pressure altitude." });
+			vrsPropertyData.Add(vrsProperty.Air_Pressure, new string[] { "Number", "B", "InHg", "The air pressure in inches of mercury that was used to calculate the AMSL altitude from the standard pressure altitude." });
 			vrsPropertyData.Add(vrsProperty.Target_Altitude, new string[] { "Number", "AB", "TAlt", "The target altitude, in feet, set on the autopilot / FMS etc." });
 			vrsPropertyData.Add(vrsProperty.Callsign, new string[] { "String", "ADE", "Call", "The callsign." });
 			vrsPropertyData.Add(vrsProperty.Callsign_Inaccurate, new string[] { "Boolean", "C", "CallSus", "True if the callsign may not be correct." });
@@ -558,6 +558,11 @@ namespace PlaneAlerter {
 				if (format.ToLower().Contains(@"[" + info[2].ToLower() + @"]")) {
 					//Replace keyword with value
 					string value = aircraft.GetProperty(info[2]) ?? "";
+
+					//If enum, replace with string value
+					if (Enums.TryGetConvertedValue(info[2], value, out string convertedvalue)) {
+						value = convertedvalue;
+					}
 
 					format = Regex.Replace(format, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);
 				}
