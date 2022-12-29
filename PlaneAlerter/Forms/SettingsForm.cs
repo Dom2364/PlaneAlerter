@@ -11,6 +11,11 @@ namespace PlaneAlerter.Forms {
 	/// </summary>
 	internal partial class SettingsForm :Form {
 		/// <summary>
+		/// Smtp host info
+		/// </summary>
+		private static Dictionary<string, object[]> HostInfo { get; } = new Dictionary<string, object[]>();
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		public SettingsForm() {
@@ -18,21 +23,21 @@ namespace PlaneAlerter.Forms {
 			InitializeComponent();
 
 			//Add smtp host info
-			smtpHostInfo.hostInfo.Clear();
-			smtpHostInfo.hostInfo.Add("smtp.gmail.com", new object[] { 587, true });
-			smtpHostInfo.hostInfo.Add("smtp.live.com", new object[] { 587, true });
-			smtpHostInfo.hostInfo.Add("smtp.office365.com", new object[] { 587, true });
-			smtpHostInfo.hostInfo.Add("smtp.mail.yahoo.com", new object[] { 465, true });
-			smtpHostInfo.hostInfo.Add("plus.smtp.mail.yahoo.com", new object[] { 465, true });
-			smtpHostInfo.hostInfo.Add("smtp.mail.yahoo.co.uk", new object[] { 465, true });
-			smtpHostInfo.hostInfo.Add("smtp.mail.yahoo.com.au", new object[] { 465, true });
-			smtpHostInfo.hostInfo.Add("smtp.att.yahoo.com", new object[] { 465, true });
-			smtpHostInfo.hostInfo.Add("smtp.comcast.net", new object[] { 587, false });
-			smtpHostInfo.hostInfo.Add("outgoing.verizon.net", new object[] { 465, true });
-			smtpHostInfo.hostInfo.Add("smtp.mail.com", new object[] { 465, true });
+			HostInfo.Clear();
+			HostInfo.Add("smtp.gmail.com", new object[] { 587, true });
+			HostInfo.Add("smtp.live.com", new object[] { 587, true });
+			HostInfo.Add("smtp.office365.com", new object[] { 587, true });
+			HostInfo.Add("smtp.mail.yahoo.com", new object[] { 465, true });
+			HostInfo.Add("plus.smtp.mail.yahoo.com", new object[] { 465, true });
+			HostInfo.Add("smtp.mail.yahoo.co.uk", new object[] { 465, true });
+			HostInfo.Add("smtp.mail.yahoo.com.au", new object[] { 465, true });
+			HostInfo.Add("smtp.att.yahoo.com", new object[] { 465, true });
+			HostInfo.Add("smtp.comcast.net", new object[] { 587, false });
+			HostInfo.Add("outgoing.verizon.net", new object[] { 465, true });
+			HostInfo.Add("smtp.mail.com", new object[] { 465, true });
 
 			//Add smtp host info to combobox
-			foreach (string smtpHost in smtpHostInfo.hostInfo.Keys)
+			foreach (var smtpHost in HostInfo.Keys)
 				smtpHostComboBox.Items.Add(smtpHost);
 
 			UpdateReceivers();
@@ -78,7 +83,7 @@ namespace PlaneAlerter.Forms {
 				return;
 			}
 
-			Dictionary<string, string> receivers = await Task.Run(() => Checker.GetReceivers());
+			var receivers = await Task.Run(Checker.GetReceivers);
 			if (receivers != null) {
 				receivers = receivers.OrderBy(x => x.Value, StringComparer.Ordinal).ToDictionary(x => x.Key, x => x.Value);
 
@@ -99,12 +104,14 @@ namespace PlaneAlerter.Forms {
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		private void smtpHostComboBox_SelectedValueChanged(object sender, EventArgs e) {
+		private void smtpHostComboBox_SelectedValueChanged(object sender, EventArgs e)
+		{
 			//If exists in smtp host info, set port and ssl values
-			if (smtpHostInfo.hostInfo.ContainsKey(smtpHostComboBox.Text)) {
-				smtpHostPortTextBox.Value = Convert.ToDecimal(smtpHostInfo.hostInfo[smtpHostComboBox.Text][0]);
-				smtpSSLCheckBox.Checked = (bool)smtpHostInfo.hostInfo[smtpHostComboBox.Text][1];
-			}
+			if (!HostInfo.ContainsKey(smtpHostComboBox.Text))
+				return;
+
+			smtpHostPortTextBox.Value = Convert.ToDecimal(HostInfo[smtpHostComboBox.Text][0]);
+			smtpSSLCheckBox.Checked = (bool)HostInfo[smtpHostComboBox.Text][1];
 		}
 
 		/// <summary>
@@ -185,15 +192,5 @@ namespace PlaneAlerter.Forms {
 			Settings.AircraftListUrl = aircraftListTextBox.Text;
 			UpdateReceivers();
 		}
-	}
-
-	/// <summary>
-	/// Smtp host info
-	/// </summary>
-	public static class smtpHostInfo {
-		/// <summary>
-		/// Smtp host info
-		/// </summary>
-		public static Dictionary<string, object[]> hostInfo = new Dictionary<string, object[]>();
 	}
 }
