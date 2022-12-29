@@ -140,7 +140,7 @@ namespace PlaneAlerter {
 			//Get credentials from Twitter
 			ITwitterCredentials userCredentials;
 			try {
-				userCredentials = await appClient.Auth.RequestCredentialsFromVerifierCodeAsync(dialog.PIN, authenticationRequest);
+				userCredentials = await appClient.Auth.RequestCredentialsFromVerifierCodeAsync(dialog.Pin, authenticationRequest);
 			}
 			catch (TwitterAuthException e) {
 				MessageBox.Show("Auth error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");

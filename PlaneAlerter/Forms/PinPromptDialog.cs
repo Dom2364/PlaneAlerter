@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace PlaneAlerter.Forms {
 	internal partial class PinPromptDialog : Form {
-		public string PIN { get; set; }
+		public string? Pin { get; set; }
 
 		public PinPromptDialog() {
 			InitializeComponent();
@@ -17,7 +17,7 @@ namespace PlaneAlerter.Forms {
 
 		private void PinPromptDialog_FormClosing(object sender, FormClosingEventArgs e) {
 			if (!string.IsNullOrWhiteSpace(pinTextBox.Text)) {
-				PIN = pinTextBox.Text;
+				Pin = pinTextBox.Text;
 				DialogResult = DialogResult.OK;
 			}
 			else {

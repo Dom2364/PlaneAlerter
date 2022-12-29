@@ -12,13 +12,18 @@ namespace PlaneAlerter.Forms {
 	/// Form for editing conditions
 	/// </summary>
 	internal partial class ConditionEditor :Form {
+		/// <summary>
+		/// List of conditions
+		/// </summary>
+		public static SortedDictionary<int, Condition> Conditions = new SortedDictionary<int, Condition>();
+
 		public ConditionEditor() {
 			//Initialise form elements
 			InitializeComponent();
 			
 			//Load conditions
 			if (File.Exists("conditions.json")) {
-				EditorConditionsList.Conditions.Clear();
+				Conditions.Clear();
 
 				//Parse json
 				var conditionsJsonText = File.ReadAllText("conditions.json");
@@ -60,7 +65,7 @@ namespace PlaneAlerter.Forms {
 							newCondition.Triggers.Add(newCondition.Triggers.Count, new Trigger((VrsProperty)Enum.Parse(typeof(VrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
 
 						//Add condition to list
-						EditorConditionsList.Conditions.Add(conditionId, newCondition);
+						Conditions.Add(conditionId, newCondition);
 					}
 				}
 			}
@@ -73,8 +78,8 @@ namespace PlaneAlerter.Forms {
 		public void UpdateConditionList() {
 			conditionEditorTreeView.Nodes.Clear();
 
-			foreach (var conditionId in EditorConditionsList.Conditions.Keys) {
-				var condition = EditorConditionsList.Conditions[conditionId];
+			foreach (var conditionId in Conditions.Keys) {
+				var condition = Conditions[conditionId];
 
 				var conditionNode = conditionEditorTreeView.Nodes.Add(conditionId + ": " + condition.Name);
 				conditionNode.Tag = conditionId;
@@ -114,7 +119,7 @@ namespace PlaneAlerter.Forms {
 		/// <param name="e">Event Args</param>
 		private void ExitButtonClick(object sender, EventArgs e) {
 			//Save conditions to file then close
-			var conditionsJson = JsonConvert.SerializeObject(EditorConditionsList.Conditions, Formatting.Indented);
+			var conditionsJson = JsonConvert.SerializeObject(Conditions, Formatting.Indented);
 			File.WriteAllText("conditions.json", conditionsJson);
 			Close();
 		}
@@ -129,15 +134,15 @@ namespace PlaneAlerter.Forms {
 			if (conditionEditorTreeView.SelectedNode == null || conditionEditorTreeView.SelectedNode.Tag == null || conditionEditorTreeView.SelectedNode.Tag.ToString() == "")
 				return;
 			//Remove condition from condition list
-			EditorConditionsList.Conditions.Remove(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
+			Conditions.Remove(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
 			//Sort conditions
 			var sortedConditions = new SortedDictionary<int, Condition>();
 			var id = 0;
-			foreach (var c in EditorConditionsList.Conditions.Values) {
+			foreach (var c in Conditions.Values) {
 				sortedConditions.Add(id,c);
 				id++;
 			}
-			EditorConditionsList.Conditions = sortedConditions;
+			Conditions = sortedConditions;
 			//Update condition list
 			UpdateConditionList();
 		}
@@ -154,12 +159,12 @@ namespace PlaneAlerter.Forms {
 			//Swap conditions then update condition list
 			var conditionId = Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag);
 			if (conditionId == 0) return;
-			var c1 = EditorConditionsList.Conditions[conditionId];
-			var c2 = EditorConditionsList.Conditions[conditionId - 1];
-			EditorConditionsList.Conditions.Remove(conditionId - 1);
-			EditorConditionsList.Conditions.Remove(conditionId);
-			EditorConditionsList.Conditions.Add(conditionId - 1, c1);
-			EditorConditionsList.Conditions.Add(conditionId, c2);
+			var c1 = Conditions[conditionId];
+			var c2 = Conditions[conditionId - 1];
+			Conditions.Remove(conditionId - 1);
+			Conditions.Remove(conditionId);
+			Conditions.Add(conditionId - 1, c1);
+			Conditions.Add(conditionId, c2);
 			UpdateConditionList();
 		}
 
@@ -174,13 +179,13 @@ namespace PlaneAlerter.Forms {
 				return;
 			//Swap conditions then update condition list
 			var conditionId = Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag);
-			if (conditionId == EditorConditionsList.Conditions.Count - 1) return;
-			var c1 = EditorConditionsList.Conditions[conditionId];
-			var c2 = EditorConditionsList.Conditions[conditionId + 1];
-			EditorConditionsList.Conditions.Remove(conditionId + 1);
-			EditorConditionsList.Conditions.Remove(conditionId);
-			EditorConditionsList.Conditions.Add(conditionId + 1, c1);
-			EditorConditionsList.Conditions.Add(conditionId, c2);
+			if (conditionId == Conditions.Count - 1) return;
+			var c1 = Conditions[conditionId];
+			var c2 = Conditions[conditionId + 1];
+			Conditions.Remove(conditionId + 1);
+			Conditions.Remove(conditionId);
+			Conditions.Add(conditionId + 1, c1);
+			Conditions.Add(conditionId, c2);
 			UpdateConditionList();
 		}
 
@@ -216,15 +221,5 @@ namespace PlaneAlerter.Forms {
 		private void conditionEditorTreeView_AfterSelect(object sender, TreeViewEventArgs e) {
 			updateUIState();
 		}
-	}
-
-	/// <summary>
-	/// Editor conditions list
-	/// </summary>
-	internal class EditorConditionsList {
-		/// <summary>
-		/// List of conditions
-		/// </summary>
-		public static SortedDictionary<int, Condition> Conditions = new SortedDictionary<int, Condition>();
 	}
 }

@@ -33,7 +33,7 @@ namespace PlaneAlerter.Forms {
 			Initialise();
 
 			//Set form element values from condition info
-			var c = EditorConditionsList.Conditions[_conditionToUpdate];
+			var c = ConditionEditor.Conditions[_conditionToUpdate];
 			conditionNameTextBox.Text = c.Name;
 			ignoreFollowingCheckbox.Checked = c.IgnoreFollowing;
 			emailCheckBox.Checked = c.EmailEnabled;
@@ -307,15 +307,15 @@ namespace PlaneAlerter.Forms {
 
 			//If condition is being updated, remove the old one
 			if (_isUpdating)
-				EditorConditionsList.Conditions.Remove(_conditionToUpdate);
+				ConditionEditor.Conditions.Remove(_conditionToUpdate);
 
 			//Sort conditions
-			var list = EditorConditionsList.Conditions.Keys.ToList();
+			var list = ConditionEditor.Conditions.Keys.ToList();
 			var sortedConditions = new SortedDictionary<int, Condition>();
 			list.Sort();
 			foreach(var key in list)
-				sortedConditions.Add(key, EditorConditionsList.Conditions[key]);
-			EditorConditionsList.Conditions = sortedConditions;
+				sortedConditions.Add(key, ConditionEditor.Conditions[key]);
+			ConditionEditor.Conditions = sortedConditions;
 
 			//Create new condition
 			var newCondition = new Condition {
@@ -343,7 +343,7 @@ namespace PlaneAlerter.Forms {
 								break;
 							}
 			//Add condition to condition list
-			EditorConditionsList.Conditions.Add(_isUpdating ? _conditionToUpdate : EditorConditionsList.Conditions.Count, newCondition);
+			ConditionEditor.Conditions.Add(_isUpdating ? _conditionToUpdate : ConditionEditor.Conditions.Count, newCondition);
 
 			//Close form
 			Close();
