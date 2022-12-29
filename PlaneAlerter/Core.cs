@@ -85,11 +85,9 @@ namespace PlaneAlerter {
 			/// </summary>
 			/// <param name="key">Property name</param>
 			/// <returns>Value of property</returns>
-			public string GetProperty(string key) {
-				if (Properties.ContainsKey(key))
-					return Properties[key];
-				else
-					return null;
+			public string? GetProperty(string key)
+			{
+				return Properties.ContainsKey(key) ? Properties[key] : null;
 			}
 
 			/// <summary>

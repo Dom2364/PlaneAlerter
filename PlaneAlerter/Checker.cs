@@ -8,7 +8,6 @@ using System.Media;
 using System.IO;
 using System.Drawing;
 using System.Net;
-using System.Net.Mail;
 using System.Threading;
 using System.Windows.Forms;
 using System.Globalization;
@@ -21,12 +20,12 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Client for sending aircraftlist.json requests
 		/// </summary>
-		static HttpWebRequest request;
+		private static HttpWebRequest Request;
 
 		/// <summary>
 		/// Time of next check
 		/// </summary>
-		static DateTime nextCheck;
+		private static DateTime NextCheck;
 
 		/// <summary>
 		/// Have conditions loaded?
@@ -36,14 +35,14 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// How many checks ago were the trails requested
 		/// </summary>
-		private static int trailsAge = 1;
+		private static int TrailsAge = 1;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		public static void Start() {
 			//Name of receiver that provided the aircraft information
-			string recieverName;
+			string receiverName;
 			//Number of triggers matching for condition
 			int triggersMatching;
 			//VRS name of property
@@ -55,10 +54,10 @@ namespace PlaneAlerter {
 			while (ThreadManager.threadStatus != ThreadManager.CheckerStatus.Stopping) {
 				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Running;
 				//Set next check time
-				nextCheck = DateTime.Now.AddSeconds(Settings.refreshRate);
+				NextCheck = DateTime.Now.AddSeconds(Settings.refreshRate);
 				//Notify user that aircraft info is being downloaded
 				Core.UI.updateStatusLabel("Downloading Aircraft Info...");
-				recieverName = "";
+				receiverName = "";
 				//Get latest aircraft information
 				GetAircraft(false, true);
 				if (Settings.filterDistance && !Settings.ignoreModeS) GetAircraft(true, false);
@@ -66,14 +65,14 @@ namespace PlaneAlerter {
 				//Check if there are aircraft to check
 				if (Core.aircraftlist.Count != 0) {
 					//Aircraft number to be shown on UI
-					int aircraftCount = 1;
+					var aircraftCount = 1;
 					//Current condition being checked
 					Core.Condition condition;
 					//Ignore following conditions for an aircraft
-					bool ignorefollowing = false;
+					var ignoreFollowing = false;
 					//Updated trails are available, this check contains the first match in a while
-					bool updatedtrailsavailable = false;
-					foreach (Core.Aircraft aircraft in Core.aircraftlist.ToList()) {
+					var updatedTrailsAvailable = false;
+					foreach (var aircraft in Core.aircraftlist.ToList()) {
 						//Update UI with aircraft being checked
 						Core.UI.updateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " + Core.aircraftlist.Count());
 						aircraftCount++;
@@ -83,15 +82,15 @@ namespace PlaneAlerter {
 							continue;
 
 						//Iterate conditions
-						foreach (int conditionid in Core.conditions.Keys.ToList()) {
-							condition = Core.conditions[conditionid];
+						foreach (var conditionId in Core.conditions.Keys.ToList()) {
+							condition = Core.conditions[conditionId];
 							//Skip if condition is disabled or condition is already matched
-							if (condition.alertType == Core.AlertType.Disabled || (Core.activeMatches.ContainsKey(aircraft.ICAO) && Core.activeMatches[aircraft.ICAO].Conditions.Exists(x => x.ConditionID == conditionid)))
+							if (condition.alertType == Core.AlertType.Disabled || (Core.activeMatches.ContainsKey(aircraft.ICAO) && Core.activeMatches[aircraft.ICAO].Conditions.Exists(x => x.ConditionID == conditionId)))
 								continue;
 
 							triggersMatching = 0;
 							//Iterate triggers for condition
-							foreach (Core.Trigger trigger in condition.triggers.Values) {
+							foreach (var trigger in condition.triggers.Values) {
 								//LEGEND
 								//A = Equals/Not Equals
 								//B = Higher Than + Lower Than
@@ -101,7 +100,7 @@ namespace PlaneAlerter {
 
 								//Get internal name for property to compare
 								propertyInternalName = Core.vrsPropertyData[trigger.Property][2].ToString();
-								string propertyValue = aircraft.GetProperty(propertyInternalName);
+								var propertyValue = aircraft.GetProperty(propertyInternalName);
 
 								//Check property against value
 								if (trigger.ComparisonType == "Equals") {
@@ -138,38 +137,40 @@ namespace PlaneAlerter {
 							//Check if condition still matches
 							if (triggersMatching == condition.triggers.Count) {
 								//Get receiver name
-								if (Core.receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) recieverName = Core.receivers[aircraft.GetProperty("Rcvr")];
+								if (Core.receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) receiverName = Core.receivers[aircraft.GetProperty("Rcvr")];
 
 								//If active matches contains aircraft, add condition to the match
 								if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
-									Core.activeMatches[aircraft.ICAO].AddCondition(conditionid, condition, aircraft);
+									Core.activeMatches[aircraft.ICAO].AddCondition(conditionId, condition, aircraft);
 								}
 								//Else add to active matches
 								else {
-									Core.Match m = new Core.Match(aircraft.ICAO);
-									m.AddCondition(conditionid, condition, aircraft);
+									var m = new Core.Match(aircraft.ICAO);
+									m.AddCondition(conditionId, condition, aircraft);
 									Core.activeMatches.Add(aircraft.ICAO, m);
 								}
 
 								//Cancel checking for conditions for this aircraft
-								ignorefollowing = condition.ignoreFollowing;
+								ignoreFollowing = condition.ignoreFollowing;
 
 								//Get trails if they haven't been requested due to no matches
 								if (Core.activeMatches.Count == 1 && Settings.trailsUpdateFrequency != 0) {
 									GetAircraft(false, true, true);
 									if (Settings.filterDistance && !Settings.ignoreModeS) GetAircraft(true, false, true);
-									updatedtrailsavailable = true;
+									updatedTrailsAvailable = true;
 								}
 
 								//If updated trails are available, update trail and position
-								if (updatedtrailsavailable) {
-									foreach (Core.Aircraft updatedac in Core.aircraftlist.ToList()) {
-										if (updatedac.ICAO == aircraft.ICAO) {
-											aircraft.Trail = updatedac.Trail;
-											aircraft.SetProperty("Lat", updatedac.GetProperty("Lat"));
-											aircraft.SetProperty("Long", updatedac.GetProperty("Long"));
-											break;
-										}
+								if (updatedTrailsAvailable) {
+									foreach (var updatedAircraft in Core.aircraftlist.ToList())
+									{
+										if (updatedAircraft.ICAO != aircraft.ICAO)
+											continue;
+
+										aircraft.Trail = updatedAircraft.Trail;
+										aircraft.SetProperty("Lat", updatedAircraft.GetProperty("Lat"));
+										aircraft.SetProperty("Long", updatedAircraft.GetProperty("Long"));
+										break;
 									}
 								}
 
@@ -179,13 +180,13 @@ namespace PlaneAlerter {
 
 								//Send Alert
 								if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
-									SendAlert(condition, aircraft, recieverName, true);
+									SendAlert(condition, aircraft, receiverName, true);
 							}
-							if (ignorefollowing) break;
+							if (ignoreFollowing) break;
 						}
 						//If active matches contains this aircraft, update aircraft info
 						if (Core.activeMatches.ContainsKey(aircraft.ICAO))
-							foreach (Core.MatchedCondition c in Core.activeMatches[aircraft.ICAO].Conditions)
+							foreach (var c in Core.activeMatches[aircraft.ICAO].Conditions)
 								c.AircraftInfo = aircraft;
 
 						//Cancel if thread is supposed to stop
@@ -195,9 +196,9 @@ namespace PlaneAlerter {
 					//Check if aircraft have lost signal and remove aircraft that have timed out
 					Core.UI.updateStatusLabel("Checking aircraft are still on radar...");
 					//Iterate active matches
-					foreach (Core.Match match in Core.activeMatches.Values.ToList()) {
+					foreach (var match in Core.activeMatches.Values.ToList()) {
 						//Iterate match conditions
-						foreach (Core.MatchedCondition c in match.Conditions) {
+						foreach (var c in match.Conditions) {
 							//Check if signal has been lost for more than the removal timeout
 							if (match.SignalLost && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.removalTimeout - (Settings.removalTimeout * 2)))) < 0) {
 								//Remove from active matches
@@ -206,23 +207,23 @@ namespace PlaneAlerter {
 								Stats.updateStats();
 								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.conditionName, Color.Orange);
 								//Update aircraft info
-								Core.Aircraft aircraft = c.AircraftInfo;
+								var aircraft = c.AircraftInfo;
 
 								//Alert if alert type is both or last
 								if (c.Condition.alertType == Core.AlertType.First_and_Last_Contact || c.Condition.alertType == Core.AlertType.Last_Contact) {
 									condition = c.Condition;
 
 									//Get receiver name
-									if (Core.receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) recieverName = Core.receivers[aircraft.GetProperty("Rcvr")];
+									if (Core.receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) receiverName = Core.receivers[aircraft.GetProperty("Rcvr")];
 
 									//Send Alert
-									SendAlert(condition, aircraft, recieverName, false);
+									SendAlert(condition, aircraft, receiverName, false);
 								}
 								break;
 							}
 							//Check if signal has been lost/returned
-							bool stillActive = false;
-							foreach (Core.Aircraft aircraft in Core.aircraftlist)
+							var stillActive = false;
+							foreach (var aircraft in Core.aircraftlist)
 								if (aircraft.ICAO == match.Icao)
 									stillActive = true;
 							if (!stillActive && match.SignalLost == false) {
@@ -230,7 +231,7 @@ namespace PlaneAlerter {
 								Core.activeMatches[match.Icao].SignalLost = true;
 								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
 							}
-							if (stillActive && match.SignalLost == true) {
+							if (stillActive && match.SignalLost) {
 								Core.activeMatches[match.Icao].SignalLost = false;
 								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
 							}
@@ -243,7 +244,7 @@ namespace PlaneAlerter {
 				Core.UI.updateStatusLabel("Waiting for next check...");
 				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Waiting;
 				//Wait until the next check time
-				while (DateTime.Compare(DateTime.Now, nextCheck) < 0) {
+				while (DateTime.Compare(DateTime.Now, NextCheck) < 0) {
 					//Cancel if thread is supposed to stop
 					if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Stopping) return;
 					Thread.Sleep(1000);
@@ -286,14 +287,14 @@ namespace PlaneAlerter {
 				}
 
 				//Get credentials
-				string[] creds = Settings.TwitterUsers[condition.twitterAccount];
+				string[] credentials = Settings.TwitterUsers[condition.twitterAccount];
 
 				//Replace keywords in content
 				content = Core.ParseCustomFormatString(content, aircraft, condition);
 				if (content.Length > 250) {
-					int charsover = content.Length - 250;
+					var charsOver = content.Length - 250;
 					content = content.Substring(0, 250) + "...";
-					Core.UI.writeToConsole("WARNING: Tweet content is " + charsover + " characters over the limit of 280, removing end of message", Color.Orange);
+					Core.UI.writeToConsole("WARNING: Tweet content is " + charsOver + " characters over the limit of 280, removing end of message", Color.Orange);
 				}
 					
 				//Add link to tweet
@@ -312,10 +313,10 @@ namespace PlaneAlerter {
 				}
 
 				//Get map URL if enabled
-				string mapURL = condition.tweetMap?Core.GenerateMapURL(aircraft) :"";
+				var mapUrl = condition.tweetMap?Core.GenerateMapURL(aircraft) :"";
 
 				//Send tweet
-				bool success = Twitter.Tweet(creds[0], creds[1], content, mapURL).Result;
+				var success = Twitter.Tweet(credentials[0], credentials[1], content, mapUrl).Result;
 				if (success) {
 					Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightBlue);
 				}
@@ -330,7 +331,7 @@ namespace PlaneAlerter {
 		/// Get latest aircraftlist.json
 		/// </summary>
 		public static void GetAircraft(bool modeSOnly, bool clearExisting, bool forceRequestTrails = false) {
-			bool requestTrails = Settings.trailsUpdateFrequency==1;
+			var requestTrails = Settings.trailsUpdateFrequency==1;
 
 			//Force request trails
 			if (forceRequestTrails) {
@@ -342,20 +343,20 @@ namespace PlaneAlerter {
 			}
 			//Threshold enabled
 			else if (Settings.trailsUpdateFrequency >= 2) {
-				if (trailsAge >= Settings.trailsUpdateFrequency) {
+				if (TrailsAge >= Settings.trailsUpdateFrequency) {
 					requestTrails = true;
-					trailsAge = 0;
+					TrailsAge = 0;
 				}
-				trailsAge++;
+				TrailsAge++;
 			}
 
 			//Generate aircraftlist.json url
-			string url = Settings.acListUrl;
+			var url = Settings.acListUrl;
 			url += Settings.acListUrl.Contains("?") ? "&" : "?";
-			url += "lat=" + Settings.Lat.ToString() + "&lng=" + Settings.Long.ToString();
+			url += "lat=" + Settings.Lat + "&lng=" + Settings.Long;
 			if (Settings.filterDistance && !modeSOnly) url += "&fDstU=" + Settings.ignoreDistance.ToString("#.##");
-			if (Settings.filterAltitude) url += "&fAltU=" + Settings.ignoreAltitude.ToString();
-			if (Settings.filterReceiver) url += "&feed=" + Settings.filterReceiverId.ToString();
+			if (Settings.filterAltitude) url += "&fAltU=" + Settings.ignoreAltitude;
+			if (Settings.filterReceiver) url += "&feed=" + Settings.filterReceiverId;
 			if (modeSOnly) url += "&fNoPosQN=1";
 			if (requestTrails) url += "&trFmt=fa&refreshTrails=1";
 
@@ -365,13 +366,13 @@ namespace PlaneAlerter {
 					responseJson = RequestAircraftList(url);
 				}
 				catch (Exception e) {
-					Core.UI.writeToConsole("ERROR: " + e.GetType().ToString() + " while downloading AircraftList.json: " + e.Message, Color.Red);
+					Core.UI.writeToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					return;
 				}
 
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null) {
-					Core.UI.writeToConsole("ERROR: Invalid response recieved from server", Color.Red);
+					Core.UI.writeToConsole("ERROR: Invalid response received from server", Color.Red);
 					return;
 				}
 
@@ -380,7 +381,7 @@ namespace PlaneAlerter {
 					throw new JsonReaderException();
 
 				//Save old trails if not requesting new ones
-				Dictionary<string, double[]> oldTrails = null;
+				Dictionary<string, double[]>? oldTrails = null;
 				if (!requestTrails) oldTrails = Core.aircraftlist.ToDictionary(x => x.ICAO, x => x.Trail);
 
 				//Parse aircraft data
@@ -389,13 +390,13 @@ namespace PlaneAlerter {
 					//Ignore if no icao is provided
 					if (a["Icao"] == null) continue;
 					//Create new aircraft
-					Core.Aircraft aircraft = new Core.Aircraft(a["Icao"].ToString());
+					var aircraft = new Core.Aircraft(a["Icao"].ToString());
 
 					//Parse aircraft trail
 					if (requestTrails) {
 						if (a["Cot"] != null)
 							aircraft.Trail = new double[a["Cot"].Count()];
-						for (int i = 0; i < aircraft.Trail.Length - 1; i++)
+						for (var i = 0; i < aircraft.Trail.Length - 1; i++)
 							if (a["Cot"][i].Value<string>() != null)
 								aircraft.Trail[i] = double.Parse(a["Cot"][i].Value<string>(), CultureInfo.InvariantCulture);
 							else
@@ -406,10 +407,10 @@ namespace PlaneAlerter {
 					}
 
 					//Parse aircraft properties
-					List<JProperty> properties = a.Properties().ToList();
-					for (int i = 0;i < properties.Count();i++)
+					var properties = a.Properties().ToList();
+					for (var i = 0; i < properties.Count; i++)
 						aircraft.AddProperty(properties[i].Name, properties[i].Value.ToString());
-					properties = null;
+					
 					//Add aircraft to list
 					Core.aircraftlist.Add(aircraft);
 				}
@@ -421,7 +422,6 @@ namespace PlaneAlerter {
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();
-				responseJson = null;
 				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (UriFormatException) {
@@ -442,28 +442,29 @@ namespace PlaneAlerter {
 			}
 		}
 
-		private static JObject RequestAircraftList(string url) {
+		private static JObject? RequestAircraftList(string url) {
 			//Create request
-			request = (HttpWebRequest)WebRequest.Create(url);
-			request.Method = "GET";
-			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-			request.Timeout = Settings.timeout * 1000;
+			Request = (HttpWebRequest)WebRequest.Create(url);
+			Request.Method = "GET";
+			Request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+			Request.Timeout = Settings.timeout * 1000;
 			//Add credentials if they are provided
 			if (Settings.VRSAuthenticate) {
-				string encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
-				request.Headers.Add("Authorization", "Basic " + encoded);
+				var encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
+				Request.Headers.Add("Authorization", "Basic " + encoded);
 			}
 			//Send request and parse json response
-			using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-			using (Stream responsestream = response.GetResponseStream())
-			using (StreamReader reader = new StreamReader(responsestream))
-			using (JsonTextReader jsonreader = new JsonTextReader(reader))
-				return JsonSerializer.Create().Deserialize<JObject>(jsonreader);
+			using var response = (HttpWebResponse)Request.GetResponse();
+			using var responseStream = response.GetResponseStream();
+			using var reader = new StreamReader(responseStream);
+			using var jsonReader = new JsonTextReader(reader);
+
+			return JsonSerializer.Create().Deserialize<JObject>(jsonReader);
 		}
 
-		public static Dictionary<string, string> GetReceivers() {
+		public static Dictionary<string, string>? GetReceivers() {
 			//Generate aircraftlist.json url
-			string url = Settings.acListUrl;
+			var url = Settings.acListUrl;
 			url += Settings.acListUrl.Contains("?") ? "&" : "?";
 			url += "fUtQ=abc";
 
@@ -473,7 +474,7 @@ namespace PlaneAlerter {
 					responseJson = RequestAircraftList(url);
 				}
 				catch (Exception e) {
-					Core.UI.writeToConsole("ERROR: " + e.GetType().ToString() + " while downloading AircraftList.json: " + e.Message, Color.Red);
+					Core.UI.writeToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					return null;
 				}
 
@@ -493,7 +494,7 @@ namespace PlaneAlerter {
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();
-				responseJson = null;
+
 				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (UriFormatException) {
@@ -524,18 +525,23 @@ namespace PlaneAlerter {
 				//Clear conditions and active matches
 				Core.conditions.Clear();
 				Core.activeMatches.Clear();
+
 				//Parse conditions file
-				JObject conditionJson;
-				using (FileStream filestream = new FileStream("conditions.json", FileMode.Open))
-					using (StreamReader reader = new StreamReader(filestream))
-						using (JsonTextReader jsonreader = new JsonTextReader(reader))
-							conditionJson = JsonSerializer.Create().Deserialize<JObject>(jsonreader);
-				if (conditionJson == null) return;
+				JObject? conditionJson;
+				using (var fileStream = new FileStream("conditions.json", FileMode.Open))
+					using (var reader = new StreamReader(fileStream))
+						using (var jsonReader = new JsonTextReader(reader))
+							conditionJson = JsonSerializer.Create().Deserialize<JObject>(jsonReader);
+
+				if (conditionJson == null)
+					return;
+
 				//Iterate parsed conditions
-				for (int conditionid = 0;conditionid < conditionJson.Count;conditionid++) {
-					JToken condition = conditionJson[conditionid.ToString()];
+				for (var conditionId = 0; conditionId < conditionJson.Count; conditionId++) {
+					var condition = conditionJson[conditionId.ToString()];
+
 					//Create condition and copy values
-					Core.Condition newCondition = new Core.Condition {
+					var newCondition = new Core.Condition {
 						conditionName = condition["conditionName"].ToString(),
 						alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
 						ignoreFollowing = (bool)condition["ignoreFollowing"],
@@ -551,33 +557,36 @@ namespace PlaneAlerter {
 					};
 
 					if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString())) {
-						Core.vrsProperty emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"] ?? Core.vrsProperty.Registration.ToString()).ToString());
+						var emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"] ?? Core.vrsProperty.Registration.ToString()).ToString());
 						newCondition.emailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.vrsPropertyData[emailProperty][2] + "]";
 						newCondition.emailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.vrsPropertyData[emailProperty][2] + "]";
 					}
 
-					List<string> emailsArray = new List<string>();
-					foreach (JToken email in condition["recieverEmails"])
+					var emailsArray = new List<string>();
+					foreach (var email in condition["recieverEmails"])
 						emailsArray.Add(email.ToString());
 					newCondition.recieverEmails = emailsArray;
-					foreach (JToken trigger in condition["triggers"].Values())
+					foreach (var trigger in condition["triggers"].Values())
 						newCondition.triggers.Add(newCondition.triggers.Count, new Core.Trigger((Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
 					//Add condition to list
-					Core.conditions.Add(conditionid, newCondition);
+					Core.conditions.Add(conditionId, newCondition);
 				}
 				//Try to clean up json parsing
 				conditionJson.RemoveAll();
-				conditionJson = null;
+				
 				//Save to file again in case some defaults were set
-				string conditionsJson = JsonConvert.SerializeObject(Core.conditions, Formatting.Indented);
+				var conditionsJson = JsonConvert.SerializeObject(Core.conditions, Formatting.Indented);
 				File.WriteAllText("conditions.json", conditionsJson);
+
 				//Update condition list
 				Core.UI.Invoke((MethodInvoker)(() => {
 					Core.UI.updateConditionList();
 				}));
 				Core.UI.conditionTreeView.Nodes[0].Expand();
+
 				//Log to UI
 				Core.UI.writeToConsole("Conditions Loaded", Color.White);
+
 				//Restart threads
 				if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.WaitingForLoad) 
 					ThreadManager.Restart();

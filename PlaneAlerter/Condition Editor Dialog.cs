@@ -31,7 +31,7 @@ namespace PlaneAlerter {
 			//Initialise form options
 			Initialise();
 			//Set form element values from condition info
-			Core.Condition c = EditorConditionsList.conditions[conditionToUpdate];
+			Core.Condition c = EditorConditionsList.Conditions[conditionToUpdate];
 			conditionNameTextBox.Text = c.conditionName;
 			ignoreFollowingCheckbox.Checked = c.ignoreFollowing;
 			emailCheckBox.Checked = c.emailEnabled;
@@ -294,15 +294,15 @@ namespace PlaneAlerter {
 
 			//If condition is being updated, remove the old one
 			if (isUpdating)
-				EditorConditionsList.conditions.Remove(conditionToUpdate);
+				EditorConditionsList.Conditions.Remove(conditionToUpdate);
 
 			//Sort conditions
-			List<int> list = EditorConditionsList.conditions.Keys.ToList();
+			List<int> list = EditorConditionsList.Conditions.Keys.ToList();
 			SortedDictionary<int, Core.Condition> sortedConditions = new SortedDictionary<int, Core.Condition>();
 			list.Sort();
 			foreach(var key in list)
-				sortedConditions.Add(key, EditorConditionsList.conditions[key]);
-			EditorConditionsList.conditions = sortedConditions;
+				sortedConditions.Add(key, EditorConditionsList.Conditions[key]);
+			EditorConditionsList.Conditions = sortedConditions;
 
 			//Create new condition
 			Core.Condition newCondition = new Core.Condition {
@@ -330,9 +330,9 @@ namespace PlaneAlerter {
 							}
 			//Add condition to condition list
 			if (isUpdating)
-				EditorConditionsList.conditions.Add(conditionToUpdate, newCondition);
+				EditorConditionsList.Conditions.Add(conditionToUpdate, newCondition);
 			else
-				EditorConditionsList.conditions.Add(EditorConditionsList.conditions.Count, newCondition);
+				EditorConditionsList.Conditions.Add(EditorConditionsList.Conditions.Count, newCondition);
 			//Close form
 			Close();
 		}
