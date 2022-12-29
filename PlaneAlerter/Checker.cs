@@ -268,13 +268,13 @@ namespace PlaneAlerter {
 
 			if (condition.EmailEnabled) {
 				//Send emails
-				foreach (string email in condition.ReceiverEmails) {
+				foreach (var email in condition.ReceiverEmails) {
 					Email.SendEmail(email, condition, aircraft, receiver, isFirst);
 				}
 			}
 			
 			if (condition.TwitterEnabled) {
-				string content = isFirst?condition.TweetFirstFormat:condition.TweetLastFormat;
+				var content = isFirst?condition.TweetFirstFormat:condition.TweetLastFormat;
 
 				//Check if selected account is valid
 				if (string.IsNullOrWhiteSpace(condition.TwitterAccount)) {
@@ -291,7 +291,7 @@ namespace PlaneAlerter {
 				}
 
 				//Get credentials
-				string[] credentials = Settings.TwitterUsers[condition.TwitterAccount];
+				var credentials = Settings.TwitterUsers[condition.TwitterAccount];
 
 				//Replace keywords in content
 				content = Core.ParseCustomFormatString(content, aircraft, condition);
