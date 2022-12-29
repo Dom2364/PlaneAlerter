@@ -13,7 +13,7 @@ namespace PlaneAlerter {
 	/// <summary>
 	/// Class for email operations
 	/// </summary>
-	public static class Email {
+	internal static class Email {
 		/// <summary>
 		/// Send alert email
 		/// </summary>

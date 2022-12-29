@@ -10,7 +10,7 @@ namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for editing conditions
 	/// </summary>
-	public partial class ConditionEditorDialog :Form {
+	internal partial class ConditionEditorDialog :Form {
 		/// <summary>
 		/// Id of condition to update
 		/// </summary>

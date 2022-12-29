@@ -11,7 +11,7 @@ namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for editing conditions
 	/// </summary>
-	public partial class ConditionEditor :Form {
+	internal partial class ConditionEditor :Form {
 		public ConditionEditor() {
 			//Initialise form elements
 			InitializeComponent();
@@ -221,7 +221,7 @@ namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Editor conditions list
 	/// </summary>
-	public class EditorConditionsList {
+	internal class EditorConditionsList {
 		/// <summary>
 		/// List of conditions
 		/// </summary>

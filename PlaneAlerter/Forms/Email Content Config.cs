@@ -6,7 +6,7 @@ namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for changing email content config
 	/// </summary>
-	public partial class EmailContentConfigForm :Form {
+	internal partial class EmailContentConfigForm :Form {
 		/// <summary>
 		/// Constructor
 		/// </summary>

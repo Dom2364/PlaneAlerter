@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 
 namespace PlaneAlerter.Forms {
-	public partial class PinPromptDialog : Form {
+	internal partial class PinPromptDialog : Form {
 		public string PIN { get; set; }
 
 		public PinPromptDialog() {

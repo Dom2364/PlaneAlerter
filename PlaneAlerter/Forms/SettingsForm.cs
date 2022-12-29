@@ -9,7 +9,7 @@ namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for changing settings
 	/// </summary>
-	public partial class SettingsForm :Form {
+	internal partial class SettingsForm :Form {
 		/// <summary>
 		/// Constructor
 		/// </summary>

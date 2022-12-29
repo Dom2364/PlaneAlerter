@@ -6,7 +6,7 @@ namespace PlaneAlerter {
 	/// <summary>
 	/// Class for managing threads
 	/// </summary>
-	static class ThreadManager {
+	internal class ThreadManager {
 		/// <summary>
 		/// Thread status of checker thread
 		/// </summary>

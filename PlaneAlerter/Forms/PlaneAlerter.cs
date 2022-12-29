@@ -19,7 +19,7 @@ namespace PlaneAlerter.Forms
 	/// <summary>
 	/// Main form
 	/// </summary>
-	public partial class PlaneAlerter : Form
+	internal partial class PlaneAlerter : Form
 	{
 		/// <summary>
 		/// Send message to windows

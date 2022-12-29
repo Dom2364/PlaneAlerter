@@ -13,7 +13,7 @@ namespace PlaneAlerter {
 	/// <summary>
 	/// Important variables and things
 	/// </summary>
-	public static class Core {
+	internal static class Core {
 		/// <summary>
 		/// List of current conditions
 		/// </summary>

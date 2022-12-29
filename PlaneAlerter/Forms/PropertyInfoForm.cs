@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 
 namespace PlaneAlerter.Forms {
-	public partial class PropertyInfoForm :Form {
+	internal partial class PropertyInfoForm :Form {
 		public PropertyInfoForm() {
 			//Initialise form elements
 			InitializeComponent();

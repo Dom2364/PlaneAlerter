@@ -18,7 +18,7 @@ namespace PlaneAlerter {
 	/// <summary>
 	/// Class for checking operations
 	/// </summary>
-	static class Checker {
+	internal static class Checker {
 		/// <summary>
 		/// Client for sending aircraftlist.json requests
 		/// </summary>

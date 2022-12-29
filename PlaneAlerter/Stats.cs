@@ -5,7 +5,7 @@ namespace PlaneAlerter {
 	/// <summary>
 	/// Class for statistic operations
 	/// </summary>
-	public static class Stats {
+	internal static class Stats {
 		/// <summary>
 		/// Counter for total alerts sent
 		/// </summary>

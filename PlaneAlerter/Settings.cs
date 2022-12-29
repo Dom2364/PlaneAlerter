@@ -11,7 +11,7 @@ namespace PlaneAlerter {
 	/// <summary>
 	/// Class for storing settings
 	/// </summary>
-	public static class Settings {
+	internal static class Settings {
 		/// <summary>
 		/// Email to send alerts from
 		/// </summary>
