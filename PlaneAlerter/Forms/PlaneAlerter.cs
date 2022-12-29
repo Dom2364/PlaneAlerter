@@ -13,6 +13,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Forms
 {
@@ -92,19 +93,19 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		public void updateConditionList() {
 			conditionTreeView.Nodes[0].Nodes.Clear();
-			foreach(int conditionid in Core.Conditions.Keys) {
+			foreach(var conditionId in Core.Conditions.Keys) {
 				TreeNode conditionNode;
-				Core.Condition c = Core.Conditions[conditionid];
-				conditionNode = conditionTreeView.Nodes[0].Nodes.Add("Name: " + c.conditionName);
-				conditionNode.Tag = conditionid;
-				conditionNode.Nodes.Add("Id: " + conditionid);
-				conditionNode.Nodes.Add("Alert Type: " + c.alertType.ToString().Replace("_", " "));
-				conditionNode.Nodes.Add("Email Enabled: " + c.emailEnabled);
-				conditionNode.Nodes.Add("Twitter Enabled: " + c.twitterEnabled);
-				conditionNode.Nodes.Add("Twitter Account: " + c.twitterAccount);
-				conditionNode.Nodes.Add("Alerts Sent: " + c.alertsThisSession.ToString());
-				TreeNode triggersNode = conditionNode.Nodes.Add("Condition Triggers");
-				foreach(Core.Trigger trigger in c.triggers.Values)
+				var c = Core.Conditions[conditionId];
+				conditionNode = conditionTreeView.Nodes[0].Nodes.Add("Name: " + c.Name);
+				conditionNode.Tag = conditionId;
+				conditionNode.Nodes.Add("Id: " + conditionId);
+				conditionNode.Nodes.Add("Alert Type: " + c.AlertType.ToString().Replace("_", " "));
+				conditionNode.Nodes.Add("Email Enabled: " + c.EmailEnabled);
+				conditionNode.Nodes.Add("Twitter Enabled: " + c.TwitterEnabled);
+				conditionNode.Nodes.Add("Twitter Account: " + c.TwitterAccount);
+				conditionNode.Nodes.Add("Alerts Sent: " + c.AlertsThisSession.ToString());
+				var triggersNode = conditionNode.Nodes.Add("Condition Triggers");
+				foreach(var trigger in c.Triggers.Values)
 					triggersNode.Nodes.Add(trigger.Property.ToString() + " " + trigger.ComparisonType + " " + trigger.Value);
 			}
 		}

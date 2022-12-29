@@ -42,13 +42,13 @@ namespace PlaneAlerter {
 
 					foreach (TreeNode conditionNode in Core.Ui.conditionTreeView.Nodes[0].Nodes) {
 						int conditionId = Convert.ToInt32(conditionNode.Tag.ToString());
-						conditionNode.Nodes[5].Text = "Alerts Sent: " + Core.Conditions[conditionId].alertsThisSession;
+						conditionNode.Nodes[5].Text = "Alerts Sent: " + Core.Conditions[conditionId].AlertsThisSession;
 					}
 					Core.Ui.conditionTreeView.EndUpdate();
 					
 					Core.Ui.activeMatchesDataGridView.Rows.Clear();
 					foreach (Core.Match match in Core.ActiveMatches.Values) {
-						Core.Ui.activeMatchesDataGridView.Rows.Add(match.Icao, match.Conditions[0].AircraftInfo.GetProperty("Reg"), match.Conditions[0].AircraftInfo.GetProperty("Type"), match.Conditions[0].AircraftInfo.GetProperty("Call"), match.Conditions[0].Condition.conditionName);
+						Core.Ui.activeMatchesDataGridView.Rows.Add(match.Icao, match.Conditions[0].AircraftInfo.GetProperty("Reg"), match.Conditions[0].AircraftInfo.GetProperty("Type"), match.Conditions[0].AircraftInfo.GetProperty("Call"), match.Conditions[0].Condition.Name);
 					}	
 
 					Core.Ui.activeAlertsLabel.Text = $"Active Alerts ({Core.ActiveMatches.Count}):";

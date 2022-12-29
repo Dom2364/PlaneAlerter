@@ -7,6 +7,8 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Drawing;
+using PlaneAlerter.Enums;
+using PlaneAlerter.Models;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -22,7 +24,7 @@ namespace PlaneAlerter {
 		/// <param name="aircraft">Aircraft information for matched aircraft</param>
 		/// <param name="recieverName">Name of receiver that got the last aircraft information</param>
 		/// <param name="isDetection">Is this a detection, not a removal?</param>
-		public static void SendEmail(string emailaddress, Core.Condition condition, Core.Aircraft aircraft, string recieverName, bool isDetection) {
+		public static void SendEmail(string emailaddress, Condition condition, Aircraft aircraft, string recieverName, bool isDetection) {
             SmtpClient mailClient = new SmtpClient(Settings.SMTPHost);
             mailClient.Port = Settings.SMTPPort;
             mailClient.Credentials = new NetworkCredential(Settings.SMTPUsr, Settings.SMTPPwd);
@@ -68,7 +70,7 @@ namespace PlaneAlerter {
 			}
 
             //Set subject
-            message.Subject = Core.ParseCustomFormatString(isDetection ? condition.emailFirstFormat : condition.emailLastFormat, aircraft, condition);
+            message.Subject = Core.ParseCustomFormatString(isDetection ? condition.EmailFirstFormat : condition.EmailLastFormat, aircraft, condition);
 
             if (Settings.EmailContentConfig.TwitterOptimised) {
                 string typestring = "First Contact";
@@ -87,7 +89,7 @@ namespace PlaneAlerter {
 				if(aircraft.GetProperty("OpIcao") != null) {
 					operatorstring = aircraft.GetProperty("OpIcao") + ", ";
 				}
-                message.Body = "[" + typestring + "] " + condition.conditionName + ", " + regostring + operatorstring + aircraft.GetProperty("Type") + ", " + callsignstring + Settings.radarUrl;
+                message.Body = "[" + typestring + "] " + condition.Name + ", " + regostring + operatorstring + aircraft.GetProperty("Type") + ", " + callsignstring + Settings.radarUrl;
                 //[Last Contact] USAF (RCH9701), 79-1951, RCH, DC10, RCH9701 http://seqldradar.net
             }
             else {
@@ -132,7 +134,7 @@ namespace PlaneAlerter {
                     airframesUrl = "<h3><a style='text-decoration: none;' href='http://www.airframes.org/reg/" + aircraft.GetProperty("Reg").Replace("-", "").ToUpper() + "'>Airframes.org Lookup</a></h3>";
 
                 //Get name of transponder type
-                if (Enums.TryGetConvertedValue("Trt", aircraft.GetProperty("Trt"), out string convertedtrtvalue)) {
+                if (EnumUtils.TryGetConvertedValue("Trt", aircraft.GetProperty("Trt"), out string convertedtrtvalue)) {
                     transponderName = convertedtrtvalue;
                 }
 
@@ -167,7 +169,7 @@ namespace PlaneAlerter {
                         continue;
                     //Get parameter information from vrs property info
                     if (parameter == "UNKNOWN_PARAMETER") {
-                        foreach (Core.vrsProperty property in Core.VrsPropertyData.Keys) {
+                        foreach (VrsProperty property in Core.VrsPropertyData.Keys) {
                             if (Core.VrsPropertyData[property][2] == propertykey.ToString()) {
                                 //If property list type is essentials and this property is not in the list of essentials, leave this property as unknown so it can be skipped
                                 if (Settings.EmailContentConfig.PropertyList == Core.PropertyListType.Essentials && !Core.EssentialProperties.Contains(property))
@@ -182,7 +184,7 @@ namespace PlaneAlerter {
                     //Get value
                     string value = aircraft.GetProperty(propertykey);
                     //Add string conversions of enum values
-                    if (Enums.TryGetConvertedValue(propertykey, value, out string convertedvalue)) {
+                    if (EnumUtils.TryGetConvertedValue(propertykey, value, out string convertedvalue)) {
                         value += " (" + convertedvalue + ")";
 					}
                     //If rcvr, add receiver name
@@ -210,7 +212,7 @@ namespace PlaneAlerter {
                     message.Body += "<h1>Plane Alert - Last Contact</h1>";
 
                 //Condition name
-                message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Condition: " + condition.conditionName + "</h2>";
+                message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Condition: " + condition.Name + "</h2>";
                 //Receiver name
                 if (Settings.EmailContentConfig.ReceiverName)
                     message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Reciever: " + recieverName + "</h2>";

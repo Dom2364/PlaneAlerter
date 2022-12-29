@@ -11,6 +11,8 @@ using System.Net;
 using System.Threading;
 using System.Windows.Forms;
 using System.Globalization;
+using PlaneAlerter.Enums;
+using PlaneAlerter.Models;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -67,7 +69,7 @@ namespace PlaneAlerter {
 					//Aircraft number to be shown on UI
 					var aircraftCount = 1;
 					//Current condition being checked
-					Core.Condition condition;
+					Condition condition;
 					//Ignore following conditions for an aircraft
 					var ignoreFollowing = false;
 					//Updated trails are available, this check contains the first match in a while
@@ -85,12 +87,12 @@ namespace PlaneAlerter {
 						foreach (var conditionId in Core.Conditions.Keys.ToList()) {
 							condition = Core.Conditions[conditionId];
 							//Skip if condition is disabled or condition is already matched
-							if (condition.alertType == Core.AlertType.Disabled || (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionID == conditionId)))
+							if (condition.AlertType == AlertType.Disabled || (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionID == conditionId)))
 								continue;
 
 							triggersMatching = 0;
 							//Iterate triggers for condition
-							foreach (var trigger in condition.triggers.Values) {
+							foreach (var trigger in condition.Triggers.Values) {
 								//LEGEND
 								//A = Equals/Not Equals
 								//B = Higher Than + Lower Than
@@ -135,7 +137,7 @@ namespace PlaneAlerter {
 							}
 
 							//Check if condition still matches
-							if (triggersMatching == condition.triggers.Count) {
+							if (triggersMatching == condition.Triggers.Count) {
 								//Get receiver name
 								if (Core.Receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) receiverName = Core.Receivers[aircraft.GetProperty("Rcvr")];
 
@@ -151,7 +153,7 @@ namespace PlaneAlerter {
 								}
 
 								//Cancel checking for conditions for this aircraft
-								ignoreFollowing = condition.ignoreFollowing;
+								ignoreFollowing = condition.IgnoreFollowing;
 
 								//Get trails if they haven't been requested due to no matches
 								if (Core.ActiveMatches.Count == 1 && Settings.trailsUpdateFrequency != 0) {
@@ -176,10 +178,10 @@ namespace PlaneAlerter {
 
 								//Update stats and log to console
 								Stats.updateStats();
-								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " + condition.conditionName, Color.LightGreen);
+								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " + condition.Name, Color.LightGreen);
 
 								//Send Alert
-								if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
+								if (condition.AlertType == AlertType.First_and_Last_Contact || condition.AlertType == AlertType.First_Contact)
 									SendAlert(condition, aircraft, receiverName, true);
 							}
 							if (ignoreFollowing) break;
@@ -205,12 +207,13 @@ namespace PlaneAlerter {
 								Core.ActiveMatches.Remove(match.Icao);
 								//Update stats and log to console
 								Stats.updateStats();
-								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.conditionName, Color.Orange);
+								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
 								//Update aircraft info
 								var aircraft = c.AircraftInfo;
 
 								//Alert if alert type is both or last
-								if (c.Condition.alertType == Core.AlertType.First_and_Last_Contact || c.Condition.alertType == Core.AlertType.Last_Contact) {
+								if (c.Condition.AlertType == AlertType.First_and_Last_Contact || c.Condition.AlertType ==
+								    AlertType.Last_Contact) {
 									condition = c.Condition;
 
 									//Get receiver name
@@ -229,11 +232,11 @@ namespace PlaneAlerter {
 							if (!stillActive && match.SignalLost == false) {
 								Core.ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
 								Core.ActiveMatches[match.Icao].SignalLost = true;
-								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
+								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 							}
 							if (stillActive && match.SignalLost) {
 								Core.ActiveMatches[match.Icao].SignalLost = false;
-								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
+								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 							}
 						}
 					}
@@ -252,9 +255,9 @@ namespace PlaneAlerter {
 			}
 		}
 
-		public static void SendAlert(Core.Condition condition, Core.Aircraft aircraft, string receiver, bool isFirst) {
+		public static void SendAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
 			//Show notification
-			if (Settings.showNotifications) Core.Ui.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.conditionName}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
+			if (Settings.showNotifications) Core.Ui.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.Name}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
 
 			//Make a ding noise
 			if (Settings.soundAlerts) SystemSounds.Exclamation.Play();
@@ -262,23 +265,23 @@ namespace PlaneAlerter {
 			//Log
 			Core.LogAlert(condition, aircraft, receiver, isFirst);
 
-			if (condition.emailEnabled) {
+			if (condition.EmailEnabled) {
 				//Send emails
-				foreach (string email in condition.recieverEmails) {
+				foreach (string email in condition.ReceiverEmails) {
 					Email.SendEmail(email, condition, aircraft, receiver, isFirst);
 				}
 			}
 			
-			if (condition.twitterEnabled) {
-				string content = isFirst?condition.tweetFirstFormat:condition.tweetLastFormat;
+			if (condition.TwitterEnabled) {
+				string content = isFirst?condition.TweetFirstFormat:condition.TweetLastFormat;
 
 				//Check if selected account is valid
-				if (string.IsNullOrWhiteSpace(condition.twitterAccount)) {
+				if (string.IsNullOrWhiteSpace(condition.TwitterAccount)) {
 					Core.Ui.writeToConsole("ERROR: Please select Twitter account in condition editor", Color.Red);
 					return;
 				}
-				if (!Settings.TwitterUsers.ContainsKey(condition.twitterAccount)) {
-					Core.Ui.writeToConsole("ERROR: Selected Twitter account (" + condition.twitterAccount + ") has not been authenticated", Color.Red);
+				if (!Settings.TwitterUsers.ContainsKey(condition.TwitterAccount)) {
+					Core.Ui.writeToConsole("ERROR: Selected Twitter account (" + condition.TwitterAccount + ") has not been authenticated", Color.Red);
 					return;
 				}
 				if (string.IsNullOrEmpty(content)) {
@@ -287,7 +290,7 @@ namespace PlaneAlerter {
 				}
 
 				//Get credentials
-				string[] credentials = Settings.TwitterUsers[condition.twitterAccount];
+				string[] credentials = Settings.TwitterUsers[condition.TwitterAccount];
 
 				//Replace keywords in content
 				content = Core.ParseCustomFormatString(content, aircraft, condition);
@@ -298,32 +301,32 @@ namespace PlaneAlerter {
 				}
 					
 				//Add link to tweet
-				switch (condition.tweetLink) {
-					case Core.TweetLink.None:
+				switch (condition.TweetLink) {
+					case TweetLink.None:
 						break;
-					case Core.TweetLink.Radar_link:
+					case TweetLink.Radar_link:
 						content += " " + Settings.radarUrl;
 						break;
-					case Core.TweetLink.Radar_link_with_aircraft_selected:
+					case TweetLink.Radar_link_with_aircraft_selected:
 						if (isFirst) content += " " + Settings.radarUrl + "?icao=" + aircraft.Icao;
 						break;
-					case Core.TweetLink.Report_link:
+					case TweetLink.Report_link:
 						content += " " + Core.GenerateReportURL(aircraft.Icao, true);
 						break;
 				}
 
 				//Get map URL if enabled
-				var mapUrl = condition.tweetMap?Core.GenerateMapURL(aircraft) :"";
+				var mapUrl = condition.TweetMap?Core.GenerateMapURL(aircraft) :"";
 
 				//Send tweet
 				var success = Twitter.Tweet(credentials[0], credentials[1], content, mapUrl).Result;
 				if (success) {
-					Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.conditionName, Color.LightBlue);
+					Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.Name, Color.LightBlue);
 				}
 			}
 
 			//Increase sent alerts for condition and update stats
-			condition.increaseSentAlerts();
+			condition.IncreaseSentAlerts();
 			Stats.updateStats();
 		}
 
@@ -390,7 +393,7 @@ namespace PlaneAlerter {
 					//Ignore if no icao is provided
 					if (a["Icao"] == null) continue;
 					//Create new aircraft
-					var aircraft = new Core.Aircraft(a["Icao"].ToString());
+					var aircraft = new Aircraft(a["Icao"].ToString());
 
 					//Parse aircraft trail
 					if (requestTrails) {
@@ -541,33 +544,33 @@ namespace PlaneAlerter {
 					var condition = conditionJson[conditionId.ToString()];
 
 					//Create condition and copy values
-					var newCondition = new Core.Condition {
-						conditionName = condition["conditionName"].ToString(),
-						alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
-						ignoreFollowing = (bool)condition["ignoreFollowing"],
-						emailEnabled = (bool)(condition["emailEnabled"]??true),
-						emailFirstFormat = (condition["emailFirstFormat"] ?? "").ToString(),
-						emailLastFormat = (condition["emailLastFormat"] ?? "").ToString(),
-						twitterEnabled = (bool)(condition["twitterEnabled"]??false),
-						twitterAccount = (condition["twitterAccount"]??"").ToString(),
-						tweetFirstFormat = (condition["tweetFirstFormat"]??"").ToString(),
-						tweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
-						tweetMap = (bool)(condition["tweetMap"] ?? true),
-						tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), (condition["tweetLink"]??Core.TweetLink.None.ToString()).ToString())
+					var newCondition = new Condition {
+						Name = condition["conditionName"].ToString(),
+						AlertType = (AlertType)Enum.Parse(typeof(AlertType), condition["alertType"].ToString()),
+						IgnoreFollowing = (bool)condition["ignoreFollowing"],
+						EmailEnabled = (bool)(condition["emailEnabled"]??true),
+						EmailFirstFormat = (condition["emailFirstFormat"] ?? "").ToString(),
+						EmailLastFormat = (condition["emailLastFormat"] ?? "").ToString(),
+						TwitterEnabled = (bool)(condition["twitterEnabled"]??false),
+						TwitterAccount = (condition["twitterAccount"]??"").ToString(),
+						TweetFirstFormat = (condition["tweetFirstFormat"]??"").ToString(),
+						TweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
+						TweetMap = (bool)(condition["tweetMap"] ?? true),
+						TweetLink = (TweetLink)Enum.Parse(typeof(TweetLink), (condition["tweetLink"]??TweetLink.None.ToString()).ToString())
 					};
 
 					if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString())) {
-						var emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"] ?? Core.vrsProperty.Registration.ToString()).ToString());
-						newCondition.emailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
-						newCondition.emailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
+						var emailProperty = (VrsProperty)Enum.Parse(typeof(VrsProperty), (condition["emailProperty"] ?? VrsProperty.Registration.ToString()).ToString());
+						newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
+						newCondition.EmailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
 					}
 
 					var emailsArray = new List<string>();
 					foreach (var email in condition["recieverEmails"])
 						emailsArray.Add(email.ToString());
-					newCondition.recieverEmails = emailsArray;
+					newCondition.ReceiverEmails = emailsArray;
 					foreach (var trigger in condition["triggers"].Values())
-						newCondition.triggers.Add(newCondition.triggers.Count, new Core.Trigger((Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
+						newCondition.Triggers.Add(newCondition.Triggers.Count, new Trigger((VrsProperty)Enum.Parse(typeof(VrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
 					//Add condition to list
 					Core.Conditions.Add(conditionId, newCondition);
 				}

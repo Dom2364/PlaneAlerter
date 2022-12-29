@@ -5,6 +5,8 @@ using System.IO;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
+using PlaneAlerter.Enums;
+using PlaneAlerter.Models;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -29,7 +31,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// VRS property descriptions
 		/// </summary>
-		public static Dictionary<vrsProperty, string[]> VrsPropertyData { get; set; } = new Dictionary<vrsProperty, string[]>();
+		public static Dictionary<VrsProperty, string[]> VrsPropertyData { get; set; } = new Dictionary<VrsProperty, string[]>();
 
 		/// <summary>
 		/// Types of comparisons usable with triggers
@@ -39,7 +41,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Properties shown when essential properties selected
 		/// </summary>
-		public static List<vrsProperty> EssentialProperties { get; set; } = new List<vrsProperty>();
+		public static List<VrsProperty> EssentialProperties { get; set; } = new List<VrsProperty>();
 
 		/// <summary>
 		/// List of current matches
@@ -62,300 +64,12 @@ namespace PlaneAlerter {
 		public static Forms.PlaneAlerter Ui { get; set; }
 
 		/// <summary>
-		/// Class to store aircraft information
-		/// </summary>
-		public class Aircraft {
-			/// <summary>
-			/// List of property values retrieved from last aircraftlist.json
-			/// </summary>
-			private readonly Dictionary<string, string> _properties = new Dictionary<string, string>();
-
-			/// <summary>
-			/// ICAO hex of aircraft
-			/// </summary>
-			public string Icao { get; set; }
-
-			/// <summary>
-			/// Position track from last aircraftlist.json
-			/// </summary>
-			public double[] Trail { get; set; } = Array.Empty<double>();
-
-			/// <summary>
-			/// Get property value from property list
-			/// </summary>
-			/// <param name="key">Property name</param>
-			/// <returns>Value of property</returns>
-			public string? GetProperty(string key)
-			{
-				return _properties.ContainsKey(key) ? _properties[key] : null;
-			}
-
-			/// <summary>
-			/// Set property value
-			/// </summary>
-			/// <param name="key">Property name</param>
-			/// <param name="value">Value</param>
-			public void SetProperty(string key, string value) {
-				if (_properties.ContainsKey(key))
-					_properties[key] = value;
-			}
-
-			/// <summary>
-			/// Add a property to the list
-			/// </summary>
-			/// <param name="key">Key of property</param>
-			/// <param name="value">Value of property</param>
-			public void AddProperty(string key, string value) {
-				//Add if property is not position trail or stops list
-				//Arrays can't be used for conditions or displaying so theyre just ignored
-				if (key != "Cot" && key != "Stops")
-					_properties.Add(key, value);
-			}
-
-			/// <summary>
-			/// Get list of keys from property list
-			/// </summary>
-			/// <returns>List of property keys</returns>
-			public Dictionary<string, string>.KeyCollection GetPropertyKeys() {
-				return _properties.Keys;
-			}
-
-			/// <summary>
-			/// ToJSON
-			/// </summary>
-			public string ToJson() {
-				return Newtonsoft.Json.JsonConvert.SerializeObject(_properties);
-			}
-
-			public override string ToString() {
-				return $"Aircraft: { GetProperty("Icao")} | { GetProperty("Reg")} | { GetProperty("Type")} | { GetProperty("Call")}";
-			}
-
-			/// <summary>
-			/// Aircraft class constructor
-			/// </summary>
-			/// <param name="icao">ICAO of aircraft</param>
-			public Aircraft(string icao) {
-				Icao = icao;
-			}
-		}
-
-		/// <summary>
-		/// Alert types
-		/// </summary>
-		public enum AlertType {
-			Disabled,
-			First_Contact,
-			Last_Contact,
-			First_and_Last_Contact
-		}
-
-		/// <summary>
-		/// Tweet Link Types
-		/// </summary>
-		public enum TweetLink {
-			None,
-			Radar_link,
-			Radar_link_with_aircraft_selected,
-			Report_link
-		}
-
-		/// <summary>
 		/// Property list types used in email config
 		/// </summary>
 		public enum PropertyListType {
 			Hidden,
 			Essentials,
 			All
-		}
-
-		/// <summary>
-		/// List of VRS properties
-		/// </summary>
-		/// //ADD NEW ITEMS TO END
-		public enum vrsProperty {
-			Time_Tracked,
-			Receiver,
-			Icao,
-			Invalid_Icao,
-			Registration,
-			Altitude,
-			Altitude_AMSL,
-			Altitude_Type,
-			Target_Altitude,
-			Air_Pressure,
-			Callsign,
-			Callsign_Inaccurate,
-			Speed,
-			Speed_Type,
-			Vertical_Speed,
-			Vertical_Speed_Type,
-			Aircraft_Model,
-			Aircraft_Model_Icao,
-			Departure_Airport,
-			Arrival_Airport,
-			Operator,
-			Operator_Icao_Code,
-			Squawk,
-			Is_In_Emergency,
-			Distance,
-			Wake_Turbulence_Category,
-			Engines,
-			Engine_Type,
-			Species,
-			Is_Military,
-			Registered_Country,
-			Flight_Count,
-			Message_Count,
-			Is_On_Ground,
-			User_Tag,
-			Is_Interesting,
-			Transponder_Type,
-			Has_Signal_Level,
-			Signal_Level,
-			Mlat,
-			Manufacturer,
-			Bearing,
-			Engine_Mount,
-			Year,
-			Serial,
-			Is_Tisb,
-			Track,
-			Is_Track_Heading,
-			Latitude,
-			Longitude,
-			Is_Ferry_Flight,
-			Is_Charter_Flight,
-			Ident,
-			Target_Heading,
-			Notes
-		}
-
-		/// <summary>
-		/// Trigger information
-		/// </summary>
-		public class Trigger {
-			/// <summary>
-			/// Property to be checked
-			/// </summary>
-			public vrsProperty Property;
-
-			/// <summary>
-			/// Value to be checked against
-			/// </summary>
-			public string Value;
-
-			/// <summary>
-			/// Type of comparison
-			/// </summary>
-			public string ComparisonType;
-
-			/// <summary>
-			/// Trigger constructor
-			/// </summary>
-			/// <param name="property">Property to check</param>
-			/// <param name="value">Value to be checked against</param>
-			/// <param name="comparisonType">Type of comparison</param>
-			public Trigger(vrsProperty property, string value, string comparisonType) {
-				Property = property;
-				Value = value;
-				ComparisonType = comparisonType;
-			}
-		}
-
-		/// <summary>
-		/// Condition information
-		/// </summary>
-		public class Condition {
-			/// <summary>
-			/// Name of condition
-			/// </summary>
-			public string conditionName;
-
-			/// <summary>
-			/// Ignore following conditions
-			/// </summary>
-			public bool ignoreFollowing;
-
-			/// <summary>
-			/// Alerts sent for this condition
-			/// </summary>
-			public int alertsThisSession = 0;
-
-			/// <summary>
-			/// Send emails?
-			/// </summary>
-			public bool emailEnabled;
-
-			/// <summary>
-			/// Emails to send alert to
-			/// </summary>
-			public List<string> recieverEmails = new List<string>();
-
-			/// <summary>
-			/// Email first contact alert format
-			/// </summary>
-			public string emailFirstFormat;
-
-			/// <summary>
-			/// Email last contact alert format
-			/// </summary>
-			public string emailLastFormat;
-
-			/// <summary>
-			/// Send tweets?
-			/// </summary>
-			public bool twitterEnabled;
-
-			/// <summary>
-			/// Twitter account to send from
-			/// </summary>
-			public string twitterAccount;
-
-			/// <summary>
-			/// Tweet first contact alert format
-			/// </summary>
-			public string tweetFirstFormat;
-
-			/// <summary>
-			/// Tweet last contact alert format
-			/// </summary>
-			public string tweetLastFormat;
-
-			/// <summary>
-			/// Link to be attached in tweets
-			/// </summary>
-			public TweetLink tweetLink;
-
-			/// <summary>
-			/// Attach map?
-			/// </summary>
-			public bool tweetMap;
-
-			/// <summary>
-			/// Type of alert
-			/// </summary>
-			public AlertType alertType;
-
-			/// <summary>
-			/// List of triggers
-			/// </summary>
-			public Dictionary<int, Trigger> triggers = new Dictionary<int, Trigger>();
-
-			/// <summary>
-			/// Increase sent emails counter for condition and total alerts sent
-			/// </summary>
-			public void increaseSentAlerts() {
-				alertsThisSession++;
-				Stats.totalAlertsSent++;
-			}
-
-			/// <summary>
-			/// Creates a new condition
-			/// </summary>
-			public Condition() {
-				
-			}
 		}
 
 		/// <summary>
@@ -395,7 +109,7 @@ namespace PlaneAlerter {
 			/// <param name="aircraftInfo">Aircraft information when matched</param>
 			public void AddCondition(int id, Condition match, Aircraft aircraftInfo) {
 				Conditions.Add(new MatchedCondition(id, match, aircraftInfo));
-				IgnoreFollowing = match.ignoreFollowing;
+				IgnoreFollowing = match.IgnoreFollowing;
 			}
 
 			/// <summary>
@@ -460,80 +174,80 @@ namespace PlaneAlerter {
 			//E = Contains
 
 			//Add all of the property information
-			VrsPropertyData.Add(vrsProperty.Time_Tracked, new string[] { "Number", "AB", "TSecs", "The number of seconds that the aircraft has been tracked for." });
-			VrsPropertyData.Add(vrsProperty.Receiver, new string[] { "Number", "A", "Rcvr", "The ID of the feed that last supplied information about the aircraft." });
-			VrsPropertyData.Add(vrsProperty.Icao, new string[] { "String", "ADE", "Icao", "The ICAO of the aircraft." });
-			VrsPropertyData.Add(vrsProperty.Invalid_Icao, new string[] { "Boolean", "C", "Bad", "True if the ICAO is known to be invalid." });
-			VrsPropertyData.Add(vrsProperty.Registration, new string[] { "String", "ADE", "Reg", "The registration." });
-			VrsPropertyData.Add(vrsProperty.Altitude, new string[] { "Number", "B", "Alt", "The altitude in feet at standard pressure." });
-			VrsPropertyData.Add(vrsProperty.Altitude_AMSL, new string[] { "Number", "B", "GAlt", "The altitude adjusted for local air pressure, should be roughly the height above mean sea level." });
-			VrsPropertyData.Add(vrsProperty.Altitude_Type, new string[] { "Number", "A", "AltT", "0 = altitude is barometric, 1 = altitude is geometric. Default to barometric until told otherwise." });
-			VrsPropertyData.Add(vrsProperty.Air_Pressure, new string[] { "Number", "B", "InHg", "The air pressure in inches of mercury that was used to calculate the AMSL altitude from the standard pressure altitude." });
-			VrsPropertyData.Add(vrsProperty.Target_Altitude, new string[] { "Number", "AB", "TAlt", "The target altitude, in feet, set on the autopilot / FMS etc." });
-			VrsPropertyData.Add(vrsProperty.Callsign, new string[] { "String", "ADE", "Call", "The callsign." });
-			VrsPropertyData.Add(vrsProperty.Callsign_Inaccurate, new string[] { "Boolean", "C", "CallSus", "True if the callsign may not be correct." });
-			VrsPropertyData.Add(vrsProperty.Latitude, new string[] { "Number", "B", "Lat", "The aircraft's latitude over the ground." });
-			VrsPropertyData.Add(vrsProperty.Longitude, new string[] { "Number", "B", "Long", "The aircraft's longitude over the ground." });
-			VrsPropertyData.Add(vrsProperty.Mlat, new string[] { "Boolean", "C", "Mlat", "True if the aircraft's position was determined using Multilateration." });
-			VrsPropertyData.Add(vrsProperty.Is_Tisb, new string[] { "Boolean", "C", "Tisb", "True if the last message received was from a TIS-B source." });
-			VrsPropertyData.Add(vrsProperty.Speed, new string[] { "Number", "B", "Spd", "The speed in knots." });
-			VrsPropertyData.Add(vrsProperty.Speed_Type, new string[] { "Number", "A", "SpdTyp", "The type of speed that Speed represents. Only used with raw feeds. 0/missing = ground speed, 1 = ground speed reversing, 2 = indicated air speed, 3 = true air speed." });
-			VrsPropertyData.Add(vrsProperty.Vertical_Speed, new string[] { "Number", "B", "Vsi", "Vertical speed in feet per minute." });
-			VrsPropertyData.Add(vrsProperty.Vertical_Speed_Type, new string[] { "Number", "A", "VsiT", "0 = vertical speed is barometric, 1 = vertical speed is geometric. Default to barometric until told otherwise." });
-			VrsPropertyData.Add(vrsProperty.Track, new string[] { "Number", "B", "Trak", "Aircraft's track angle across the ground clockwise from 0° north." });
-			VrsPropertyData.Add(vrsProperty.Is_Track_Heading, new string[] { "Boolean", "C", "TrkH", "True if Trak is the aircraft's heading, false if it's the ground track. Default to ground track until told otherwise." });
-			VrsPropertyData.Add(vrsProperty.Target_Heading, new string[] { "Number", "B", "TTrk", "The track or heading currently set on the aircraft's autopilot or FMS." });
-			VrsPropertyData.Add(vrsProperty.Aircraft_Model_Icao, new string[] { "String", "ADE", "Type", "The aircraft model's ICAO type code." });
-			VrsPropertyData.Add(vrsProperty.Aircraft_Model, new string[] { "String", "AE", "Mdl", "A description of the aircraft's model." });
-			VrsPropertyData.Add(vrsProperty.Manufacturer, new string[] { "String", "A", "Man", "The manufacturer of the aircraft." });
-			VrsPropertyData.Add(vrsProperty.Serial, new string[] { "String", "ADE", "CNum", "The aircraft's construction or serial number." });
-			VrsPropertyData.Add(vrsProperty.Departure_Airport, new string[] { "String", "AE", "From", "The code and name of the departure airport." });
-			VrsPropertyData.Add(vrsProperty.Arrival_Airport, new string[] { "String", "AE", "To", "The code and name of the arrival airport." });
-			VrsPropertyData.Add(vrsProperty.Operator, new string[] { "String", "AE", "Op", "The name of the aircraft's operator." });
-			VrsPropertyData.Add(vrsProperty.Operator_Icao_Code, new string[] { "String", "A", "OpIcao", "The operator's ICAO code." });
-			VrsPropertyData.Add(vrsProperty.Squawk, new string[] { "Number", "ABD", "Sqk", "The squawk." });
-			VrsPropertyData.Add(vrsProperty.Ident, new string[] { "Boolean", "C", "Ident", "True if the aircraft is squawking ident." });
-			VrsPropertyData.Add(vrsProperty.Is_In_Emergency, new string[] { "Boolean", "C", "Help", "True if the aircraft is transmitting an emergency squawk." });
-			VrsPropertyData.Add(vrsProperty.Distance, new string[] { "Number", "B", "Dst", "The distance to the aircraft in kilometres." });
-			VrsPropertyData.Add(vrsProperty.Bearing, new string[] { "Number", "B", "Brng", "The bearing to the aircraft from 0° north" });
-			VrsPropertyData.Add(vrsProperty.Wake_Turbulence_Category, new string[] { "Number", "AB", "WTC", "The wake turbulence category of the aircraft. 1 = none, 2 = light, 3 = medium, 4 = heavy" });
-			VrsPropertyData.Add(vrsProperty.Engines, new string[] { "Number", "AB", "Engines", "The number of engines the aircraft has." });
-			VrsPropertyData.Add(vrsProperty.Engine_Type, new string[] { "Number", "A", "EngType", "The type of engine the aircraft uses. 0 = none, 1 = piston, 2 = turbo, 3 = jet, 4 = electric" });
-			VrsPropertyData.Add(vrsProperty.Engine_Mount, new string[] { "Number", "A", "EngMount", "The placement of engines on the aircraft. 0 = unknown, 1 = aft mounted, 2 = wing buried, 3 = fuselage buried, 4 = nose mounted, 5 = wing mounted" });
-			VrsPropertyData.Add(vrsProperty.Species, new string[] { "Number", "A", "Species", "The species of the aircraft (helicopter, jet etc.). 0 = none, 1 = landplane, 2 = seaplane, 3 = amphibian, 4 = helicopter, 5 = gyrocopter, 6 = tiltwing, 7 = ground vehicle, 8 = tower" });
-			VrsPropertyData.Add(vrsProperty.Is_Military, new string[] { "Boolean", "C", "Mil", "True if the aircraft appears to be operated by the military." });
-			VrsPropertyData.Add(vrsProperty.Registered_Country, new string[] { "String", "A", "Cou", "The country that the aircraft is registered to." });
-			VrsPropertyData.Add(vrsProperty.Flight_Count, new string[] { "Number", "AB", "FlightsCount", "The number of Flights records the aircraft has in the database." });
-			VrsPropertyData.Add(vrsProperty.Message_Count, new string[] { "Number", "AB", "CMsgs", "The count of messages received for the aircraft." });
-			VrsPropertyData.Add(vrsProperty.Is_On_Ground, new string[] { "Boolean", "C", "Gnd", "True if the aircraft is on the ground." });
-			VrsPropertyData.Add(vrsProperty.User_Tag, new string[] { "String", "AE", "Tag", "The user tag found for the aircraft in the BaseStation.sqb local database." });
-			VrsPropertyData.Add(vrsProperty.Notes, new string[] { "String", "AE", "Notes", "The notes found for the aircraft in the BaseStation.sqb local database." });
-			VrsPropertyData.Add(vrsProperty.Is_Interesting, new string[] { "Boolean", "C", "Interested", "True if the aircraft is flagged as interesting in the BaseStation.sqb local database." });
-			VrsPropertyData.Add(vrsProperty.Transponder_Type, new string[] { "Number", "AB", "Trt", "Transponder type. 0 = Unknown, 1 = Mode-S, 2 = ADS-B (unknown version), 3 = ADS-B 1, 4 = ADS-B 2." });
-			VrsPropertyData.Add(vrsProperty.Year, new string[] { "Number", "AB", "Year", "The year the aircraft was manufactured." });
-			VrsPropertyData.Add(vrsProperty.Has_Signal_Level, new string[] { "Boolean", "C", "HasSig", "True if the aircraft has a signal level associated with it." });
-			VrsPropertyData.Add(vrsProperty.Signal_Level, new string[] { "Number", "B", "Sig", "The signal level for the last message received from the aircraft, as reported by the receiver. Not all receivers pass signal levels. The value's units are receiver-dependent." });
-			VrsPropertyData.Add(vrsProperty.Is_Ferry_Flight, new string[] { "Boolean", "C", "IsFerryFlight", "True if this is a ferry flight." });
-			VrsPropertyData.Add(vrsProperty.Is_Charter_Flight, new string[] { "Boolean", "C", "IsCharterFlight", "True if this is a charter flight." });
+			VrsPropertyData.Add(VrsProperty.Time_Tracked, new string[] { "Number", "AB", "TSecs", "The number of seconds that the aircraft has been tracked for." });
+			VrsPropertyData.Add(VrsProperty.Receiver, new string[] { "Number", "A", "Rcvr", "The ID of the feed that last supplied information about the aircraft." });
+			VrsPropertyData.Add(VrsProperty.Icao, new string[] { "String", "ADE", "Icao", "The ICAO of the aircraft." });
+			VrsPropertyData.Add(VrsProperty.Invalid_Icao, new string[] { "Boolean", "C", "Bad", "True if the ICAO is known to be invalid." });
+			VrsPropertyData.Add(VrsProperty.Registration, new string[] { "String", "ADE", "Reg", "The registration." });
+			VrsPropertyData.Add(VrsProperty.Altitude, new string[] { "Number", "B", "Alt", "The altitude in feet at standard pressure." });
+			VrsPropertyData.Add(VrsProperty.Altitude_AMSL, new string[] { "Number", "B", "GAlt", "The altitude adjusted for local air pressure, should be roughly the height above mean sea level." });
+			VrsPropertyData.Add(VrsProperty.Altitude_Type, new string[] { "Number", "A", "AltT", "0 = altitude is barometric, 1 = altitude is geometric. Default to barometric until told otherwise." });
+			VrsPropertyData.Add(VrsProperty.Air_Pressure, new string[] { "Number", "B", "InHg", "The air pressure in inches of mercury that was used to calculate the AMSL altitude from the standard pressure altitude." });
+			VrsPropertyData.Add(VrsProperty.Target_Altitude, new string[] { "Number", "AB", "TAlt", "The target altitude, in feet, set on the autopilot / FMS etc." });
+			VrsPropertyData.Add(VrsProperty.Callsign, new string[] { "String", "ADE", "Call", "The callsign." });
+			VrsPropertyData.Add(VrsProperty.Callsign_Inaccurate, new string[] { "Boolean", "C", "CallSus", "True if the callsign may not be correct." });
+			VrsPropertyData.Add(VrsProperty.Latitude, new string[] { "Number", "B", "Lat", "The aircraft's latitude over the ground." });
+			VrsPropertyData.Add(VrsProperty.Longitude, new string[] { "Number", "B", "Long", "The aircraft's longitude over the ground." });
+			VrsPropertyData.Add(VrsProperty.Mlat, new string[] { "Boolean", "C", "Mlat", "True if the aircraft's position was determined using Multilateration." });
+			VrsPropertyData.Add(VrsProperty.Is_Tisb, new string[] { "Boolean", "C", "Tisb", "True if the last message received was from a TIS-B source." });
+			VrsPropertyData.Add(VrsProperty.Speed, new string[] { "Number", "B", "Spd", "The speed in knots." });
+			VrsPropertyData.Add(VrsProperty.Speed_Type, new string[] { "Number", "A", "SpdTyp", "The type of speed that Speed represents. Only used with raw feeds. 0/missing = ground speed, 1 = ground speed reversing, 2 = indicated air speed, 3 = true air speed." });
+			VrsPropertyData.Add(VrsProperty.Vertical_Speed, new string[] { "Number", "B", "Vsi", "Vertical speed in feet per minute." });
+			VrsPropertyData.Add(VrsProperty.Vertical_Speed_Type, new string[] { "Number", "A", "VsiT", "0 = vertical speed is barometric, 1 = vertical speed is geometric. Default to barometric until told otherwise." });
+			VrsPropertyData.Add(VrsProperty.Track, new string[] { "Number", "B", "Trak", "Aircraft's track angle across the ground clockwise from 0° north." });
+			VrsPropertyData.Add(VrsProperty.Is_Track_Heading, new string[] { "Boolean", "C", "TrkH", "True if Trak is the aircraft's heading, false if it's the ground track. Default to ground track until told otherwise." });
+			VrsPropertyData.Add(VrsProperty.Target_Heading, new string[] { "Number", "B", "TTrk", "The track or heading currently set on the aircraft's autopilot or FMS." });
+			VrsPropertyData.Add(VrsProperty.Aircraft_Model_Icao, new string[] { "String", "ADE", "Type", "The aircraft model's ICAO type code." });
+			VrsPropertyData.Add(VrsProperty.Aircraft_Model, new string[] { "String", "AE", "Mdl", "A description of the aircraft's model." });
+			VrsPropertyData.Add(VrsProperty.Manufacturer, new string[] { "String", "A", "Man", "The manufacturer of the aircraft." });
+			VrsPropertyData.Add(VrsProperty.Serial, new string[] { "String", "ADE", "CNum", "The aircraft's construction or serial number." });
+			VrsPropertyData.Add(VrsProperty.Departure_Airport, new string[] { "String", "AE", "From", "The code and name of the departure airport." });
+			VrsPropertyData.Add(VrsProperty.Arrival_Airport, new string[] { "String", "AE", "To", "The code and name of the arrival airport." });
+			VrsPropertyData.Add(VrsProperty.Operator, new string[] { "String", "AE", "Op", "The name of the aircraft's operator." });
+			VrsPropertyData.Add(VrsProperty.Operator_Icao_Code, new string[] { "String", "A", "OpIcao", "The operator's ICAO code." });
+			VrsPropertyData.Add(VrsProperty.Squawk, new string[] { "Number", "ABD", "Sqk", "The squawk." });
+			VrsPropertyData.Add(VrsProperty.Ident, new string[] { "Boolean", "C", "Ident", "True if the aircraft is squawking ident." });
+			VrsPropertyData.Add(VrsProperty.Is_In_Emergency, new string[] { "Boolean", "C", "Help", "True if the aircraft is transmitting an emergency squawk." });
+			VrsPropertyData.Add(VrsProperty.Distance, new string[] { "Number", "B", "Dst", "The distance to the aircraft in kilometres." });
+			VrsPropertyData.Add(VrsProperty.Bearing, new string[] { "Number", "B", "Brng", "The bearing to the aircraft from 0° north" });
+			VrsPropertyData.Add(VrsProperty.Wake_Turbulence_Category, new string[] { "Number", "AB", "WTC", "The wake turbulence category of the aircraft. 1 = none, 2 = light, 3 = medium, 4 = heavy" });
+			VrsPropertyData.Add(VrsProperty.Engines, new string[] { "Number", "AB", "Engines", "The number of engines the aircraft has." });
+			VrsPropertyData.Add(VrsProperty.Engine_Type, new string[] { "Number", "A", "EngType", "The type of engine the aircraft uses. 0 = none, 1 = piston, 2 = turbo, 3 = jet, 4 = electric" });
+			VrsPropertyData.Add(VrsProperty.Engine_Mount, new string[] { "Number", "A", "EngMount", "The placement of engines on the aircraft. 0 = unknown, 1 = aft mounted, 2 = wing buried, 3 = fuselage buried, 4 = nose mounted, 5 = wing mounted" });
+			VrsPropertyData.Add(VrsProperty.Species, new string[] { "Number", "A", "Species", "The species of the aircraft (helicopter, jet etc.). 0 = none, 1 = landplane, 2 = seaplane, 3 = amphibian, 4 = helicopter, 5 = gyrocopter, 6 = tiltwing, 7 = ground vehicle, 8 = tower" });
+			VrsPropertyData.Add(VrsProperty.Is_Military, new string[] { "Boolean", "C", "Mil", "True if the aircraft appears to be operated by the military." });
+			VrsPropertyData.Add(VrsProperty.Registered_Country, new string[] { "String", "A", "Cou", "The country that the aircraft is registered to." });
+			VrsPropertyData.Add(VrsProperty.Flight_Count, new string[] { "Number", "AB", "FlightsCount", "The number of Flights records the aircraft has in the database." });
+			VrsPropertyData.Add(VrsProperty.Message_Count, new string[] { "Number", "AB", "CMsgs", "The count of messages received for the aircraft." });
+			VrsPropertyData.Add(VrsProperty.Is_On_Ground, new string[] { "Boolean", "C", "Gnd", "True if the aircraft is on the ground." });
+			VrsPropertyData.Add(VrsProperty.User_Tag, new string[] { "String", "AE", "Tag", "The user tag found for the aircraft in the BaseStation.sqb local database." });
+			VrsPropertyData.Add(VrsProperty.Notes, new string[] { "String", "AE", "Notes", "The notes found for the aircraft in the BaseStation.sqb local database." });
+			VrsPropertyData.Add(VrsProperty.Is_Interesting, new string[] { "Boolean", "C", "Interested", "True if the aircraft is flagged as interesting in the BaseStation.sqb local database." });
+			VrsPropertyData.Add(VrsProperty.Transponder_Type, new string[] { "Number", "AB", "Trt", "Transponder type. 0 = Unknown, 1 = Mode-S, 2 = ADS-B (unknown version), 3 = ADS-B 1, 4 = ADS-B 2." });
+			VrsPropertyData.Add(VrsProperty.Year, new string[] { "Number", "AB", "Year", "The year the aircraft was manufactured." });
+			VrsPropertyData.Add(VrsProperty.Has_Signal_Level, new string[] { "Boolean", "C", "HasSig", "True if the aircraft has a signal level associated with it." });
+			VrsPropertyData.Add(VrsProperty.Signal_Level, new string[] { "Number", "B", "Sig", "The signal level for the last message received from the aircraft, as reported by the receiver. Not all receivers pass signal levels. The value's units are receiver-dependent." });
+			VrsPropertyData.Add(VrsProperty.Is_Ferry_Flight, new string[] { "Boolean", "C", "IsFerryFlight", "True if this is a ferry flight." });
+			VrsPropertyData.Add(VrsProperty.Is_Charter_Flight, new string[] { "Boolean", "C", "IsCharterFlight", "True if this is a charter flight." });
 
 			//Add essential properties to list
-			EssentialProperties.Add(vrsProperty.Receiver);
-			EssentialProperties.Add(vrsProperty.Icao);
-			EssentialProperties.Add(vrsProperty.Registration);
-			EssentialProperties.Add(vrsProperty.Altitude);
-			EssentialProperties.Add(vrsProperty.Callsign);
-			EssentialProperties.Add(vrsProperty.Speed);
-			EssentialProperties.Add(vrsProperty.Vertical_Speed);
-			EssentialProperties.Add(vrsProperty.Aircraft_Model);
-			EssentialProperties.Add(vrsProperty.Aircraft_Model_Icao);
-			EssentialProperties.Add(vrsProperty.Departure_Airport);
-			EssentialProperties.Add(vrsProperty.Arrival_Airport);
-			EssentialProperties.Add(vrsProperty.Operator);
-			EssentialProperties.Add(vrsProperty.Operator_Icao_Code);
-			EssentialProperties.Add(vrsProperty.Squawk);
-			EssentialProperties.Add(vrsProperty.Registered_Country);
-			EssentialProperties.Add(vrsProperty.Transponder_Type);
-			EssentialProperties.Add(vrsProperty.Manufacturer);
+			EssentialProperties.Add(VrsProperty.Receiver);
+			EssentialProperties.Add(VrsProperty.Icao);
+			EssentialProperties.Add(VrsProperty.Registration);
+			EssentialProperties.Add(VrsProperty.Altitude);
+			EssentialProperties.Add(VrsProperty.Callsign);
+			EssentialProperties.Add(VrsProperty.Speed);
+			EssentialProperties.Add(VrsProperty.Vertical_Speed);
+			EssentialProperties.Add(VrsProperty.Aircraft_Model);
+			EssentialProperties.Add(VrsProperty.Aircraft_Model_Icao);
+			EssentialProperties.Add(VrsProperty.Departure_Airport);
+			EssentialProperties.Add(VrsProperty.Arrival_Airport);
+			EssentialProperties.Add(VrsProperty.Operator);
+			EssentialProperties.Add(VrsProperty.Operator_Icao_Code);
+			EssentialProperties.Add(VrsProperty.Squawk);
+			EssentialProperties.Add(VrsProperty.Registered_Country);
+			EssentialProperties.Add(VrsProperty.Transponder_Type);
+			EssentialProperties.Add(VrsProperty.Manufacturer);
 
 			//Add comparison types
 			ComparisonTypes.Add("A", new string[] { "Equals", "Not Equals" });
@@ -545,7 +259,7 @@ namespace PlaneAlerter {
 
 		public static void LogAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
 			try {
-				string message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")} | {condition.conditionName} | {receiver} | {(isFirst?"FIRST":"LAST")} CONTACT ALERT: " + Environment.NewLine;
+				string message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")} | {condition.Name} | {receiver} | {(isFirst?"FIRST":"LAST")} CONTACT ALERT: " + Environment.NewLine;
 				message += aircraft.ToJson() + Environment.NewLine + Environment.NewLine;
 
 				File.AppendAllText("alerts.log", message);
@@ -561,7 +275,7 @@ namespace PlaneAlerter {
 		/// <returns>Parsed string</returns>
 		public static string ParseCustomFormatString(string format, Aircraft aircraft, Condition condition) {
 			Dictionary<string, string> variables = new Dictionary<string, string> {
-				{ "ConditionName", condition.conditionName },
+				{ "ConditionName", condition.Name },
 				{ "RcvrName", Receivers.ContainsKey(aircraft.GetProperty("Rcvr")) ? Receivers[aircraft.GetProperty("Rcvr")] : "" },
 				{ "Date", DateTime.Now.ToString("d") },
 				{ "Time", DateTime.Now.ToString("t") },
@@ -584,7 +298,7 @@ namespace PlaneAlerter {
 					string value = aircraft.GetProperty(info[2]) ?? "";
 
 					//If enum, replace with string value
-					if (Enums.TryGetConvertedValue(info[2], value, out string convertedvalue)) {
+					if (EnumUtils.TryGetConvertedValue(info[2], value, out string convertedvalue)) {
 						value = convertedvalue;
 					}
 

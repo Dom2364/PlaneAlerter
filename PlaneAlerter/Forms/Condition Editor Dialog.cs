@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using PlaneAlerter.Enums;
+using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Forms {
 	/// <summary>
@@ -32,26 +34,26 @@ namespace PlaneAlerter.Forms {
 
 			//Set form element values from condition info
 			var c = EditorConditionsList.Conditions[_conditionToUpdate];
-			conditionNameTextBox.Text = c.conditionName;
-			ignoreFollowingCheckbox.Checked = c.ignoreFollowing;
-			emailCheckBox.Checked = c.emailEnabled;
-			emailFirstFormatTextBox.Text = c.emailFirstFormat;
-			emailLastFormatTextBox.Text = c.emailLastFormat;
-			recieverEmailTextBox.Text = string.Join(Environment.NewLine, c.recieverEmails.ToArray());
-			twitterCheckBox.Checked = c.twitterEnabled;
-			twitterAccountComboBox.Text = c.twitterAccount;
-			tweetFirstFormatTextBox.Text = c.tweetFirstFormat;
-			tweetLastFormatTextBox.Text = c.tweetLastFormat;
-			tweetMapCheckBox.Checked = c.tweetMap;
-			tweetLinkComboBox.Text = c.tweetLink.ToString().Replace('_', ' ');
-			alertTypeComboBox.Text = c.alertType.ToString().Replace('_', ' ');
+			conditionNameTextBox.Text = c.Name;
+			ignoreFollowingCheckbox.Checked = c.IgnoreFollowing;
+			emailCheckBox.Checked = c.EmailEnabled;
+			emailFirstFormatTextBox.Text = c.EmailFirstFormat;
+			emailLastFormatTextBox.Text = c.EmailLastFormat;
+			recieverEmailTextBox.Text = string.Join(Environment.NewLine, c.ReceiverEmails.ToArray());
+			twitterCheckBox.Checked = c.TwitterEnabled;
+			twitterAccountComboBox.Text = c.TwitterAccount;
+			tweetFirstFormatTextBox.Text = c.TweetFirstFormat;
+			tweetLastFormatTextBox.Text = c.TweetLastFormat;
+			tweetMapCheckBox.Checked = c.TweetMap;
+			tweetLinkComboBox.Text = c.TweetLink.ToString().Replace('_', ' ');
+			alertTypeComboBox.Text = c.AlertType.ToString().Replace('_', ' ');
 
-			foreach (var trigger in c.triggers.Values) {
+			foreach (var trigger in c.Triggers.Values) {
 				triggerDataGridView.Rows.Add();
 				var newRow = triggerDataGridView.Rows[triggerDataGridView.Rows.Count - 2];
 
 				var comboBoxCell = (DataGridViewComboBoxCell)(newRow.Cells[0]);
-				foreach (Core.vrsProperty property in Enum.GetValues(typeof(Core.vrsProperty)))
+				foreach (VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
 					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
 
 				newRow.Cells[0].Value = trigger.Property.ToString().Replace('_', ' ');
@@ -92,16 +94,16 @@ namespace PlaneAlerter.Forms {
 			var rows = triggerDataGridView.Rows.Cast<DataGridViewRow>();
             foreach(var row in rows) {
 				var comboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
-				foreach(Core.vrsProperty property in Enum.GetValues(typeof(Core.vrsProperty)))
+				foreach(VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
 					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
 			}
 
 			//Add alert types to combobox
-			foreach(Core.AlertType property in Enum.GetValues(typeof(Core.AlertType)))
+			foreach(AlertType property in Enum.GetValues(typeof(AlertType)))
 				alertTypeComboBox.Items.Add(property.ToString().Replace('_', ' '));
 
 			//Add tweet link types
-			foreach (Core.TweetLink linkType in Enum.GetValues(typeof(Core.TweetLink)))
+			foreach (TweetLink linkType in Enum.GetValues(typeof(TweetLink)))
 				tweetLinkComboBox.Items.Add(linkType.ToString().Replace('_', ' '));
 
 			//Add twitter accounts to combobox
@@ -122,7 +124,7 @@ namespace PlaneAlerter.Forms {
 			//Check if cell changed is in the value column and value isnt empty
 			if (e.ColumnIndex == 2 && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString() != "") {
 				//Clear value if property is number and value is not a number
-				if (triggerDataGridView.Rows[e.RowIndex].Cells[2].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString() != "" && Core.VrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][0] == "Number") {
+				if (triggerDataGridView.Rows[e.RowIndex].Cells[2].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString() != "" && Core.VrsPropertyData[(VrsProperty)Enum.Parse(typeof(VrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][0] == "Number") {
 					try {
 						Convert.ToDouble(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value);
 					}
@@ -142,7 +144,7 @@ namespace PlaneAlerter.Forms {
 				//Get comparison types supported by property
 				string supportedComparisonTypes;
 				try {
-					supportedComparisonTypes = Core.VrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][1];
+					supportedComparisonTypes = Core.VrsPropertyData[(VrsProperty)Enum.Parse(typeof(VrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][1];
 				}
 				catch (Exception) {
 					return;
@@ -188,7 +190,7 @@ namespace PlaneAlerter.Forms {
 
 				//Add vrs properties to combobox
 				comboBoxCell.Items.Clear();
-				foreach (Core.vrsProperty property in Enum.GetValues(typeof(Core.vrsProperty)))
+				foreach (VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
 					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
 			}
 		}
@@ -309,35 +311,35 @@ namespace PlaneAlerter.Forms {
 
 			//Sort conditions
 			var list = EditorConditionsList.Conditions.Keys.ToList();
-			var sortedConditions = new SortedDictionary<int, Core.Condition>();
+			var sortedConditions = new SortedDictionary<int, Condition>();
 			list.Sort();
 			foreach(var key in list)
 				sortedConditions.Add(key, EditorConditionsList.Conditions[key]);
 			EditorConditionsList.Conditions = sortedConditions;
 
 			//Create new condition
-			var newCondition = new Core.Condition {
-				conditionName = conditionNameTextBox.Text,
-				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
-				ignoreFollowing = ignoreFollowingCheckbox.Checked,
-				emailEnabled = emailCheckBox.Checked,
-				emailFirstFormat = emailFirstFormatTextBox.Text,
-				emailLastFormat = emailLastFormatTextBox.Text,
-				recieverEmails = recieverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
-				twitterEnabled = twitterCheckBox.Checked,
-				twitterAccount = twitterAccountComboBox.Text,
-				tweetFirstFormat = tweetFirstFormatTextBox.Text,
-				tweetLastFormat = tweetLastFormatTextBox.Text,
-				tweetMap = tweetMapCheckBox.Checked,
-				tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), tweetLinkComboBox.Text.Replace(' ', '_'))
+			var newCondition = new Condition {
+				Name = conditionNameTextBox.Text,
+				AlertType = (AlertType)Enum.Parse(typeof(AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
+				IgnoreFollowing = ignoreFollowingCheckbox.Checked,
+				EmailEnabled = emailCheckBox.Checked,
+				EmailFirstFormat = emailFirstFormatTextBox.Text,
+				EmailLastFormat = emailLastFormatTextBox.Text,
+				ReceiverEmails = recieverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
+				TwitterEnabled = twitterCheckBox.Checked,
+				TwitterAccount = twitterAccountComboBox.Text,
+				TweetFirstFormat = tweetFirstFormatTextBox.Text,
+				TweetLastFormat = tweetLastFormatTextBox.Text,
+				TweetMap = tweetMapCheckBox.Checked,
+				TweetLink = (TweetLink)Enum.Parse(typeof(TweetLink), tweetLinkComboBox.Text.Replace(' ', '_'))
 			};
 
 			if (triggerDataGridView.Rows.Count != 0)
 				foreach (DataGridViewRow row in triggerDataGridView.Rows)
 					if (row.Index != triggerDataGridView.Rows.Count - 1)
-						foreach (Core.vrsProperty property in Enum.GetValues(typeof(Core.vrsProperty)))
+						foreach (VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
 							if (property.ToString() == row.Cells[0].Value.ToString().Replace(' ', '_')) {
-								newCondition.triggers.Add(newCondition.triggers.Count, new Core.Trigger(property, row.Cells[2].Value.ToString(), row.Cells[1].Value.ToString()));
+								newCondition.Triggers.Add(newCondition.Triggers.Count, new Trigger(property, row.Cells[2].Value.ToString(), row.Cells[1].Value.ToString()));
 								break;
 							}
 			//Add condition to condition list
@@ -410,19 +412,19 @@ namespace PlaneAlerter.Forms {
 		/// Update enabled state and styling of UI based on settings
 		/// </summary>
 		private void UpdateUIState() {
-			var alertType = Core.AlertType.First_and_Last_Contact;
+			var alertType = AlertType.First_and_Last_Contact;
 
 			if (!string.IsNullOrEmpty(alertTypeComboBox.Text)) {
-				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text.Replace(' ', '_'));
+				alertType = (AlertType)Enum.Parse(typeof(AlertType), alertTypeComboBox.Text.Replace(' ', '_'));
 			}
 			
-			emailFirstFormatTextBox.Enabled = emailCheckBox.Checked && (alertType != Core.AlertType.Last_Contact);
-			emailLastFormatTextBox.Enabled = emailCheckBox.Checked && (alertType != Core.AlertType.First_Contact);
+			emailFirstFormatTextBox.Enabled = emailCheckBox.Checked && (alertType != AlertType.Last_Contact);
+			emailLastFormatTextBox.Enabled = emailCheckBox.Checked && (alertType != AlertType.First_Contact);
 			recieverEmailTextBox.Enabled = emailCheckBox.Checked;
 
 			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
-			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked && (alertType != Core.AlertType.Last_Contact);
-			tweetLastFormatTextBox.Enabled = twitterCheckBox.Checked && (alertType != Core.AlertType.First_Contact);
+			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked && (alertType != AlertType.Last_Contact);
+			tweetLastFormatTextBox.Enabled = twitterCheckBox.Checked && (alertType != AlertType.First_Contact);
 		}
 
 		private void alertTypeComboBox_SelectedIndexChanged(object sender, EventArgs e) {

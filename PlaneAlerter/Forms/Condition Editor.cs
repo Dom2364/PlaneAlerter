@@ -4,6 +4,8 @@ using System.IO;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PlaneAlerter.Enums;
+using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Forms {
 	/// <summary>
@@ -28,34 +30,34 @@ namespace PlaneAlerter.Forms {
 						var condition = conditionJson[conditionId.ToString()];
 
 						//Create condition from parsed json
-						var newCondition = new Core.Condition {
-							conditionName = condition["conditionName"].ToString(),
-							alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), condition["alertType"].ToString()),
-							ignoreFollowing = (bool)condition["ignoreFollowing"],
-							emailEnabled = (bool)(condition["emailEnabled"] ?? true),
-							emailFirstFormat = (condition["emailFirstFormat"] ?? "").ToString(),
-							emailLastFormat = (condition["emailLastFormat"] ?? "").ToString(),
-							twitterEnabled = (bool)(condition["twitterEnabled"] ?? false),
-							twitterAccount = (condition["twitterAccount"] ?? "").ToString(),
-							tweetFirstFormat = (condition["tweetFirstFormat"] ?? "").ToString(),
-							tweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
-							tweetMap = (bool)(condition["tweetMap"] ?? true),
-							tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), (condition["tweetLink"] ?? Core.TweetLink.None.ToString()).ToString())
+						var newCondition = new Condition {
+							Name = condition["conditionName"].ToString(),
+							AlertType = (AlertType)Enum.Parse(typeof(AlertType), condition["alertType"].ToString()),
+							IgnoreFollowing = (bool)condition["ignoreFollowing"],
+							EmailEnabled = (bool)(condition["emailEnabled"] ?? true),
+							EmailFirstFormat = (condition["emailFirstFormat"] ?? "").ToString(),
+							EmailLastFormat = (condition["emailLastFormat"] ?? "").ToString(),
+							TwitterEnabled = (bool)(condition["twitterEnabled"] ?? false),
+							TwitterAccount = (condition["twitterAccount"] ?? "").ToString(),
+							TweetFirstFormat = (condition["tweetFirstFormat"] ?? "").ToString(),
+							TweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
+							TweetMap = (bool)(condition["tweetMap"] ?? true),
+							TweetLink = (TweetLink)Enum.Parse(typeof(TweetLink), (condition["tweetLink"] ?? TweetLink.None.ToString()).ToString())
 						};
 
 						if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString())) {
-							var emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"] ?? Core.vrsProperty.Registration.ToString()).ToString());
-							newCondition.emailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
-							newCondition.emailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
+							var emailProperty = (VrsProperty)Enum.Parse(typeof(VrsProperty), (condition["emailProperty"] ?? VrsProperty.Registration.ToString()).ToString());
+							newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
+							newCondition.EmailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
 						}
 
 						var emailsArray = new List<string>();
 						foreach (var email in condition["recieverEmails"])
 							emailsArray.Add(email.ToString());
-						newCondition.recieverEmails = emailsArray;
+						newCondition.ReceiverEmails = emailsArray;
 
 						foreach (var trigger in condition["triggers"].Values())
-							newCondition.triggers.Add(newCondition.triggers.Count, new Core.Trigger((Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
+							newCondition.Triggers.Add(newCondition.Triggers.Count, new Trigger((VrsProperty)Enum.Parse(typeof(VrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
 
 						//Add condition to list
 						EditorConditionsList.Conditions.Add(conditionId, newCondition);
@@ -74,16 +76,16 @@ namespace PlaneAlerter.Forms {
 			foreach (var conditionId in EditorConditionsList.Conditions.Keys) {
 				var condition = EditorConditionsList.Conditions[conditionId];
 
-				var conditionNode = conditionEditorTreeView.Nodes.Add(conditionId + ": " + condition.conditionName);
+				var conditionNode = conditionEditorTreeView.Nodes.Add(conditionId + ": " + condition.Name);
 				conditionNode.Tag = conditionId;
 				conditionNode.Nodes.Add("Id: " + conditionId);
-				conditionNode.Nodes.Add("Alert Type: " + condition.alertType);
-				conditionNode.Nodes.Add("Email Enabled: " + condition.emailEnabled);
-				conditionNode.Nodes.Add("Twitter Enabled: " + condition.twitterEnabled);
-				conditionNode.Nodes.Add("Twitter Account: " + condition.twitterAccount);
+				conditionNode.Nodes.Add("Alert Type: " + condition.AlertType);
+				conditionNode.Nodes.Add("Email Enabled: " + condition.EmailEnabled);
+				conditionNode.Nodes.Add("Twitter Enabled: " + condition.TwitterEnabled);
+				conditionNode.Nodes.Add("Twitter Account: " + condition.TwitterAccount);
 
 				var triggersNode = conditionNode.Nodes.Add("Condition Triggers");
-				foreach (var trigger in condition.triggers.Values)
+				foreach (var trigger in condition.Triggers.Values)
 					triggersNode.Nodes.Add(trigger.Property.ToString() + " " + trigger.ComparisonType + " " + trigger.Value);
 			}
 			
@@ -129,7 +131,7 @@ namespace PlaneAlerter.Forms {
 			//Remove condition from condition list
 			EditorConditionsList.Conditions.Remove(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
 			//Sort conditions
-			var sortedConditions = new SortedDictionary<int, Core.Condition>();
+			var sortedConditions = new SortedDictionary<int, Condition>();
 			var id = 0;
 			foreach (var c in EditorConditionsList.Conditions.Values) {
 				sortedConditions.Add(id,c);
@@ -223,6 +225,6 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// List of conditions
 		/// </summary>
-		public static SortedDictionary<int, Core.Condition> Conditions = new SortedDictionary<int, Core.Condition>();
+		public static SortedDictionary<int, Condition> Conditions = new SortedDictionary<int, Condition>();
 	}
 }

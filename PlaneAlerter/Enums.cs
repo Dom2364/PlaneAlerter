@@ -5,7 +5,7 @@ namespace PlaneAlerter {
 	/// <summary>
 	/// Enumerations used in VRS properties
 	/// </summary>
-	internal static class Enums {
+	internal static class EnumUtils {
         public static bool TryGetConvertedValue(string propertyKey, string value, out string? convertedValue) {
             switch (propertyKey) {
                 case "Trt":
