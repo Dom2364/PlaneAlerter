@@ -243,7 +243,7 @@ namespace PlaneAlerter {
 		/// <param name="update">Is this an update?</param>
 		public static void UpdateSettings(bool update) {
 			if (Core.LoopThread != null)
-				Core.Ui.writeToConsole("Reloading Settings...", Color.White);
+				Core.Ui.WriteToConsole("Reloading Settings...", Color.White);
 			VRSAuthenticate = (VRSUser != "");
 
 			//Update UI
@@ -305,7 +305,7 @@ namespace PlaneAlerter {
 
 			//Create settings file if one does not exist
 			if (!File.Exists("settings.json")) {
-				Core.Ui.writeToConsole("No settings file! Creating one...", Color.White);
+				Core.Ui.WriteToConsole("No settings file! Creating one...", Color.White);
 				File.WriteAllText("settings.json", JsonConvert.SerializeObject(new Dictionary<string, object>(), Formatting.Indented));
 			}
 
@@ -370,11 +370,11 @@ namespace PlaneAlerter {
 			}
 
 			//Log to UI
-			Core.Ui.writeToConsole("Settings Loaded", Color.White);
+			Core.Ui.WriteToConsole("Settings Loaded", Color.White);
 
 			//If email content config file does not exist, create one
 			if (!File.Exists("emailconfig.json")) {
-				Core.Ui.writeToConsole("No email content config file! Creating one...", Color.White);
+				Core.Ui.WriteToConsole("No email content config file! Creating one...", Color.White);
                 LoadECCDefaults();
 			}
 
@@ -407,13 +407,13 @@ namespace PlaneAlerter {
 			eccJson.RemoveAll();
 
 			//Log to UI
-			Core.Ui.writeToConsole("Email Content Config Loaded", Color.White);
+			Core.Ui.WriteToConsole("Email Content Config Loaded", Color.White);
 
 			//Update settings
 			UpdateSettings(false);
 
 			//Update twitter accounts list
-			Core.Ui.updateTwitterAccounts();
+			Core.Ui.UpdateTwitterAccounts();
 
 			SettingsLoaded = true;
 		}

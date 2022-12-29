@@ -58,7 +58,7 @@ namespace PlaneAlerter {
 				//Set next check time
 				NextCheck = DateTime.Now.AddSeconds(Settings.RefreshRate);
 				//Notify user that aircraft info is being downloaded
-				Core.Ui.updateStatusLabel("Downloading Aircraft Info...");
+				Core.Ui.UpdateStatusLabel("Downloading Aircraft Info...");
 				receiverName = "";
 				//Get latest aircraft information
 				GetAircraft(false, true);
@@ -76,7 +76,7 @@ namespace PlaneAlerter {
 					var updatedTrailsAvailable = false;
 					foreach (var aircraft in Core.AircraftList.ToList()) {
 						//Update UI with aircraft being checked
-						Core.Ui.updateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " + Core.AircraftList.Count());
+						Core.Ui.UpdateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " + Core.AircraftList.Count());
 						aircraftCount++;
 
 						if (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].IgnoreFollowing) continue;
@@ -178,7 +178,7 @@ namespace PlaneAlerter {
 
 								//Update stats and log to console
 								Stats.updateStats();
-								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " + condition.Name, Color.LightGreen);
+								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " + condition.Name, Color.LightGreen);
 
 								//Send Alert
 								if (condition.AlertType == AlertType.First_and_Last_Contact || condition.AlertType == AlertType.First_Contact)
@@ -196,7 +196,7 @@ namespace PlaneAlerter {
 							return;
 					}
 					//Check if aircraft have lost signal and remove aircraft that have timed out
-					Core.Ui.updateStatusLabel("Checking aircraft are still on radar...");
+					Core.Ui.UpdateStatusLabel("Checking aircraft are still on radar...");
 					//Iterate active matches
 					foreach (var match in Core.ActiveMatches.Values.ToList()) {
 						//Iterate match conditions
@@ -207,7 +207,7 @@ namespace PlaneAlerter {
 								Core.ActiveMatches.Remove(match.Icao);
 								//Update stats and log to console
 								Stats.updateStats();
-								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
+								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
 								//Update aircraft info
 								var aircraft = c.AircraftInfo;
 
@@ -232,11 +232,11 @@ namespace PlaneAlerter {
 							if (!stillActive && match.SignalLost == false) {
 								Core.ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
 								Core.ActiveMatches[match.Icao].SignalLost = true;
-								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 							}
 							if (stillActive && match.SignalLost) {
 								Core.ActiveMatches[match.Icao].SignalLost = false;
-								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 							}
 						}
 					}
@@ -244,7 +244,7 @@ namespace PlaneAlerter {
 				//Cancel if thread is supposed to stop
 				if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Stopping) return;
 				//Set thread status to waiting
-				Core.Ui.updateStatusLabel("Waiting for next check...");
+				Core.Ui.UpdateStatusLabel("Waiting for next check...");
 				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Waiting;
 				//Wait until the next check time
 				while (DateTime.Compare(DateTime.Now, NextCheck) < 0) {
@@ -277,15 +277,15 @@ namespace PlaneAlerter {
 
 				//Check if selected account is valid
 				if (string.IsNullOrWhiteSpace(condition.TwitterAccount)) {
-					Core.Ui.writeToConsole("ERROR: Please select Twitter account in condition editor", Color.Red);
+					Core.Ui.WriteToConsole("ERROR: Please select Twitter account in condition editor", Color.Red);
 					return;
 				}
 				if (!Settings.TwitterUsers.ContainsKey(condition.TwitterAccount)) {
-					Core.Ui.writeToConsole("ERROR: Selected Twitter account (" + condition.TwitterAccount + ") has not been authenticated", Color.Red);
+					Core.Ui.WriteToConsole("ERROR: Selected Twitter account (" + condition.TwitterAccount + ") has not been authenticated", Color.Red);
 					return;
 				}
 				if (string.IsNullOrEmpty(content)) {
-					Core.Ui.writeToConsole("ERROR: Tweet content can't be empty. Tweet content can be configured in the condition editor.", Color.Red);
+					Core.Ui.WriteToConsole("ERROR: Tweet content can't be empty. Tweet content can be configured in the condition editor.", Color.Red);
 					return;
 				}
 
@@ -297,7 +297,7 @@ namespace PlaneAlerter {
 				if (content.Length > 250) {
 					var charsOver = content.Length - 250;
 					content = content.Substring(0, 250) + "...";
-					Core.Ui.writeToConsole("WARNING: Tweet content is " + charsOver + " characters over the limit of 280, removing end of message", Color.Orange);
+					Core.Ui.WriteToConsole("WARNING: Tweet content is " + charsOver + " characters over the limit of 280, removing end of message", Color.Orange);
 				}
 					
 				//Add link to tweet
@@ -321,7 +321,7 @@ namespace PlaneAlerter {
 				//Send tweet
 				var success = Twitter.Tweet(credentials[0], credentials[1], content, mapUrl).Result;
 				if (success) {
-					Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.Name, Color.LightBlue);
+					Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.Name, Color.LightBlue);
 				}
 			}
 
@@ -369,13 +369,13 @@ namespace PlaneAlerter {
 					responseJson = RequestAircraftList(url);
 				}
 				catch (Exception e) {
-					Core.Ui.writeToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
+					Core.Ui.WriteToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					return;
 				}
 
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null) {
-					Core.Ui.writeToConsole("ERROR: Invalid response received from server", Color.Red);
+					Core.Ui.WriteToConsole("ERROR: Invalid response received from server", Color.Red);
 					return;
 				}
 
@@ -428,19 +428,19 @@ namespace PlaneAlerter {
 				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (UriFormatException) {
-				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.AircraftListUrl + ")", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: AircraftList.json url invalid (" + Settings.AircraftListUrl + ")", Color.Red);
 				return;
 			}
 			catch (InvalidDataException) {
-				Core.Ui.writeToConsole("ERROR: Data returned from " + Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: Data returned from " + Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
 				return;
 			}
 			catch (WebException e) {
-				Core.Ui.writeToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
 				return;
 			}
 			catch (JsonReaderException e) {
-				Core.Ui.writeToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
 				return;
 			}
 		}
@@ -477,13 +477,13 @@ namespace PlaneAlerter {
 					responseJson = RequestAircraftList(url);
 				}
 				catch (Exception e) {
-					Core.Ui.writeToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
+					Core.Ui.WriteToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					return null;
 				}
 
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null) {
-					Core.Ui.writeToConsole("ERROR: Invalid response recieved from server", Color.Red);
+					Core.Ui.WriteToConsole("ERROR: Invalid response recieved from server", Color.Red);
 					return null;
 				}
 				//Throw error if server time was not parsed
@@ -501,19 +501,19 @@ namespace PlaneAlerter {
 				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (UriFormatException) {
-				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.AircraftListUrl + ")", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: AircraftList.json url invalid (" + Settings.AircraftListUrl + ")", Color.Red);
 				return null;
 			}
 			catch (InvalidDataException) {
-				Core.Ui.writeToConsole("ERROR: Data returned from " + Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: Data returned from " + Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
 				return null;
 			}
 			catch (WebException e) {
-				Core.Ui.writeToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
 				return null;
 			}
 			catch (JsonReaderException e) {
-				Core.Ui.writeToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
 				return null;
 			}
 
@@ -583,12 +583,12 @@ namespace PlaneAlerter {
 
 				//Update condition list
 				Core.Ui.Invoke((MethodInvoker)(() => {
-					Core.Ui.updateConditionList();
+					Core.Ui.UpdateConditionList();
 				}));
 				Core.Ui.conditionTreeView.Nodes[0].Expand();
 
 				//Log to UI
-				Core.Ui.writeToConsole("Conditions Loaded", Color.White);
+				Core.Ui.WriteToConsole("Conditions Loaded", Color.White);
 
 				//Restart threads
 				if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.WaitingForLoad) 
@@ -606,7 +606,7 @@ namespace PlaneAlerter {
 		static Checker() {
 			//Create conditions file if one doesnt exist
 			if (!File.Exists("conditions.json")) {
-				Core.Ui.writeToConsole("No conditions file! Creating one...", Color.White);
+				Core.Ui.WriteToConsole("No conditions file! Creating one...", Color.White);
 				File.WriteAllText("conditions.json", "{\n}");
 			}
 			//Load conditions

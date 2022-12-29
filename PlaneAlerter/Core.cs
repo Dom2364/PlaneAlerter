@@ -52,12 +52,12 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Thread for checking operations
 		/// </summary>
-		public static Thread LoopThread { get; set; }
+		public static Thread? LoopThread { get; set; }
 
 		/// <summary>
 		/// Thread for updating statistics
 		/// </summary>
-		public static Thread StatsThread { get; set; }
+		public static Thread? StatsThread { get; set; }
 
 		/// <summary>
 		/// Active form
@@ -167,7 +167,7 @@ namespace PlaneAlerter {
 				File.AppendAllText("alerts.log", message);
 			}
 			catch (Exception e) {
-				Ui.writeToConsole("ERROR: Error writing to alerts.log file: " + e.Message, Color.Red);
+				Ui.WriteToConsole("ERROR: Error writing to alerts.log file: " + e.Message, Color.Red);
 			}
 		}
 
@@ -217,11 +217,11 @@ namespace PlaneAlerter {
 		public static string GenerateReportURL(string ICAO, bool mobile) {
 			string reportUrl = "";
 			if (string.IsNullOrWhiteSpace(Settings.RadarUrl)) {
-				Ui.writeToConsole("ERROR: Please enter radar URL in settings", Color.Red);
+				Ui.WriteToConsole("ERROR: Please enter radar URL in settings", Color.Red);
 				return "";
 			}
 			if (!Settings.RadarUrl.ToLower().Contains("virtualradar")) {
-				Ui.writeToConsole("WARNING: Radar URL must end with /VirtualRadar/ for report links to work", Color.Orange);
+				Ui.WriteToConsole("WARNING: Radar URL must end with /VirtualRadar/ for report links to work", Color.Orange);
 				return "";
 			}
 

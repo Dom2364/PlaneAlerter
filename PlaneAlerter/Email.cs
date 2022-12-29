@@ -50,7 +50,7 @@ namespace PlaneAlerter {
 				message.To.Add(emailAddress);
 			}
 			catch {
-				Core.Ui.writeToConsole("ERROR: Email to send to is invalid (" + emailAddress + ")", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: Email to send to is invalid (" + emailAddress + ")", Color.Red);
 				return;
 			}
 
@@ -59,7 +59,7 @@ namespace PlaneAlerter {
 				message.From = new MailAddress(Settings.SenderEmail, "PlaneAlerter Alerts");
 			}
 			catch {
-				Core.Ui.writeToConsole("ERROR: Email to send from is invalid (" + Settings.SenderEmail + ")", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: Email to send from is invalid (" + Settings.SenderEmail + ")", Color.Red);
 				return;
 			}
 
@@ -134,7 +134,7 @@ namespace PlaneAlerter {
                 }
 
                 //Write to UI
-                Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
+                Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
 
                 //Generate aircraft property value table
                 var aircraftPropertyKeys = aircraft.GetPropertyKeys();
@@ -253,23 +253,23 @@ namespace PlaneAlerter {
 			}
 			catch(SmtpException e) {
 				if(e.InnerException != null) {
-					Core.Ui.writeToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
+					Core.Ui.WriteToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
 					return;
 				}
-				Core.Ui.writeToConsole("SMTP ERROR: " + e.Message, Color.Red);
+				Core.Ui.WriteToConsole("SMTP ERROR: " + e.Message, Color.Red);
 				return;
 			}
 			catch (InvalidOperationException e) {
 				if (e.InnerException != null) {
-					Core.Ui.writeToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
+					Core.Ui.WriteToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
 					return;
 				}
-				Core.Ui.writeToConsole("SMTP ERROR: " + e.Message, Color.Red);
+				Core.Ui.WriteToConsole("SMTP ERROR: " + e.Message, Color.Red);
 				return;
 			}
 
 			//Log to UI
-			Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
+			Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
 		}
 	}
 }

@@ -24,19 +24,19 @@ namespace PlaneAlerter {
 			//Check for errors
 			bool error = false;
 			if (Core.Conditions.Count == 0) {
-				Core.Ui.writeToConsole("No conditions, not running checks", Color.White);
+				Core.Ui.WriteToConsole("No conditions, not running checks", Color.White);
 				error = true;
 			}
 			if (Settings.AircraftListUrl == "") {
-				Core.Ui.writeToConsole("ERROR: No AircraftList.json url specified, go to Options>Settings", Color.White);
+				Core.Ui.WriteToConsole("ERROR: No AircraftList.json url specified, go to Options>Settings", Color.White);
 				error = true;
 			}
 			if (Settings.RadarUrl == "") {
-				Core.Ui.writeToConsole("ERROR: No radar url specified, go to Options>Settings", Color.White);
+				Core.Ui.WriteToConsole("ERROR: No radar url specified, go to Options>Settings", Color.White);
 				error = true;
 			}
 			if (!Regex.IsMatch(Settings.AircraftListUrl, @"(http|https):\/\/.+?\/VirtualRadar\/AircraftList\.json.*", RegexOptions.IgnoreCase)) {
-				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid. Example: http://127.0.0.1/VirtualRadar/AircraftList.json", Color.White);
+				Core.Ui.WriteToConsole("ERROR: AircraftList.json url invalid. Example: http://127.0.0.1/VirtualRadar/AircraftList.json", Color.White);
 				error = true;
 			}
 			if (error) {
@@ -52,7 +52,7 @@ namespace PlaneAlerter {
 			Core.LoopThread.Name = "Checker Thread";
 			Core.LoopThread.Start();
 			
-			Core.Ui.writeToConsole("Checker Started", Color.White);
+			Core.Ui.WriteToConsole("Checker Started", Color.White);
 			Core.Ui.restartToolStripMenuItem.Enabled = true;
 			Core.Ui.startToolStripMenuItem.Text = "Stop";
 		}
@@ -78,7 +78,7 @@ namespace PlaneAlerter {
 				Core.Ui.statusLabel.Text = "Status: Idle";
 				Core.Ui.startToolStripMenuItem.Text = "Start";
 				Core.Ui.startToolStripMenuItem.Enabled = true;
-				Core.Ui.writeToConsole("Checker Stopped", Color.White);
+				Core.Ui.WriteToConsole("Checker Stopped", Color.White);
 			}
 		}
 

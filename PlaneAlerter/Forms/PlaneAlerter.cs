@@ -13,7 +13,6 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Forms
 {
@@ -77,7 +76,7 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		/// <param name="text">Text to display</param>
 		/// <param name="color">Color of text</param>
-		public void writeToConsole(string text, Color color) {
+		public void WriteToConsole(string text, Color color) {
 			try {
 				console.Select(console.Text.Length, 0);
 				console.SelectionBackColor = color;
@@ -91,12 +90,12 @@ namespace PlaneAlerter.Forms
 		/// <summary>
 		/// Updates the condition list
 		/// </summary>
-		public void updateConditionList() {
+		public void UpdateConditionList() {
 			conditionTreeView.Nodes[0].Nodes.Clear();
 			foreach(var conditionId in Core.Conditions.Keys) {
-				TreeNode conditionNode;
 				var c = Core.Conditions[conditionId];
-				conditionNode = conditionTreeView.Nodes[0].Nodes.Add("Name: " + c.Name);
+
+				var conditionNode = conditionTreeView.Nodes[0].Nodes.Add("Name: " + c.Name);
 				conditionNode.Tag = conditionId;
 				conditionNode.Nodes.Add("Id: " + conditionId);
 				conditionNode.Nodes.Add("Alert Type: " + c.AlertType.ToString().Replace("_", " "));
@@ -104,6 +103,7 @@ namespace PlaneAlerter.Forms
 				conditionNode.Nodes.Add("Twitter Enabled: " + c.TwitterEnabled);
 				conditionNode.Nodes.Add("Twitter Account: " + c.TwitterAccount);
 				conditionNode.Nodes.Add("Alerts Sent: " + c.AlertsThisSession.ToString());
+
 				var triggersNode = conditionNode.Nodes.Add("Condition Triggers");
 				foreach(var trigger in c.Triggers.Values)
 					triggersNode.Nodes.Add(trigger.Property.ToString() + " " + trigger.ComparisonType + " " + trigger.Value);
@@ -113,14 +113,19 @@ namespace PlaneAlerter.Forms
 		/// <summary>
 		/// Update the remove twitter account menu options
 		/// </summary>
-		public void updateTwitterAccounts() {
+		public void UpdateTwitterAccounts() {
 			removeAccountToolStripMenuItem.DropDownItems.Clear();
 			removeAccountToolStripMenuItem.Enabled = Settings.TwitterUsers.Count > 0;
-			foreach (string screenname in Settings.TwitterUsers.Keys) {
-				ToolStripItem item = removeAccountToolStripMenuItem.DropDownItems.Add(screenname);
-				item.Click += (object sender, EventArgs args) => {
-					ToolStripItem clickeditem = (ToolStripItem)sender;
-					Twitter.RemoveAccount(clickeditem.Text);
+
+			foreach (var screenName in Settings.TwitterUsers.Keys) {
+				var item = removeAccountToolStripMenuItem.DropDownItems.Add(screenName);
+				item.Click += (sender, args) =>
+				{
+					if (sender == null)
+						return;
+
+					var clickedItem = (ToolStripItem)sender;
+					Twitter.RemoveAccount(clickedItem.Text);
 				};
 			}
 		}
@@ -129,7 +134,7 @@ namespace PlaneAlerter.Forms
 		/// Updates the status label
 		/// </summary>
 		/// <param name="text">Text to update label with</param>
-		public void updateStatusLabel(string text) {
+		public void UpdateStatusLabel(string text) {
 			//Suspend and resume drawing so it doesn't try to draw as it's being changed
 			SuspendDrawing(statusStrip1);
 			statusLabel.Text = "Status: " + text;
@@ -137,11 +142,11 @@ namespace PlaneAlerter.Forms
 		}
 
 		private void startConditionEditorToolStripMenuItem_Click(object sender, EventArgs e) {
-			ConditionEditor editor = new ConditionEditor();
+			var editor = new ConditionEditor();
 			editor.Show();
 			editor.FormClosing += delegate { 
 				Checker.LoadConditions();
-				updateConditionList();
+				UpdateConditionList();
 			};		
 		}
 
@@ -160,7 +165,7 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		void RestartToolStripMenuItemClick(object sender, EventArgs e) {
+		private void RestartToolStripMenuItemClick(object sender, EventArgs e) {
 			ThreadManager.Restart();
 		}
 		
@@ -169,7 +174,7 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		void PlaneAlerterFormClosing(object sender, FormClosingEventArgs e) {
+		private void PlaneAlerterFormClosing(object sender, FormClosingEventArgs e) {
 			//Abort threads if running
 			if (Core.StatsThread != null)
 				Core.StatsThread.Abort();
@@ -183,7 +188,7 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		void ConsoleLinkClicked(object sender, LinkClickedEventArgs e) {
+		private void ConsoleLinkClicked(object sender, LinkClickedEventArgs e) {
 			//Open link
 			Process.Start(new ProcessStartInfo(e.LinkText)
 			{
@@ -209,7 +214,7 @@ namespace PlaneAlerter.Forms
 		/// <param name="e">Event Args</param>
 		private void settingsToolStripMenuItem_Click(object sender, EventArgs e) {
 			//Show settings form then update settings
-			SettingsForm settingsForm = new SettingsForm();
+			var settingsForm = new SettingsForm();
 			settingsForm.ShowDialog();
 			Settings.UpdateSettings(true);
 		}
@@ -221,7 +226,7 @@ namespace PlaneAlerter.Forms
 		/// <param name="e">Event Args</param>
 		private void propertyInfoToolStripMenuItem_Click(object sender, EventArgs e) {
 			//Show property info form
-			PropertyInfoForm propertyInfoForm = new PropertyInfoForm();
+			var propertyInfoForm = new PropertyInfoForm();
 			propertyInfoForm.Show();
 		}
 
@@ -242,7 +247,7 @@ namespace PlaneAlerter.Forms
 		/// <param name="e">Event Args</param>
 		private void emailContentConfigToolStripMenuItem_Click(object sender, EventArgs e) {
 			//Show email content config form
-			EmailContentConfigForm ecc = new EmailContentConfigForm();
+			var ecc = new EmailContentConfigForm();
 			ecc.ShowDialog();
 		}
 
