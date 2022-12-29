@@ -221,7 +221,7 @@ namespace PlaneAlerter {
                     message.Body += $"<h3><a style='text-decoration: none;' href='{Settings.RadarUrl}?icao={aircraft.Icao}'>Goto Radar</a></h3>";
                 //Report url
                 if (Settings.EmailContentConfig.ReportLink)
-                    message.Body += $"<h3>VRS Report: <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.Icao, false)}'>Desktop</a>   <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.Icao, true)}'>Mobile</a></h3>";
+                    message.Body += $"<h3>VRS Report: <a style='text-decoration: none;' href='{Core.GenerateReportUrl(aircraft.Icao, false)}'>Desktop</a>   <a style='text-decoration: none;' href='{Core.GenerateReportUrl(aircraft.Icao, true)}'>Mobile</a></h3>";
                 //Airframes.org url
                 if (Settings.EmailContentConfig.AfLookup)
                     message.Body += airframesUrl;
@@ -237,11 +237,11 @@ namespace PlaneAlerter {
                 //Map
                 if (Settings.EmailContentConfig.Map && aircraft.GetProperty("Lat") != null) {
                     message.Body += "<h3 style='margin: 0px'><a style='text-decoration: none' href=" + googleMapsUrl + ">Open in Google Maps</a></h3><br />" +
-                    "<img style='border: 2px solid #444;' alt='Loading Map...' src='" + Core.GenerateMapURL(aircraft).Replace("&", "&amp;") + "' />";
+                    "<img style='border: 2px solid #444;' alt='Loading Map...' src='" + Core.GenerateMapUrl(aircraft).Replace("&", "&amp;") + "' />";
                 }
                 //KML
                 if (Settings.EmailContentConfig.KMLfile && aircraft.GetProperty("Lat") != null)
-                    message.Attachments.Add(Attachment.CreateAttachmentFromString(Core.GenerateKML(aircraft), aircraft.Icao + ".kml"));
+                    message.Attachments.Add(Attachment.CreateAttachmentFromString(Core.GenerateKml(aircraft), aircraft.Icao + ".kml"));
                 
 
                 message.Body += "</td></tr></table></body></html>";

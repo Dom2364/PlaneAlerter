@@ -312,12 +312,12 @@ namespace PlaneAlerter {
 						if (isFirst) content += " " + Settings.RadarUrl + "?icao=" + aircraft.Icao;
 						break;
 					case TweetLink.Report_link:
-						content += " " + Core.GenerateReportURL(aircraft.Icao, true);
+						content += " " + Core.GenerateReportUrl(aircraft.Icao, true);
 						break;
 				}
 
 				//Get map URL if enabled
-				var mapUrl = condition.TweetMap?Core.GenerateMapURL(aircraft) :"";
+				var mapUrl = condition.TweetMap?Core.GenerateMapUrl(aircraft) :"";
 
 				//Send tweet
 				var success = Twitter.Tweet(credentials[0], credentials[1], content, mapUrl).Result;
