@@ -27,15 +27,15 @@ namespace PlaneAlerter {
 				Core.Ui.writeToConsole("No conditions, not running checks", Color.White);
 				error = true;
 			}
-			if (Settings.acListUrl == "") {
+			if (Settings.AircraftListUrl == "") {
 				Core.Ui.writeToConsole("ERROR: No AircraftList.json url specified, go to Options>Settings", Color.White);
 				error = true;
 			}
-			if (Settings.radarUrl == "") {
+			if (Settings.RadarUrl == "") {
 				Core.Ui.writeToConsole("ERROR: No radar url specified, go to Options>Settings", Color.White);
 				error = true;
 			}
-			if (!Regex.IsMatch(Settings.acListUrl, @"(http|https):\/\/.+?\/VirtualRadar\/AircraftList\.json.*", RegexOptions.IgnoreCase)) {
+			if (!Regex.IsMatch(Settings.AircraftListUrl, @"(http|https):\/\/.+?\/VirtualRadar\/AircraftList\.json.*", RegexOptions.IgnoreCase)) {
 				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid. Example: http://127.0.0.1/VirtualRadar/AircraftList.json", Color.White);
 				error = true;
 			}

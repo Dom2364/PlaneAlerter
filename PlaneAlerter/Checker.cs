@@ -56,13 +56,13 @@ namespace PlaneAlerter {
 			while (ThreadManager.threadStatus != ThreadManager.CheckerStatus.Stopping) {
 				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Running;
 				//Set next check time
-				NextCheck = DateTime.Now.AddSeconds(Settings.refreshRate);
+				NextCheck = DateTime.Now.AddSeconds(Settings.RefreshRate);
 				//Notify user that aircraft info is being downloaded
 				Core.Ui.updateStatusLabel("Downloading Aircraft Info...");
 				receiverName = "";
 				//Get latest aircraft information
 				GetAircraft(false, true);
-				if (Settings.filterDistance && !Settings.ignoreModeS) GetAircraft(true, false);
+				if (Settings.FilterDistance && !Settings.IgnoreModeS) GetAircraft(true, false);
 
 				//Check if there are aircraft to check
 				if (Core.AircraftList.Count != 0) {
@@ -156,9 +156,9 @@ namespace PlaneAlerter {
 								ignoreFollowing = condition.IgnoreFollowing;
 
 								//Get trails if they haven't been requested due to no matches
-								if (Core.ActiveMatches.Count == 1 && Settings.trailsUpdateFrequency != 0) {
+								if (Core.ActiveMatches.Count == 1 && Settings.TrailsUpdateFrequency != 0) {
 									GetAircraft(false, true, true);
-									if (Settings.filterDistance && !Settings.ignoreModeS) GetAircraft(true, false, true);
+									if (Settings.FilterDistance && !Settings.IgnoreModeS) GetAircraft(true, false, true);
 									updatedTrailsAvailable = true;
 								}
 
@@ -202,7 +202,7 @@ namespace PlaneAlerter {
 						//Iterate match conditions
 						foreach (var c in match.Conditions) {
 							//Check if signal has been lost for more than the removal timeout
-							if (match.SignalLost && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.removalTimeout - (Settings.removalTimeout * 2)))) < 0) {
+							if (match.SignalLost && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.RemovalTimeout - (Settings.RemovalTimeout * 2)))) < 0) {
 								//Remove from active matches
 								Core.ActiveMatches.Remove(match.Icao);
 								//Update stats and log to console
@@ -257,10 +257,10 @@ namespace PlaneAlerter {
 
 		public static void SendAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
 			//Show notification
-			if (Settings.showNotifications) Core.Ui.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.Name}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
+			if (Settings.ShowNotifications) Core.Ui.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.Name}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
 
 			//Make a ding noise
-			if (Settings.soundAlerts) SystemSounds.Exclamation.Play();
+			if (Settings.SoundAlerts) SystemSounds.Exclamation.Play();
 
 			//Log
 			Core.LogAlert(condition, aircraft, receiver, isFirst);
@@ -305,10 +305,10 @@ namespace PlaneAlerter {
 					case TweetLink.None:
 						break;
 					case TweetLink.Radar_link:
-						content += " " + Settings.radarUrl;
+						content += " " + Settings.RadarUrl;
 						break;
 					case TweetLink.Radar_link_with_aircraft_selected:
-						if (isFirst) content += " " + Settings.radarUrl + "?icao=" + aircraft.Icao;
+						if (isFirst) content += " " + Settings.RadarUrl + "?icao=" + aircraft.Icao;
 						break;
 					case TweetLink.Report_link:
 						content += " " + Core.GenerateReportURL(aircraft.Icao, true);
@@ -334,7 +334,7 @@ namespace PlaneAlerter {
 		/// Get latest aircraftlist.json
 		/// </summary>
 		public static void GetAircraft(bool modeSOnly, bool clearExisting, bool forceRequestTrails = false) {
-			var requestTrails = Settings.trailsUpdateFrequency==1;
+			var requestTrails = Settings.TrailsUpdateFrequency==1;
 
 			//Force request trails
 			if (forceRequestTrails) {
@@ -345,8 +345,8 @@ namespace PlaneAlerter {
 				requestTrails = false;
 			}
 			//Threshold enabled
-			else if (Settings.trailsUpdateFrequency >= 2) {
-				if (TrailsAge >= Settings.trailsUpdateFrequency) {
+			else if (Settings.TrailsUpdateFrequency >= 2) {
+				if (TrailsAge >= Settings.TrailsUpdateFrequency) {
 					requestTrails = true;
 					TrailsAge = 0;
 				}
@@ -354,12 +354,12 @@ namespace PlaneAlerter {
 			}
 
 			//Generate aircraftlist.json url
-			var url = Settings.acListUrl;
-			url += Settings.acListUrl.Contains("?") ? "&" : "?";
+			var url = Settings.AircraftListUrl;
+			url += Settings.AircraftListUrl.Contains("?") ? "&" : "?";
 			url += "lat=" + Settings.Lat + "&lng=" + Settings.Long;
-			if (Settings.filterDistance && !modeSOnly) url += "&fDstU=" + Settings.ignoreDistance.ToString("#.##");
-			if (Settings.filterAltitude) url += "&fAltU=" + Settings.ignoreAltitude;
-			if (Settings.filterReceiver) url += "&feed=" + Settings.filterReceiverId;
+			if (Settings.FilterDistance && !modeSOnly) url += "&fDstU=" + Settings.IgnoreDistance.ToString("#.##");
+			if (Settings.FilterAltitude) url += "&fAltU=" + Settings.IgnoreAltitude;
+			if (Settings.FilterReceiver) url += "&feed=" + Settings.FilterReceiverId;
 			if (modeSOnly) url += "&fNoPosQN=1";
 			if (requestTrails) url += "&trFmt=fa&refreshTrails=1";
 
@@ -428,11 +428,11 @@ namespace PlaneAlerter {
 				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (UriFormatException) {
-				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.acListUrl + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.AircraftListUrl + ")", Color.Red);
 				return;
 			}
 			catch (InvalidDataException) {
-				Core.Ui.writeToConsole("ERROR: Data returned from " + Settings.acListUrl + " was not gzip compressed", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Data returned from " + Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
 				return;
 			}
 			catch (WebException e) {
@@ -450,10 +450,10 @@ namespace PlaneAlerter {
 			Request = (HttpWebRequest)WebRequest.Create(url);
 			Request.Method = "GET";
 			Request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-			Request.Timeout = Settings.timeout * 1000;
+			Request.Timeout = Settings.Timeout * 1000;
 			//Add credentials if they are provided
 			if (Settings.VRSAuthenticate) {
-				var encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
+				var encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUser + ":" + Settings.VRSPassword));
 				Request.Headers.Add("Authorization", "Basic " + encoded);
 			}
 			//Send request and parse json response
@@ -467,8 +467,8 @@ namespace PlaneAlerter {
 
 		public static Dictionary<string, string>? GetReceivers() {
 			//Generate aircraftlist.json url
-			var url = Settings.acListUrl;
-			url += Settings.acListUrl.Contains("?") ? "&" : "?";
+			var url = Settings.AircraftListUrl;
+			url += Settings.AircraftListUrl.Contains("?") ? "&" : "?";
 			url += "fUtQ=abc";
 
 			try {
@@ -501,11 +501,11 @@ namespace PlaneAlerter {
 				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (UriFormatException) {
-				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.acListUrl + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.AircraftListUrl + ")", Color.Red);
 				return null;
 			}
 			catch (InvalidDataException) {
-				Core.Ui.writeToConsole("ERROR: Data returned from " + Settings.acListUrl + " was not gzip compressed", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Data returned from " + Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
 				return null;
 			}
 			catch (WebException e) {

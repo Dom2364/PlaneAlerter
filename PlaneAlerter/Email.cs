@@ -25,7 +25,7 @@ namespace PlaneAlerter {
 		public static void SendEmail(string emailAddress, Condition condition, Aircraft aircraft, string receiverName, bool isDetection) {
             var mailClient = new SmtpClient(Settings.SMTPHost);
             mailClient.Port = Settings.SMTPPort;
-            mailClient.Credentials = new NetworkCredential(Settings.SMTPUsr, Settings.SMTPPwd);
+            mailClient.Credentials = new NetworkCredential(Settings.SMTPUser, Settings.SMTPPassword);
             mailClient.EnableSsl = Settings.SMTPSSL;
             
 			//Transponder type from aircraft info
@@ -56,10 +56,10 @@ namespace PlaneAlerter {
 
 			//Set sender email to the one set in settings
 			try {
-				message.From = new MailAddress(Settings.senderEmail, "PlaneAlerter Alerts");
+				message.From = new MailAddress(Settings.SenderEmail, "PlaneAlerter Alerts");
 			}
 			catch {
-				Core.Ui.writeToConsole("ERROR: Email to send from is invalid (" + Settings.senderEmail + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Email to send from is invalid (" + Settings.SenderEmail + ")", Color.Red);
 				return;
 			}
 
@@ -84,19 +84,19 @@ namespace PlaneAlerter {
 				if(aircraft.GetProperty("OpIcao") != null) {
 					operatorString = aircraft.GetProperty("OpIcao") + ", ";
 				}
-                message.Body = "[" + typeString + "] " + condition.Name + ", " + regoString + operatorString + aircraft.GetProperty("Type") + ", " + callsignString + Settings.radarUrl;
+                message.Body = "[" + typeString + "] " + condition.Name + ", " + regoString + operatorString + aircraft.GetProperty("Type") + ", " + callsignString + Settings.RadarUrl;
                 //[Last Contact] USAF (RCH9701), 79-1951, RCH, DC10, RCH9701 http://aussieadsb.com
             }
             else {
                 //Create request for aircraft image urls
-                var request = (HttpWebRequest)WebRequest.Create(Settings.acListUrl.Substring(0, Settings.acListUrl.LastIndexOf("/") + 1) + "AirportDataThumbnails.json?icao=" + aircraft.Icao + "&numThumbs=" + imageLinks.Length);
+                var request = (HttpWebRequest)WebRequest.Create(Settings.AircraftListUrl.Substring(0, Settings.AircraftListUrl.LastIndexOf("/") + 1) + "AirportDataThumbnails.json?icao=" + aircraft.Icao + "&numThumbs=" + imageLinks.Length);
                 request.Method = "GET";
                 request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
                 request.Timeout = 5000;
 
                 //If vrs authentication is used, add credentials to request
                 if (Settings.VRSAuthenticate) {
-                    var encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUsr + ":" + Settings.VRSPwd));
+                    var encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUser + ":" + Settings.VRSPassword));
                     request.Headers.Add("Authorization", "Basic " + encoded);
                 }
 
@@ -218,7 +218,7 @@ namespace PlaneAlerter {
                     message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Transponder: " + transponderName + "</h2>";
                 //Radar url
                 if (Settings.EmailContentConfig.RadarLink)
-                    message.Body += $"<h3><a style='text-decoration: none;' href='{Settings.radarUrl}?icao={aircraft.Icao}'>Goto Radar</a></h3>";
+                    message.Body += $"<h3><a style='text-decoration: none;' href='{Settings.RadarUrl}?icao={aircraft.Icao}'>Goto Radar</a></h3>";
                 //Report url
                 if (Settings.EmailContentConfig.ReportLink)
                     message.Body += $"<h3>VRS Report: <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.Icao, false)}'>Desktop</a>   <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.Icao, true)}'>Mobile</a></h3>";

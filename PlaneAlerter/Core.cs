@@ -216,18 +216,18 @@ namespace PlaneAlerter {
 		/// </summary>
 		public static string GenerateReportURL(string ICAO, bool mobile) {
 			string reportUrl = "";
-			if (string.IsNullOrWhiteSpace(Settings.radarUrl)) {
+			if (string.IsNullOrWhiteSpace(Settings.RadarUrl)) {
 				Ui.writeToConsole("ERROR: Please enter radar URL in settings", Color.Red);
 				return "";
 			}
-			if (!Settings.radarUrl.ToLower().Contains("virtualradar")) {
+			if (!Settings.RadarUrl.ToLower().Contains("virtualradar")) {
 				Ui.writeToConsole("WARNING: Radar URL must end with /VirtualRadar/ for report links to work", Color.Orange);
 				return "";
 			}
 
 
-			reportUrl += Settings.radarUrl;
-			if (Settings.radarUrl[Settings.radarUrl.Length - 1] != '/') reportUrl += "/";
+			reportUrl += Settings.RadarUrl;
+			if (Settings.RadarUrl[Settings.RadarUrl.Length - 1] != '/') reportUrl += "/";
 
 			if (mobile) reportUrl += "mobileReport.html?sort1=date&sortAsc1=0&icao-Q=" + ICAO;
 			else reportUrl += "desktopReport.html?sort1=date&sortAsc1=0&icao-Q=" + ICAO;
@@ -242,7 +242,7 @@ namespace PlaneAlerter {
 			string staticMapUrl = "";
 			//If aircraft has a position, generate a google map url
 			if (aircraft.GetProperty("Lat") != null)
-				if (Settings.centreMapOnAircraft) {
+				if (Settings.CentreMapOnAircraft) {
 					if (aircraft.Trail.Count() != 4)
 						staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
 					else

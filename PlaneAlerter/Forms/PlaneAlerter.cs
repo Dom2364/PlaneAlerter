@@ -67,7 +67,7 @@ namespace PlaneAlerter.Forms
 			Shown += delegate {
 				while (!Settings.SettingsLoaded || !Checker.ConditionsLoaded)
 					Thread.Sleep(100);
-				if (Settings.startOnStart) ThreadManager.Start();
+				if (Settings.StartOnStart) ThreadManager.Start();
 				Stats.updateStats();
 			};
 		}
@@ -211,7 +211,7 @@ namespace PlaneAlerter.Forms
 			//Show settings form then update settings
 			SettingsForm settingsForm = new SettingsForm();
 			settingsForm.ShowDialog();
-			Settings.updateSettings(true);
+			Settings.UpdateSettings(true);
 		}
 
 		/// <summary>
