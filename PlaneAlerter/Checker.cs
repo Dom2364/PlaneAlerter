@@ -177,7 +177,7 @@ namespace PlaneAlerter {
 								}
 
 								//Update stats and log to console
-								Stats.updateStats();
+								Stats.UpdateStats();
 								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " + condition.Name, Color.LightGreen);
 
 								//Send Alert
@@ -206,7 +206,7 @@ namespace PlaneAlerter {
 								//Remove from active matches
 								Core.ActiveMatches.Remove(match.Icao);
 								//Update stats and log to console
-								Stats.updateStats();
+								Stats.UpdateStats();
 								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
 								//Update aircraft info
 								var aircraft = c.AircraftInfo;
@@ -327,7 +327,7 @@ namespace PlaneAlerter {
 
 			//Increase sent alerts for condition and update stats
 			condition.IncreaseSentAlerts();
-			Stats.updateStats();
+			Stats.UpdateStats();
 		}
 
 		/// <summary>

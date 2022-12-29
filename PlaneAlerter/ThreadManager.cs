@@ -73,7 +73,7 @@ namespace PlaneAlerter {
 				//Clear matches
 				Core.ActiveMatches.Clear();
 
-				Stats.updateStats();
+				Stats.UpdateStats();
 
 				Core.Ui.statusLabel.Text = "Status: Idle";
 				Core.Ui.startToolStripMenuItem.Text = "Start";

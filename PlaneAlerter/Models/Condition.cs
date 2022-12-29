@@ -89,7 +89,7 @@ namespace PlaneAlerter.Models
 		public void IncreaseSentAlerts()
 		{
 			AlertsThisSession++;
-			Stats.totalAlertsSent++;
+			Stats.TotalAlertsSent++;
 		}
 
 		/// <summary>

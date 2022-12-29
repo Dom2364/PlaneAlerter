@@ -67,7 +67,7 @@ namespace PlaneAlerter.Forms
 				while (!Settings.SettingsLoaded || !Checker.ConditionsLoaded)
 					Thread.Sleep(100);
 				if (Settings.StartOnStart) ThreadManager.Start();
-				Stats.updateStats();
+				Stats.UpdateStats();
 			};
 		}
 
