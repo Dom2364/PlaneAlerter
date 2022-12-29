@@ -10,17 +10,17 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Property to be checked
 		/// </summary>
-		public VrsProperty Property;
+		public VrsProperty Property { get; }
 
 		/// <summary>
 		/// Value to be checked against
 		/// </summary>
-		public string Value;
+		public string Value { get; }
 
 		/// <summary>
 		/// Type of comparison
 		/// </summary>
-		public string ComparisonType;
+		public string ComparisonType { get; }
 
 		/// <summary>
 		/// Trigger constructor
