@@ -87,7 +87,7 @@ namespace PlaneAlerter {
 						foreach (var conditionId in Core.Conditions.Keys.ToList()) {
 							condition = Core.Conditions[conditionId];
 							//Skip if condition is disabled or condition is already matched
-							if (condition.AlertType == AlertType.Disabled || (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionID == conditionId)))
+							if (condition.AlertType == AlertType.Disabled || (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionId == conditionId)))
 								continue;
 
 							triggersMatching = 0;
@@ -147,7 +147,7 @@ namespace PlaneAlerter {
 								}
 								//Else add to active matches
 								else {
-									var m = new Core.Match(aircraft.Icao);
+									var m = new Match(aircraft.Icao);
 									m.AddCondition(conditionId, condition, aircraft);
 									Core.ActiveMatches.Add(aircraft.Icao, m);
 								}

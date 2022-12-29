@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
+using Match = PlaneAlerter.Models.Match;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -62,105 +63,6 @@ namespace PlaneAlerter {
 		/// Active form
 		/// </summary>
 		public static Forms.PlaneAlerter Ui { get; set; }
-
-		/// <summary>
-		/// Property list types used in email config
-		/// </summary>
-		public enum PropertyListType {
-			Hidden,
-			Essentials,
-			All
-		}
-
-		/// <summary>
-		/// Match information
-		/// </summary>
-		public class Match {
-			/// <summary>
-			/// ICAO of aircraft matched
-			/// </summary>
-			public string Icao { get; private set; }
-
-			/// <summary>
-			/// Time signal was lost
-			/// </summary>
-			public DateTime SignalLostTime;
-
-			/// <summary>
-			/// Has signal been lost?
-			/// </summary>
-			public bool SignalLost;
-
-			/// <summary>
-			/// Ignore if any other alerts match for this aircraft
-			/// </summary>
-			public bool IgnoreFollowing;
-
-			/// <summary>
-			/// Conditions matched to
-			/// </summary>
-			public readonly List<MatchedCondition> Conditions;
-
-			/// <summary>
-			/// Add a condition to the match
-			/// </summary>
-			/// <param name="id">ID of condition</param>
-			/// <param name="match">Condition</param>
-			/// <param name="aircraftInfo">Aircraft information when matched</param>
-			public void AddCondition(int id, Condition match, Aircraft aircraftInfo) {
-				Conditions.Add(new MatchedCondition(id, match, aircraftInfo));
-				IgnoreFollowing = match.IgnoreFollowing;
-			}
-
-			/// <summary>
-			/// Remove condition from match
-			/// </summary>
-			/// <param name="match"></param>
-			public void RemoveCondition(MatchedCondition match) {
-				Conditions.Remove(match);
-			}
-
-			/// <summary>
-			/// Create match
-			/// </summary>
-			/// <param name="icao">ICAO of aircraft matched</param>
-			public Match(string icao) {
-				Icao = icao;
-				Conditions = new List<MatchedCondition>();
-			}
-		}
-
-		/// <summary>
-		/// Matched condition information
-		/// </summary>
-		public class MatchedCondition {
-			/// <summary>
-			/// Condition matched with
-			/// </summary>
-			public Condition Condition;
-
-			/// <summary>
-			/// ID of condition matched with
-			/// </summary>
-			public int ConditionID;
-
-			/// <summary>
-			/// Information of aircraft matched with
-			/// </summary>
-			public Aircraft AircraftInfo;
-
-			/// <summary>
-			/// Create condition match
-			/// </summary>
-			/// <param name="conditionID">ID of condition</param>
-			/// <param name="c">Condition matched with</param>
-			/// <param name="aircraftInfo">Aircraft information of matched aircraft</param>
-			public MatchedCondition(int conditionID, Condition c, Aircraft aircraftInfo) {
-				Condition = c;
-				AircraftInfo = aircraftInfo;
-				ConditionID = conditionID;
-			}
-		}
 
 		/// <summary>
 		/// Core static constructor

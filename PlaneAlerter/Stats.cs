@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
+using PlaneAlerter.Models;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -47,7 +48,7 @@ namespace PlaneAlerter {
 					Core.Ui.conditionTreeView.EndUpdate();
 					
 					Core.Ui.activeMatchesDataGridView.Rows.Clear();
-					foreach (Core.Match match in Core.ActiveMatches.Values) {
+					foreach (var match in Core.ActiveMatches.Values) {
 						Core.Ui.activeMatchesDataGridView.Rows.Add(match.Icao, match.Conditions[0].AircraftInfo.GetProperty("Reg"), match.Conditions[0].AircraftInfo.GetProperty("Type"), match.Conditions[0].AircraftInfo.GetProperty("Call"), match.Conditions[0].Condition.Name);
 					}	
 

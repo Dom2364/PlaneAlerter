@@ -7,6 +7,7 @@ using System.Net.Mail;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PlaneAlerter.Enums;
 using Tweetinvi.Models;
 
 namespace PlaneAlerter {
@@ -178,7 +179,7 @@ namespace PlaneAlerter {
 			public static bool Map;
             public static bool TwitterOptimised;
 			public static bool KMLfile;
-			public static Core.PropertyListType PropertyList;
+			public static PropertyListType PropertyList;
 		}
 
 		/// <summary>
@@ -279,7 +280,7 @@ namespace PlaneAlerter {
             EmailContentConfig.AircraftPhotos = true;
             EmailContentConfig.Map = true;
 			EmailContentConfig.KMLfile = true;
-            EmailContentConfig.PropertyList = Core.PropertyListType.All;
+            EmailContentConfig.PropertyList = PropertyListType.All;
             EmailContentConfig.RadarLink = true;
             EmailContentConfig.ReportLink = true;
             EmailContentConfig.ReceiverName = true;
@@ -397,7 +398,7 @@ namespace PlaneAlerter {
                 EmailContentConfig.AircraftPhotos = (bool)eccJson["AircraftPhotos"];
                 EmailContentConfig.Map = (bool)eccJson["Map"];
                 EmailContentConfig.TwitterOptimised = (bool)eccJson["TwitterOptimised"];
-                EmailContentConfig.PropertyList = (Core.PropertyListType)Enum.Parse(typeof(Core.PropertyListType), eccJson["PropertyList"].ToString());
+                EmailContentConfig.PropertyList = (PropertyListType)Enum.Parse(typeof(PropertyListType), eccJson["PropertyList"].ToString());
 				EmailContentConfig.KMLfile = (bool)eccJson["KMLfile"];
             }
 			catch {
