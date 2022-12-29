@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Property list types used in email config
 	/// </summary>
-	public enum PropertyListType
+	internal enum PropertyListType
 	{
 		Hidden,
 		Essentials,

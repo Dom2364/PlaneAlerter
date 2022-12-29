@@ -6,7 +6,7 @@ namespace PlaneAlerter.Models
 	/// <summary>
 	/// Class to store aircraft information
 	/// </summary>
-	public class Aircraft
+	internal class Aircraft
 	{
 		/// <summary>
 		/// List of property values retrieved from last aircraftlist.json

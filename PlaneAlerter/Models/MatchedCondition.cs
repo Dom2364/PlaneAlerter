@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Matched condition information
 	/// </summary>
-	public class MatchedCondition
+	internal class MatchedCondition
 	{
 		/// <summary>
 		/// Condition matched with

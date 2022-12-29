@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Tweet Link Types
 	/// </summary>
-	public enum TweetLink
+	internal enum TweetLink
 	{
 		None,
 		Radar_link,

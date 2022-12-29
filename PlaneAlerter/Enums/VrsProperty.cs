@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PlaneAlerter.Enums
+﻿namespace PlaneAlerter.Enums
 {
 	/// <summary>
 	/// List of VRS properties
 	/// </summary>
 	/// //ADD NEW ITEMS TO END
-	public enum VrsProperty
+	internal enum VrsProperty
 	{
 		Time_Tracked,
 		Receiver,

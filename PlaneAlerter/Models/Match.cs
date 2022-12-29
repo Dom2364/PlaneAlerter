@@ -6,7 +6,7 @@ namespace PlaneAlerter.Models
 	/// <summary>
 	/// Match information
 	/// </summary>
-	public class Match
+	internal class Match
 	{
 		/// <summary>
 		/// ICAO of aircraft matched

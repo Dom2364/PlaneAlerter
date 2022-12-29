@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PlaneAlerter.Enums;
+﻿using PlaneAlerter.Enums;
 
 namespace PlaneAlerter.Models
 {
 	/// <summary>
 	/// Trigger information
 	/// </summary>
-	public class Trigger
+	internal class Trigger
 	{
 		/// <summary>
 		/// Property to be checked

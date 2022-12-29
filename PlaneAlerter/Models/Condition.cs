@@ -6,7 +6,7 @@ namespace PlaneAlerter.Models
 	/// <summary>
 	/// Condition information
 	/// </summary>
-	public class Condition
+	internal class Condition
 	{
 		/// <summary>
 		/// Name of condition
