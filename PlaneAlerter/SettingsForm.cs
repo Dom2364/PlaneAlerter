@@ -159,9 +159,13 @@ namespace PlaneAlerter {
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		private void gmailLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
+		private void gmailLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
 			//Open gmail link
-			Process.Start("https://www.google.com/settings/security/lesssecureapps");
+			Process.Start(new ProcessStartInfo("https://www.google.com/settings/security/lesssecureapps")
+			{
+				UseShellExecute = true
+			});
 		}
 
 		private void filterDstCheckBox_CheckedChanged(object sender, EventArgs e) {

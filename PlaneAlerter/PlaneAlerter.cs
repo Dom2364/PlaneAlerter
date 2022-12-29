@@ -183,7 +183,11 @@ namespace PlaneAlerter
 		/// <param name="e">Event Args</param>
 		void ConsoleLinkClicked(object sender, LinkClickedEventArgs e) {
 			//Open link
-			Process.Start(e.LinkText);
+			Process.Start(new ProcessStartInfo(e.LinkText)
+			{
+				UseShellExecute = true
+			});
+
 		}
 
 		/// <summary>
@@ -247,7 +251,10 @@ namespace PlaneAlerter
 		/// <param name="e">Event Args</param>
 		private void donateToolStripMenuItem_Click(object sender, EventArgs e) {
 			//Open donate link
-			Process.Start(@"https://www.paypal.me/dom2364");
+			Process.Start(new ProcessStartInfo("https://www.paypal.me/dom2364")
+			{
+				UseShellExecute = true
+			});
 		}
 
 		private void addAccountToolStripMenuItem_Click(object sender, EventArgs e) {
