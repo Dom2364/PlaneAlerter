@@ -60,7 +60,7 @@ namespace PlaneAlerter.Forms
 			InitializeComponent();
 
 			//Set UI to this form
-			Core.UI = this;
+			Core.Ui = this;
 
 			//When shown, wait until everything has loaded then start threads
 			Shown += delegate {
@@ -92,9 +92,9 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		public void updateConditionList() {
 			conditionTreeView.Nodes[0].Nodes.Clear();
-			foreach(int conditionid in Core.conditions.Keys) {
+			foreach(int conditionid in Core.Conditions.Keys) {
 				TreeNode conditionNode;
-				Core.Condition c = Core.conditions[conditionid];
+				Core.Condition c = Core.Conditions[conditionid];
 				conditionNode = conditionTreeView.Nodes[0].Nodes.Add("Name: " + c.conditionName);
 				conditionNode.Tag = conditionid;
 				conditionNode.Nodes.Add("Id: " + conditionid);
@@ -170,10 +170,10 @@ namespace PlaneAlerter.Forms
 		/// <param name="e">Event Args</param>
 		void PlaneAlerterFormClosing(object sender, FormClosingEventArgs e) {
 			//Abort threads if running
-			if (Core.statsThread != null)
-				Core.statsThread.Abort();
-			if (Core.loopThread != null)
-				Core.loopThread.Abort();
+			if (Core.StatsThread != null)
+				Core.StatsThread.Abort();
+			if (Core.LoopThread != null)
+				Core.LoopThread.Abort();
 			Settings.Save();
 		}
 		

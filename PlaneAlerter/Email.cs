@@ -54,7 +54,7 @@ namespace PlaneAlerter {
 				message.To.Add(emailaddress);
 			}
 			catch {
-				Core.UI.writeToConsole("ERROR: Email to send to is invalid (" + emailaddress + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Email to send to is invalid (" + emailaddress + ")", Color.Red);
 				return;
 			}
 
@@ -63,7 +63,7 @@ namespace PlaneAlerter {
 				message.From = new MailAddress(Settings.senderEmail, "PlaneAlerter Alerts");
 			}
 			catch {
-				Core.UI.writeToConsole("ERROR: Email to send from is invalid (" + Settings.senderEmail + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Email to send from is invalid (" + Settings.senderEmail + ")", Color.Red);
 				return;
 			}
 
@@ -92,7 +92,7 @@ namespace PlaneAlerter {
             }
             else {
                 //Create request for aircraft image urls
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Settings.acListUrl.Substring(0, Settings.acListUrl.LastIndexOf("/") + 1) + "AirportDataThumbnails.json?icao=" + aircraft.ICAO + "&numThumbs=" + imageLinks.Length);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Settings.acListUrl.Substring(0, Settings.acListUrl.LastIndexOf("/") + 1) + "AirportDataThumbnails.json?icao=" + aircraft.Icao + "&numThumbs=" + imageLinks.Length);
                 request.Method = "GET";
                 request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
                 request.Timeout = 5000;
@@ -137,7 +137,7 @@ namespace PlaneAlerter {
                 }
 
                 //Write to UI
-                Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.ICAO + " | " + message.Subject, Color.LightBlue);
+                Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
 
                 //Generate aircraft property value table
                 Dictionary<string, string>.KeyCollection aircraftPropertyKeys = aircraft.GetPropertyKeys();
@@ -167,10 +167,10 @@ namespace PlaneAlerter {
                         continue;
                     //Get parameter information from vrs property info
                     if (parameter == "UNKNOWN_PARAMETER") {
-                        foreach (Core.vrsProperty property in Core.vrsPropertyData.Keys) {
-                            if (Core.vrsPropertyData[property][2] == propertykey.ToString()) {
+                        foreach (Core.vrsProperty property in Core.VrsPropertyData.Keys) {
+                            if (Core.VrsPropertyData[property][2] == propertykey.ToString()) {
                                 //If property list type is essentials and this property is not in the list of essentials, leave this property as unknown so it can be skipped
-                                if (Settings.EmailContentConfig.PropertyList == Core.PropertyListType.Essentials && !Core.essentialProperties.Contains(property))
+                                if (Settings.EmailContentConfig.PropertyList == Core.PropertyListType.Essentials && !Core.EssentialProperties.Contains(property))
                                     continue;
                                 parameter = property.ToString();
                             }
@@ -219,10 +219,10 @@ namespace PlaneAlerter {
                     message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Transponder: " + transponderName + "</h2>";
                 //Radar url
                 if (Settings.EmailContentConfig.RadarLink)
-                    message.Body += $"<h3><a style='text-decoration: none;' href='{Settings.radarUrl}?icao={aircraft.ICAO}'>Goto Radar</a></h3>";
+                    message.Body += $"<h3><a style='text-decoration: none;' href='{Settings.radarUrl}?icao={aircraft.Icao}'>Goto Radar</a></h3>";
                 //Report url
                 if (Settings.EmailContentConfig.ReportLink)
-                    message.Body += $"<h3>VRS Report: <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.ICAO, false)}'>Desktop</a>   <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.ICAO, true)}'>Mobile</a></h3>";
+                    message.Body += $"<h3>VRS Report: <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.Icao, false)}'>Desktop</a>   <a style='text-decoration: none;' href='{Core.GenerateReportURL(aircraft.Icao, true)}'>Mobile</a></h3>";
                 //Airframes.org url
                 if (Settings.EmailContentConfig.AfLookup)
                     message.Body += airframesUrl;
@@ -242,7 +242,7 @@ namespace PlaneAlerter {
                 }
                 //KML
                 if (Settings.EmailContentConfig.KMLfile && aircraft.GetProperty("Lat") != null)
-                    message.Attachments.Add(Attachment.CreateAttachmentFromString(Core.GenerateKML(aircraft), aircraft.ICAO + ".kml"));
+                    message.Attachments.Add(Attachment.CreateAttachmentFromString(Core.GenerateKML(aircraft), aircraft.Icao + ".kml"));
                 
 
                 message.Body += "</td></tr></table></body></html>";
@@ -254,23 +254,23 @@ namespace PlaneAlerter {
 			}
 			catch(SmtpException e) {
 				if(e.InnerException != null) {
-					Core.UI.writeToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
+					Core.Ui.writeToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
 					return;
 				}
-				Core.UI.writeToConsole("SMTP ERROR: " + e.Message, Color.Red);
+				Core.Ui.writeToConsole("SMTP ERROR: " + e.Message, Color.Red);
 				return;
 			}
 			catch (InvalidOperationException e) {
 				if (e.InnerException != null) {
-					Core.UI.writeToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
+					Core.Ui.writeToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
 					return;
 				}
-				Core.UI.writeToConsole("SMTP ERROR: " + e.Message, Color.Red);
+				Core.Ui.writeToConsole("SMTP ERROR: " + e.Message, Color.Red);
 				return;
 			}
 
 			//Log to UI
-			Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.ICAO + " | " + message.Subject, Color.LightBlue);
+			Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
 		}
 	}
 }

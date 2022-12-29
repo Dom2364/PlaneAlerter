@@ -29,7 +29,7 @@ namespace PlaneAlerter {
 		/// </summary>
 		public static async Task<bool> Tweet(string token, string tokensecret, string content, string mediaURL) {
 			if (content.Contains("@")) {
-				Core.UI.writeToConsole("ERROR: Mentions are not allowed in tweets", System.Drawing.Color.Red);
+				Core.Ui.writeToConsole("ERROR: Mentions are not allowed in tweets", System.Drawing.Color.Red);
 				return false;
 			}
 
@@ -51,7 +51,7 @@ namespace PlaneAlerter {
 					}	
 				}
 				catch (Exception e) {
-					Core.UI.writeToConsole($"ERROR: {e.GetType()} error downloading map image from Google: {e.Message}", System.Drawing.Color.Red);
+					Core.Ui.writeToConsole($"ERROR: {e.GetType()} error downloading map image from Google: {e.Message}", System.Drawing.Color.Red);
 					return false;
 				}
 
@@ -63,13 +63,13 @@ namespace PlaneAlerter {
 
 					//Check if it was uploaded properly
 					if (media.HasBeenUploaded) mediaid = media.Id;
-					else Core.UI.writeToConsole("ERROR: Error uploading map", System.Drawing.Color.Red);
+					else Core.Ui.writeToConsole("ERROR: Error uploading map", System.Drawing.Color.Red);
 				}
 				catch (TwitterException e) {
-					Core.UI.writeToConsole($"ERROR: Error uploading map image to Twitter: {e.ToString()}", System.Drawing.Color.Red);
+					Core.Ui.writeToConsole($"ERROR: Error uploading map image to Twitter: {e.ToString()}", System.Drawing.Color.Red);
 				}
 				catch (Exception e) { 
-					Core.UI.writeToConsole($"ERROR: {e.GetType()} error uploading map image to Twitter: {e.Message}", System.Drawing.Color.Red);
+					Core.Ui.writeToConsole($"ERROR: {e.GetType()} error uploading map image to Twitter: {e.Message}", System.Drawing.Color.Red);
 				}
 			}
 
@@ -96,11 +96,11 @@ namespace PlaneAlerter {
 					detailedcontent = contentjson["detail"]!=null? contentjson["detail"].ToString() : null;
 				}
 
-				Core.UI.writeToConsole($"ERROR: Error publishing tweet: {(detailedcontent!=null?detailedcontent + Environment.NewLine:"")}{e.ToString()}", System.Drawing.Color.Red);
+				Core.Ui.writeToConsole($"ERROR: Error publishing tweet: {(detailedcontent!=null?detailedcontent + Environment.NewLine:"")}{e.ToString()}", System.Drawing.Color.Red);
 				return false;
 			}
 			catch (Exception e) {
-				Core.UI.writeToConsole($"ERROR: {e.GetType()} error publishing tweet: " + e.Message, System.Drawing.Color.Red);
+				Core.Ui.writeToConsole($"ERROR: {e.GetType()} error publishing tweet: " + e.Message, System.Drawing.Color.Red);
 				return false;
 			}
 
@@ -170,7 +170,7 @@ namespace PlaneAlerter {
 				//Add user
 				Settings.TwitterUsers.Add(screenname, new string[] { userCredentials.AccessToken, userCredentials.AccessTokenSecret });
 				MessageBox.Show("Twitter user '" + screenname + "' authorized!", "User Authorized");
-				Core.UI.updateTwitterAccounts();
+				Core.Ui.updateTwitterAccounts();
 			}
 		}
 
@@ -187,7 +187,7 @@ namespace PlaneAlerter {
 			//Remove user
 			Settings.TwitterUsers.Remove(screenname);
 			MessageBox.Show("Twitter user '" + screenname + "' removed!", "User Removed");
-			Core.UI.updateTwitterAccounts();
+			Core.Ui.updateTwitterAccounts();
 		}
 	}
 }

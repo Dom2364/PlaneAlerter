@@ -56,14 +56,14 @@ namespace PlaneAlerter {
 				//Set next check time
 				NextCheck = DateTime.Now.AddSeconds(Settings.refreshRate);
 				//Notify user that aircraft info is being downloaded
-				Core.UI.updateStatusLabel("Downloading Aircraft Info...");
+				Core.Ui.updateStatusLabel("Downloading Aircraft Info...");
 				receiverName = "";
 				//Get latest aircraft information
 				GetAircraft(false, true);
 				if (Settings.filterDistance && !Settings.ignoreModeS) GetAircraft(true, false);
 
 				//Check if there are aircraft to check
-				if (Core.aircraftlist.Count != 0) {
+				if (Core.AircraftList.Count != 0) {
 					//Aircraft number to be shown on UI
 					var aircraftCount = 1;
 					//Current condition being checked
@@ -72,20 +72,20 @@ namespace PlaneAlerter {
 					var ignoreFollowing = false;
 					//Updated trails are available, this check contains the first match in a while
 					var updatedTrailsAvailable = false;
-					foreach (var aircraft in Core.aircraftlist.ToList()) {
+					foreach (var aircraft in Core.AircraftList.ToList()) {
 						//Update UI with aircraft being checked
-						Core.UI.updateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " + Core.aircraftlist.Count());
+						Core.Ui.updateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " + Core.AircraftList.Count());
 						aircraftCount++;
 
-						if (Core.activeMatches.ContainsKey(aircraft.ICAO) && Core.activeMatches[aircraft.ICAO].IgnoreFollowing) continue;
+						if (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].IgnoreFollowing) continue;
 						if (aircraft.GetProperty("Reg") == null && aircraft.GetProperty("Type") == null && (aircraft.GetProperty("FlightsCount") == null || Convert.ToInt32(aircraft.GetProperty("FlightsCount")) == 0)) 
 							continue;
 
 						//Iterate conditions
-						foreach (var conditionId in Core.conditions.Keys.ToList()) {
-							condition = Core.conditions[conditionId];
+						foreach (var conditionId in Core.Conditions.Keys.ToList()) {
+							condition = Core.Conditions[conditionId];
 							//Skip if condition is disabled or condition is already matched
-							if (condition.alertType == Core.AlertType.Disabled || (Core.activeMatches.ContainsKey(aircraft.ICAO) && Core.activeMatches[aircraft.ICAO].Conditions.Exists(x => x.ConditionID == conditionId)))
+							if (condition.alertType == Core.AlertType.Disabled || (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionID == conditionId)))
 								continue;
 
 							triggersMatching = 0;
@@ -99,7 +99,7 @@ namespace PlaneAlerter {
 								//E = Contains
 
 								//Get internal name for property to compare
-								propertyInternalName = Core.vrsPropertyData[trigger.Property][2].ToString();
+								propertyInternalName = Core.VrsPropertyData[trigger.Property][2].ToString();
 								var propertyValue = aircraft.GetProperty(propertyInternalName);
 
 								//Check property against value
@@ -137,24 +137,24 @@ namespace PlaneAlerter {
 							//Check if condition still matches
 							if (triggersMatching == condition.triggers.Count) {
 								//Get receiver name
-								if (Core.receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) receiverName = Core.receivers[aircraft.GetProperty("Rcvr")];
+								if (Core.Receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) receiverName = Core.Receivers[aircraft.GetProperty("Rcvr")];
 
 								//If active matches contains aircraft, add condition to the match
-								if (Core.activeMatches.ContainsKey(aircraft.ICAO)) {
-									Core.activeMatches[aircraft.ICAO].AddCondition(conditionId, condition, aircraft);
+								if (Core.ActiveMatches.ContainsKey(aircraft.Icao)) {
+									Core.ActiveMatches[aircraft.Icao].AddCondition(conditionId, condition, aircraft);
 								}
 								//Else add to active matches
 								else {
-									var m = new Core.Match(aircraft.ICAO);
+									var m = new Core.Match(aircraft.Icao);
 									m.AddCondition(conditionId, condition, aircraft);
-									Core.activeMatches.Add(aircraft.ICAO, m);
+									Core.ActiveMatches.Add(aircraft.Icao, m);
 								}
 
 								//Cancel checking for conditions for this aircraft
 								ignoreFollowing = condition.ignoreFollowing;
 
 								//Get trails if they haven't been requested due to no matches
-								if (Core.activeMatches.Count == 1 && Settings.trailsUpdateFrequency != 0) {
+								if (Core.ActiveMatches.Count == 1 && Settings.trailsUpdateFrequency != 0) {
 									GetAircraft(false, true, true);
 									if (Settings.filterDistance && !Settings.ignoreModeS) GetAircraft(true, false, true);
 									updatedTrailsAvailable = true;
@@ -162,9 +162,9 @@ namespace PlaneAlerter {
 
 								//If updated trails are available, update trail and position
 								if (updatedTrailsAvailable) {
-									foreach (var updatedAircraft in Core.aircraftlist.ToList())
+									foreach (var updatedAircraft in Core.AircraftList.ToList())
 									{
-										if (updatedAircraft.ICAO != aircraft.ICAO)
+										if (updatedAircraft.Icao != aircraft.Icao)
 											continue;
 
 										aircraft.Trail = updatedAircraft.Trail;
@@ -176,7 +176,7 @@ namespace PlaneAlerter {
 
 								//Update stats and log to console
 								Stats.updateStats();
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightGreen);
+								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " + condition.conditionName, Color.LightGreen);
 
 								//Send Alert
 								if (condition.alertType == Core.AlertType.First_and_Last_Contact || condition.alertType == Core.AlertType.First_Contact)
@@ -185,8 +185,8 @@ namespace PlaneAlerter {
 							if (ignoreFollowing) break;
 						}
 						//If active matches contains this aircraft, update aircraft info
-						if (Core.activeMatches.ContainsKey(aircraft.ICAO))
-							foreach (var c in Core.activeMatches[aircraft.ICAO].Conditions)
+						if (Core.ActiveMatches.ContainsKey(aircraft.Icao))
+							foreach (var c in Core.ActiveMatches[aircraft.Icao].Conditions)
 								c.AircraftInfo = aircraft;
 
 						//Cancel if thread is supposed to stop
@@ -194,18 +194,18 @@ namespace PlaneAlerter {
 							return;
 					}
 					//Check if aircraft have lost signal and remove aircraft that have timed out
-					Core.UI.updateStatusLabel("Checking aircraft are still on radar...");
+					Core.Ui.updateStatusLabel("Checking aircraft are still on radar...");
 					//Iterate active matches
-					foreach (var match in Core.activeMatches.Values.ToList()) {
+					foreach (var match in Core.ActiveMatches.Values.ToList()) {
 						//Iterate match conditions
 						foreach (var c in match.Conditions) {
 							//Check if signal has been lost for more than the removal timeout
 							if (match.SignalLost && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((Settings.removalTimeout - (Settings.removalTimeout * 2)))) < 0) {
 								//Remove from active matches
-								Core.activeMatches.Remove(match.Icao);
+								Core.ActiveMatches.Remove(match.Icao);
 								//Update stats and log to console
 								Stats.updateStats();
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.conditionName, Color.Orange);
+								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.conditionName, Color.Orange);
 								//Update aircraft info
 								var aircraft = c.AircraftInfo;
 
@@ -214,7 +214,7 @@ namespace PlaneAlerter {
 									condition = c.Condition;
 
 									//Get receiver name
-									if (Core.receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) receiverName = Core.receivers[aircraft.GetProperty("Rcvr")];
+									if (Core.Receivers.ContainsKey(aircraft.GetProperty("Rcvr"))) receiverName = Core.Receivers[aircraft.GetProperty("Rcvr")];
 
 									//Send Alert
 									SendAlert(condition, aircraft, receiverName, false);
@@ -223,17 +223,17 @@ namespace PlaneAlerter {
 							}
 							//Check if signal has been lost/returned
 							var stillActive = false;
-							foreach (var aircraft in Core.aircraftlist)
-								if (aircraft.ICAO == match.Icao)
+							foreach (var aircraft in Core.AircraftList)
+								if (aircraft.Icao == match.Icao)
 									stillActive = true;
 							if (!stillActive && match.SignalLost == false) {
-								Core.activeMatches[match.Icao].SignalLostTime = DateTime.Now;
-								Core.activeMatches[match.Icao].SignalLost = true;
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
+								Core.ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
+								Core.ActiveMatches[match.Icao].SignalLost = true;
+								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
 							}
 							if (stillActive && match.SignalLost) {
-								Core.activeMatches[match.Icao].SignalLost = false;
-								Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
+								Core.ActiveMatches[match.Icao].SignalLost = false;
+								Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.conditionName, Color.LightGoldenrodYellow);
 							}
 						}
 					}
@@ -241,7 +241,7 @@ namespace PlaneAlerter {
 				//Cancel if thread is supposed to stop
 				if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Stopping) return;
 				//Set thread status to waiting
-				Core.UI.updateStatusLabel("Waiting for next check...");
+				Core.Ui.updateStatusLabel("Waiting for next check...");
 				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Waiting;
 				//Wait until the next check time
 				while (DateTime.Compare(DateTime.Now, NextCheck) < 0) {
@@ -254,7 +254,7 @@ namespace PlaneAlerter {
 
 		public static void SendAlert(Core.Condition condition, Core.Aircraft aircraft, string receiver, bool isFirst) {
 			//Show notification
-			if (Settings.showNotifications) Core.UI.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.conditionName}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
+			if (Settings.showNotifications) Core.Ui.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.conditionName}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
 
 			//Make a ding noise
 			if (Settings.soundAlerts) SystemSounds.Exclamation.Play();
@@ -274,15 +274,15 @@ namespace PlaneAlerter {
 
 				//Check if selected account is valid
 				if (string.IsNullOrWhiteSpace(condition.twitterAccount)) {
-					Core.UI.writeToConsole("ERROR: Please select Twitter account in condition editor", Color.Red);
+					Core.Ui.writeToConsole("ERROR: Please select Twitter account in condition editor", Color.Red);
 					return;
 				}
 				if (!Settings.TwitterUsers.ContainsKey(condition.twitterAccount)) {
-					Core.UI.writeToConsole("ERROR: Selected Twitter account (" + condition.twitterAccount + ") has not been authenticated", Color.Red);
+					Core.Ui.writeToConsole("ERROR: Selected Twitter account (" + condition.twitterAccount + ") has not been authenticated", Color.Red);
 					return;
 				}
 				if (string.IsNullOrEmpty(content)) {
-					Core.UI.writeToConsole("ERROR: Tweet content can't be empty. Tweet content can be configured in the condition editor.", Color.Red);
+					Core.Ui.writeToConsole("ERROR: Tweet content can't be empty. Tweet content can be configured in the condition editor.", Color.Red);
 					return;
 				}
 
@@ -294,7 +294,7 @@ namespace PlaneAlerter {
 				if (content.Length > 250) {
 					var charsOver = content.Length - 250;
 					content = content.Substring(0, 250) + "...";
-					Core.UI.writeToConsole("WARNING: Tweet content is " + charsOver + " characters over the limit of 280, removing end of message", Color.Orange);
+					Core.Ui.writeToConsole("WARNING: Tweet content is " + charsOver + " characters over the limit of 280, removing end of message", Color.Orange);
 				}
 					
 				//Add link to tweet
@@ -305,10 +305,10 @@ namespace PlaneAlerter {
 						content += " " + Settings.radarUrl;
 						break;
 					case Core.TweetLink.Radar_link_with_aircraft_selected:
-						if (isFirst) content += " " + Settings.radarUrl + "?icao=" + aircraft.ICAO;
+						if (isFirst) content += " " + Settings.radarUrl + "?icao=" + aircraft.Icao;
 						break;
 					case Core.TweetLink.Report_link:
-						content += " " + Core.GenerateReportURL(aircraft.ICAO, true);
+						content += " " + Core.GenerateReportURL(aircraft.Icao, true);
 						break;
 				}
 
@@ -318,7 +318,7 @@ namespace PlaneAlerter {
 				//Send tweet
 				var success = Twitter.Tweet(credentials[0], credentials[1], content, mapUrl).Result;
 				if (success) {
-					Core.UI.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.ICAO + " | " + condition.conditionName, Color.LightBlue);
+					Core.Ui.writeToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.conditionName, Color.LightBlue);
 				}
 			}
 
@@ -338,7 +338,7 @@ namespace PlaneAlerter {
 				requestTrails = true;
 			}
 			//No matches so we don't need trails
-			else if (Core.activeMatches.Count == 0) {
+			else if (Core.ActiveMatches.Count == 0) {
 				requestTrails = false;
 			}
 			//Threshold enabled
@@ -366,13 +366,13 @@ namespace PlaneAlerter {
 					responseJson = RequestAircraftList(url);
 				}
 				catch (Exception e) {
-					Core.UI.writeToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
+					Core.Ui.writeToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					return;
 				}
 
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null) {
-					Core.UI.writeToConsole("ERROR: Invalid response received from server", Color.Red);
+					Core.Ui.writeToConsole("ERROR: Invalid response received from server", Color.Red);
 					return;
 				}
 
@@ -382,10 +382,10 @@ namespace PlaneAlerter {
 
 				//Save old trails if not requesting new ones
 				Dictionary<string, double[]>? oldTrails = null;
-				if (!requestTrails) oldTrails = Core.aircraftlist.ToDictionary(x => x.ICAO, x => x.Trail);
+				if (!requestTrails) oldTrails = Core.AircraftList.ToDictionary(x => x.Icao, x => x.Trail);
 
 				//Parse aircraft data
-				if (clearExisting) Core.aircraftlist.Clear();
+				if (clearExisting) Core.AircraftList.Clear();
 				foreach (JObject a in responseJson["acList"].ToList()) {
 					//Ignore if no icao is provided
 					if (a["Icao"] == null) continue;
@@ -403,7 +403,7 @@ namespace PlaneAlerter {
 								aircraft.Trail[i] = 0;
 					}
 					else {
-						if (oldTrails != null && oldTrails.ContainsKey(aircraft.ICAO)) aircraft.Trail = oldTrails[aircraft.ICAO];
+						if (oldTrails != null && oldTrails.ContainsKey(aircraft.Icao)) aircraft.Trail = oldTrails[aircraft.Icao];
 					}
 
 					//Parse aircraft properties
@@ -412,32 +412,32 @@ namespace PlaneAlerter {
 						aircraft.AddProperty(properties[i].Name, properties[i].Value.ToString());
 					
 					//Add aircraft to list
-					Core.aircraftlist.Add(aircraft);
+					Core.AircraftList.Add(aircraft);
 				}
 
 				//Get list of receivers
-				Core.receivers.Clear();
+				Core.Receivers.Clear();
 				foreach (JObject f in responseJson["feeds"])
-					Core.receivers.Add(f["id"].ToString(), f["name"].ToString());
+					Core.Receivers.Add(f["id"].ToString(), f["name"].ToString());
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();
 				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (UriFormatException) {
-				Core.UI.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.acListUrl + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.acListUrl + ")", Color.Red);
 				return;
 			}
 			catch (InvalidDataException) {
-				Core.UI.writeToConsole("ERROR: Data returned from " + Settings.acListUrl + " was not gzip compressed", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Data returned from " + Settings.acListUrl + " was not gzip compressed", Color.Red);
 				return;
 			}
 			catch (WebException e) {
-				Core.UI.writeToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
 				return;
 			}
 			catch (JsonReaderException e) {
-				Core.UI.writeToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
 				return;
 			}
 		}
@@ -474,13 +474,13 @@ namespace PlaneAlerter {
 					responseJson = RequestAircraftList(url);
 				}
 				catch (Exception e) {
-					Core.UI.writeToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
+					Core.Ui.writeToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					return null;
 				}
 
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null) {
-					Core.UI.writeToConsole("ERROR: Invalid response recieved from server", Color.Red);
+					Core.Ui.writeToConsole("ERROR: Invalid response recieved from server", Color.Red);
 					return null;
 				}
 				//Throw error if server time was not parsed
@@ -488,9 +488,9 @@ namespace PlaneAlerter {
 					throw new JsonReaderException();
 
 				//Get list of receivers
-				Core.receivers.Clear();
+				Core.Receivers.Clear();
 				foreach (JObject f in responseJson["feeds"])
-					Core.receivers.Add(f["id"].ToString(), f["name"].ToString());
+					Core.Receivers.Add(f["id"].ToString(), f["name"].ToString());
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();
@@ -498,23 +498,23 @@ namespace PlaneAlerter {
 				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (UriFormatException) {
-				Core.UI.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.acListUrl + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: AircraftList.json url invalid (" + Settings.acListUrl + ")", Color.Red);
 				return null;
 			}
 			catch (InvalidDataException) {
-				Core.UI.writeToConsole("ERROR: Data returned from " + Settings.acListUrl + " was not gzip compressed", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Data returned from " + Settings.acListUrl + " was not gzip compressed", Color.Red);
 				return null;
 			}
 			catch (WebException e) {
-				Core.UI.writeToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
 				return null;
 			}
 			catch (JsonReaderException e) {
-				Core.UI.writeToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
+				Core.Ui.writeToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
 				return null;
 			}
 
-			return Core.receivers;
+			return Core.Receivers;
 		}
 
 		/// <summary>
@@ -523,8 +523,8 @@ namespace PlaneAlerter {
 		public static void LoadConditions() {
 			try {
 				//Clear conditions and active matches
-				Core.conditions.Clear();
-				Core.activeMatches.Clear();
+				Core.Conditions.Clear();
+				Core.ActiveMatches.Clear();
 
 				//Parse conditions file
 				JObject? conditionJson;
@@ -558,8 +558,8 @@ namespace PlaneAlerter {
 
 					if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString())) {
 						var emailProperty = (Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), (condition["emailProperty"] ?? Core.vrsProperty.Registration.ToString()).ToString());
-						newCondition.emailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.vrsPropertyData[emailProperty][2] + "]";
-						newCondition.emailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.vrsPropertyData[emailProperty][2] + "]";
+						newCondition.emailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
+						newCondition.emailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
 					}
 
 					var emailsArray = new List<string>();
@@ -569,23 +569,23 @@ namespace PlaneAlerter {
 					foreach (var trigger in condition["triggers"].Values())
 						newCondition.triggers.Add(newCondition.triggers.Count, new Core.Trigger((Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
 					//Add condition to list
-					Core.conditions.Add(conditionId, newCondition);
+					Core.Conditions.Add(conditionId, newCondition);
 				}
 				//Try to clean up json parsing
 				conditionJson.RemoveAll();
 				
 				//Save to file again in case some defaults were set
-				var conditionsJson = JsonConvert.SerializeObject(Core.conditions, Formatting.Indented);
+				var conditionsJson = JsonConvert.SerializeObject(Core.Conditions, Formatting.Indented);
 				File.WriteAllText("conditions.json", conditionsJson);
 
 				//Update condition list
-				Core.UI.Invoke((MethodInvoker)(() => {
-					Core.UI.updateConditionList();
+				Core.Ui.Invoke((MethodInvoker)(() => {
+					Core.Ui.updateConditionList();
 				}));
-				Core.UI.conditionTreeView.Nodes[0].Expand();
+				Core.Ui.conditionTreeView.Nodes[0].Expand();
 
 				//Log to UI
-				Core.UI.writeToConsole("Conditions Loaded", Color.White);
+				Core.Ui.writeToConsole("Conditions Loaded", Color.White);
 
 				//Restart threads
 				if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.WaitingForLoad) 
@@ -603,13 +603,13 @@ namespace PlaneAlerter {
 		static Checker() {
 			//Create conditions file if one doesnt exist
 			if (!File.Exists("conditions.json")) {
-				Core.UI.writeToConsole("No conditions file! Creating one...", Color.White);
+				Core.Ui.writeToConsole("No conditions file! Creating one...", Color.White);
 				File.WriteAllText("conditions.json", "{\n}");
 			}
 			//Load conditions
 			LoadConditions();
 			//Notify user if no conditions are found
-			if (Core.conditions.Count == 0) {
+			if (Core.Conditions.Count == 0) {
 				MessageBox.Show("No Conditions! Click Options then Open Condition Editor to add conditions.", "No Conditions!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 			}
 			ConditionsLoaded = true;

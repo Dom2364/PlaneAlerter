@@ -122,7 +122,7 @@ namespace PlaneAlerter.Forms {
 			//Check if cell changed is in the value column and value isnt empty
 			if (e.ColumnIndex == 2 && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString() != "") {
 				//Clear value if property is number and value is not a number
-				if (triggerDataGridView.Rows[e.RowIndex].Cells[2].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString() != "" && Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][0] == "Number") {
+				if (triggerDataGridView.Rows[e.RowIndex].Cells[2].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString() != "" && Core.VrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][0] == "Number") {
 					try {
 						Convert.ToDouble(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value);
 					}
@@ -142,7 +142,7 @@ namespace PlaneAlerter.Forms {
 				//Get comparison types supported by property
 				string supportedComparisonTypes;
 				try {
-					supportedComparisonTypes = Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][1];
+					supportedComparisonTypes = Core.VrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][1];
 				}
 				catch (Exception) {
 					return;
@@ -150,13 +150,13 @@ namespace PlaneAlerter.Forms {
 
 				//Add comparison types to combobox from supported comparison types
 				if (supportedComparisonTypes.Contains("A")) {
-					foreach (var comparisonType in Core.comparisonTypes["A"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in Core.ComparisonTypes["A"]) comparisonTypeComboBox.Items.Add(comparisonType);
 				}
 				if (supportedComparisonTypes.Contains("B")) {
-					foreach (var comparisonType in Core.comparisonTypes["B"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in Core.ComparisonTypes["B"]) comparisonTypeComboBox.Items.Add(comparisonType);
 				}
 				if (supportedComparisonTypes.Contains("C")) {
-					foreach (var comparisonType in Core.comparisonTypes["C"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in Core.ComparisonTypes["C"]) comparisonTypeComboBox.Items.Add(comparisonType);
 					triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "True";
 					triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = true;
 				}
@@ -165,10 +165,10 @@ namespace PlaneAlerter.Forms {
 					triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = false;
 				}
 				if (supportedComparisonTypes.Contains("D")) {
-					foreach (var comparisonType in Core.comparisonTypes["D"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in Core.ComparisonTypes["D"]) comparisonTypeComboBox.Items.Add(comparisonType);
 				}
 				if (supportedComparisonTypes.Contains("E")) {
-					foreach (var comparisonType in Core.comparisonTypes["E"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in Core.ComparisonTypes["E"]) comparisonTypeComboBox.Items.Add(comparisonType);
 				}
 
 				comparisonTypeComboBox.Value = comparisonTypeComboBox.Items[0].ToString();

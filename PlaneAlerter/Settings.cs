@@ -243,30 +243,30 @@ namespace PlaneAlerter {
 		/// </summary>
 		/// <param name="update">Is this an update?</param>
 		public static void updateSettings(bool update) {
-			if (Core.loopThread != null)
-				Core.UI.writeToConsole("Reloading Settings...", Color.White);
+			if (Core.LoopThread != null)
+				Core.Ui.writeToConsole("Reloading Settings...", Color.White);
 			VRSAuthenticate = (VRSUsr != "");
 
 			//Update UI
-			foreach (TreeNode settingsGroupNode in Core.UI.conditionTreeView.Nodes[1].Nodes)
+			foreach (TreeNode settingsGroupNode in Core.Ui.conditionTreeView.Nodes[1].Nodes)
 				settingsGroupNode.Nodes.Clear();
 
-			Core.UI.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("Sender Email: " + senderEmail);
-			Core.UI.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP Host: " + SMTPHost + ":" + SMTPPort);
-			Core.UI.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP SSL: " + SMTPSSL);
-			Core.UI.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP Username: " + SMTPUsr);
+			Core.Ui.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("Sender Email: " + senderEmail);
+			Core.Ui.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP Host: " + SMTPHost + ":" + SMTPPort);
+			Core.Ui.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP SSL: " + SMTPSSL);
+			Core.Ui.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP Username: " + SMTPUsr);
 
-			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("AircraftList.json Url: " + acListUrl);
-			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Radar Url: " + radarUrl);
+			Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("AircraftList.json Url: " + acListUrl);
+			Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Radar Url: " + radarUrl);
 			if (VRSAuthenticate) {
-				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " + VRSAuthenticate);
-				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Username: " + VRSUsr);
+				Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " + VRSAuthenticate);
+				Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Username: " + VRSUsr);
 			}
 			else
-				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " + VRSAuthenticate);
-			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Removal Timeout: " + removalTimeout + " secs");
-			Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Ignore aircraft further than: " + ignoreDistance + " km away");
-				Core.UI.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Ignore aircraft higher than: " + ignoreAltitude + " ft");
+				Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " + VRSAuthenticate);
+			Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Removal Timeout: " + removalTimeout + " secs");
+			Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Ignore aircraft further than: " + ignoreDistance + " km away");
+				Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Ignore aircraft higher than: " + ignoreAltitude + " ft");
 			//If its an update, restart threads
 			if (update) ThreadManager.Restart();
 		}
@@ -306,7 +306,7 @@ namespace PlaneAlerter {
 
 			//Create settings file if one does not exist
 			if (!File.Exists("settings.json")) {
-				Core.UI.writeToConsole("No settings file! Creating one...", Color.White);
+				Core.Ui.writeToConsole("No settings file! Creating one...", Color.White);
 				File.WriteAllText("settings.json", JsonConvert.SerializeObject(new Dictionary<string, object>(), Formatting.Indented));
 			}
 
@@ -372,11 +372,11 @@ namespace PlaneAlerter {
 			settingsJson = null;
 
 			//Log to UI
-			Core.UI.writeToConsole("Settings Loaded", Color.White);
+			Core.Ui.writeToConsole("Settings Loaded", Color.White);
 
 			//If email content config file does not exist, create one
 			if (!File.Exists("emailconfig.json")) {
-				Core.UI.writeToConsole("No email content config file! Creating one...", Color.White);
+				Core.Ui.writeToConsole("No email content config file! Creating one...", Color.White);
                 LoadECCDefaults();
 			}
 
@@ -410,13 +410,13 @@ namespace PlaneAlerter {
 			eccJson = null;
 
 			//Log to UI
-			Core.UI.writeToConsole("Email Content Config Loaded", Color.White);
+			Core.Ui.writeToConsole("Email Content Config Loaded", Color.White);
 
 			//Update settings
 			updateSettings(false);
 
 			//Update twitter accounts list
-			Core.UI.updateTwitterAccounts();
+			Core.Ui.updateTwitterAccounts();
 
 			SettingsLoaded = true;
 		}
