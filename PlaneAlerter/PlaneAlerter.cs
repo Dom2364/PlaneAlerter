@@ -173,7 +173,6 @@ namespace PlaneAlerter
 				Core.statsThread.Abort();
 			if (Core.loopThread != null)
 				Core.loopThread.Abort();
-			ThreadManager.ThreadManagerDispatcher.InvokeShutdown();
 			Settings.Save();
 		}
 		
