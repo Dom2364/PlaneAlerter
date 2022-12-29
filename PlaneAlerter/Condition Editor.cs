@@ -100,7 +100,7 @@ namespace PlaneAlerter {
 		/// <param name="e">Event Args</param>
 		private void addConditionButton_Click(object sender, EventArgs e) {
 			//Show editor dialog then update condition list
-			var editor = new Condition_Editor();
+			var editor = new ConditionEditorDialog();
 			editor.ShowDialog();
 			UpdateConditionList();
 		}
@@ -193,7 +193,7 @@ namespace PlaneAlerter {
 				return;
 			
 			//Open editor, update list once closed
-			var editor = new Condition_Editor(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
+			var editor = new ConditionEditorDialog(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
 			editor.ShowDialog();
 			UpdateConditionList();
 		}

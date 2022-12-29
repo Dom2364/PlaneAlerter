@@ -1,37 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using System.Text.RegularExpressions;
 
 namespace PlaneAlerter {
 	/// <summary>
 	/// Form for editing conditions
 	/// </summary>
-	public partial class Condition_Editor :Form {
+	public partial class ConditionEditorDialog :Form {
 		/// <summary>
 		/// Id of condition to update
 		/// </summary>
-		int conditionToUpdate;
+		private readonly int _conditionToUpdate;
 
 		/// <summary>
 		/// Is this updating the condition?
 		/// </summary>
-		bool isUpdating = false;
+		private readonly bool _isUpdating = false;
 
 		/// <summary>
 		/// Initialise form with a condition to update
 		/// </summary>
-		/// <param name="_conditionToUpdate"></param>
-		public Condition_Editor(int _conditionToUpdate) {
-			isUpdating = true;
-			conditionToUpdate = _conditionToUpdate;
+		/// <param name="conditionToUpdate"></param>
+		public ConditionEditorDialog(int conditionToUpdate) {
+			_isUpdating = true;
+			_conditionToUpdate = conditionToUpdate;
+
 			//Initialise form options
 			Initialise();
+
 			//Set form element values from condition info
-			Core.Condition c = EditorConditionsList.Conditions[conditionToUpdate];
+			var c = EditorConditionsList.Conditions[_conditionToUpdate];
 			conditionNameTextBox.Text = c.conditionName;
 			ignoreFollowingCheckbox.Checked = c.ignoreFollowing;
 			emailCheckBox.Checked = c.emailEnabled;
@@ -45,12 +45,15 @@ namespace PlaneAlerter {
 			tweetMapCheckBox.Checked = c.tweetMap;
 			tweetLinkComboBox.Text = c.tweetLink.ToString().Replace('_', ' ');
 			alertTypeComboBox.Text = c.alertType.ToString().Replace('_', ' ');
-			foreach (Core.Trigger trigger in c.triggers.Values) {
+
+			foreach (var trigger in c.triggers.Values) {
 				triggerDataGridView.Rows.Add();
-				DataGridViewRow newRow = triggerDataGridView.Rows[triggerDataGridView.Rows.Count - 2];
-				DataGridViewComboBoxCell comboBoxCell = (DataGridViewComboBoxCell)(newRow.Cells[0]);
+				var newRow = triggerDataGridView.Rows[triggerDataGridView.Rows.Count - 2];
+
+				var comboBoxCell = (DataGridViewComboBoxCell)(newRow.Cells[0]);
 				foreach (Core.vrsProperty property in Enum.GetValues(typeof(Core.vrsProperty)))
 					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
+
 				newRow.Cells[0].Value = trigger.Property.ToString().Replace('_', ' ');
 				newRow.Cells[1].Value = trigger.ComparisonType;
 				newRow.Cells[2].Value = trigger.Value;
@@ -60,9 +63,10 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Initialise form with no existing condition
 		/// </summary>
-		public Condition_Editor() {
+		public ConditionEditorDialog() {
 			//Initialise form options
 			Initialise();
+
 			//Set Defaults
 			conditionNameTextBox.Text = "New Condition";
 			tweetFirstFormatTextBox.Text = "";
@@ -85,9 +89,9 @@ namespace PlaneAlerter {
 			InitializeComponent();
 
 			//Add vrs properties to triggers table
-			IEnumerable<DataGridViewRow> rows = triggerDataGridView.Rows.Cast<DataGridViewRow>();
-            foreach(DataGridViewRow row in rows) {
-				DataGridViewComboBoxCell comboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
+			var rows = triggerDataGridView.Rows.Cast<DataGridViewRow>();
+            foreach(var row in rows) {
+				var comboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
 				foreach(Core.vrsProperty property in Enum.GetValues(typeof(Core.vrsProperty)))
 					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
 			}
@@ -95,9 +99,11 @@ namespace PlaneAlerter {
 			//Add alert types to combobox
 			foreach(Core.AlertType property in Enum.GetValues(typeof(Core.AlertType)))
 				alertTypeComboBox.Items.Add(property.ToString().Replace('_', ' '));
+
 			//Add tweet link types
-			foreach (Core.TweetLink linktype in Enum.GetValues(typeof(Core.TweetLink)))
-				tweetLinkComboBox.Items.Add(linktype.ToString().Replace('_', ' '));
+			foreach (Core.TweetLink linkType in Enum.GetValues(typeof(Core.TweetLink)))
+				tweetLinkComboBox.Items.Add(linkType.ToString().Replace('_', ' '));
+
 			//Add twitter accounts to combobox
 			twitterAccountComboBox.Items.Add("Add Account");
 			twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
@@ -108,60 +114,64 @@ namespace PlaneAlerter {
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		private void triggerDataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e) {
-			if (triggerDataGridView.Rows.Count != 1) {
-				//Check if cell changed is in the value column and value isnt empty
-				if (e.ColumnIndex == 2 && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString() != "") {
-					//Clear value if property is number and value is not a number
-					if (triggerDataGridView.Rows[e.RowIndex].Cells[2].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString() != "" && Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][0] == "Number") {
-						try {
-							Convert.ToDouble(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value);
-						}
-						catch (Exception) {
-							triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
-						}
-					}
-				}
-				//Change comparison type combo box based on property selected
-				if (e.ColumnIndex == 0) {
-					//Clear combobox
-					DataGridViewComboBoxCell comparisonTypeComboBox = (DataGridViewComboBoxCell)(triggerDataGridView.Rows[e.RowIndex].Cells[1]);
-					comparisonTypeComboBox.Items.Clear();
-					comparisonTypeComboBox.Value = "";
+		private void triggerDataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			if (triggerDataGridView.Rows.Count == 1)
+				return;
 
-					//Get comparison types supported by property
-					string supportedComparisonTypes = "";
+			//Check if cell changed is in the value column and value isnt empty
+			if (e.ColumnIndex == 2 && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString() != "") {
+				//Clear value if property is number and value is not a number
+				if (triggerDataGridView.Rows[e.RowIndex].Cells[2].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString() != "" && Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][0] == "Number") {
 					try {
-						supportedComparisonTypes = Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][1];
+						Convert.ToDouble(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value);
 					}
 					catch (Exception) {
-						return;
-					}
-					//Add comparison types to combobox from supported comparison types
-					if (supportedComparisonTypes.Contains("A")) {
-						foreach (string comparisonType in Core.comparisonTypes["A"]) comparisonTypeComboBox.Items.Add(comparisonType);
-					}
-					if (supportedComparisonTypes.Contains("B")) {
-						foreach (string comparisonType in Core.comparisonTypes["B"]) comparisonTypeComboBox.Items.Add(comparisonType);
-					}
-					if (supportedComparisonTypes.Contains("C")) {
-						foreach (string comparisonType in Core.comparisonTypes["C"]) comparisonTypeComboBox.Items.Add(comparisonType);
-						triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "True";
-						triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = true;
-					}
-					else {
 						triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
-						triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = false;
 					}
-					if (supportedComparisonTypes.Contains("D")) {
-						foreach (string comparisonType in Core.comparisonTypes["D"]) comparisonTypeComboBox.Items.Add(comparisonType);
-					}
-					if (supportedComparisonTypes.Contains("E")) {
-						foreach (string comparisonType in Core.comparisonTypes["E"]) comparisonTypeComboBox.Items.Add(comparisonType);
-					}
-
-					comparisonTypeComboBox.Value = comparisonTypeComboBox.Items[0].ToString();
 				}
+			}
+
+			//Change comparison type combo box based on property selected
+			if (e.ColumnIndex == 0) {
+				//Clear combobox
+				var comparisonTypeComboBox = (DataGridViewComboBoxCell)(triggerDataGridView.Rows[e.RowIndex].Cells[1]);
+				comparisonTypeComboBox.Items.Clear();
+				comparisonTypeComboBox.Value = "";
+
+				//Get comparison types supported by property
+				string supportedComparisonTypes;
+				try {
+					supportedComparisonTypes = Core.vrsPropertyData[(Core.vrsProperty)Enum.Parse(typeof(Core.vrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][1];
+				}
+				catch (Exception) {
+					return;
+				}
+
+				//Add comparison types to combobox from supported comparison types
+				if (supportedComparisonTypes.Contains("A")) {
+					foreach (var comparisonType in Core.comparisonTypes["A"]) comparisonTypeComboBox.Items.Add(comparisonType);
+				}
+				if (supportedComparisonTypes.Contains("B")) {
+					foreach (var comparisonType in Core.comparisonTypes["B"]) comparisonTypeComboBox.Items.Add(comparisonType);
+				}
+				if (supportedComparisonTypes.Contains("C")) {
+					foreach (var comparisonType in Core.comparisonTypes["C"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "True";
+					triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = true;
+				}
+				else {
+					triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
+					triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = false;
+				}
+				if (supportedComparisonTypes.Contains("D")) {
+					foreach (var comparisonType in Core.comparisonTypes["D"]) comparisonTypeComboBox.Items.Add(comparisonType);
+				}
+				if (supportedComparisonTypes.Contains("E")) {
+					foreach (var comparisonType in Core.comparisonTypes["E"]) comparisonTypeComboBox.Items.Add(comparisonType);
+				}
+
+				comparisonTypeComboBox.Value = comparisonTypeComboBox.Items[0].ToString();
 			}
 		}
 		
@@ -170,11 +180,12 @@ namespace PlaneAlerter {
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		void TriggerDataGridViewUserAddedRow(object sender, DataGridViewRowEventArgs e)
+		private void TriggerDataGridViewUserAddedRow(object sender, DataGridViewRowEventArgs e)
 		{
 			//Iterate rows in table
 			foreach (DataGridViewRow row in triggerDataGridView.Rows) {
-				DataGridViewComboBoxCell comboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
+				var comboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
+
 				//Add vrs properties to combobox
 				comboBoxCell.Items.Clear();
 				foreach (Core.vrsProperty property in Enum.GetValues(typeof(Core.vrsProperty)))
@@ -187,8 +198,8 @@ namespace PlaneAlerter {
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		void SaveButtonClick(object sender, EventArgs e) {
-			bool cancelSave = false;
+		private void SaveButtonClick(object sender, EventArgs e) {
+			var cancelSave = false;
 
 			//Check if values are empty/invalid
 			if (conditionNameTextBox.Text == "") {
@@ -277,7 +288,7 @@ namespace PlaneAlerter {
 			//Trim empty lines from email textbox
 			recieverEmailTextBox.Text = recieverEmailTextBox.Text.TrimEnd('\r', '\n');
 			//Check if emails are valid
-			foreach (string line in recieverEmailTextBox.Lines) {
+			foreach (var line in recieverEmailTextBox.Lines) {
 				try {
 					new System.Net.Mail.MailAddress(line);
 				}
@@ -293,19 +304,19 @@ namespace PlaneAlerter {
 			}
 
 			//If condition is being updated, remove the old one
-			if (isUpdating)
-				EditorConditionsList.Conditions.Remove(conditionToUpdate);
+			if (_isUpdating)
+				EditorConditionsList.Conditions.Remove(_conditionToUpdate);
 
 			//Sort conditions
-			List<int> list = EditorConditionsList.Conditions.Keys.ToList();
-			SortedDictionary<int, Core.Condition> sortedConditions = new SortedDictionary<int, Core.Condition>();
+			var list = EditorConditionsList.Conditions.Keys.ToList();
+			var sortedConditions = new SortedDictionary<int, Core.Condition>();
 			list.Sort();
 			foreach(var key in list)
 				sortedConditions.Add(key, EditorConditionsList.Conditions[key]);
 			EditorConditionsList.Conditions = sortedConditions;
 
 			//Create new condition
-			Core.Condition newCondition = new Core.Condition {
+			var newCondition = new Core.Condition {
 				conditionName = conditionNameTextBox.Text,
 				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
 				ignoreFollowing = ignoreFollowingCheckbox.Checked,
@@ -320,6 +331,7 @@ namespace PlaneAlerter {
 				tweetMap = tweetMapCheckBox.Checked,
 				tweetLink = (Core.TweetLink)Enum.Parse(typeof(Core.TweetLink), tweetLinkComboBox.Text.Replace(' ', '_'))
 			};
+
 			if (triggerDataGridView.Rows.Count != 0)
 				foreach (DataGridViewRow row in triggerDataGridView.Rows)
 					if (row.Index != triggerDataGridView.Rows.Count - 1)
@@ -329,10 +341,8 @@ namespace PlaneAlerter {
 								break;
 							}
 			//Add condition to condition list
-			if (isUpdating)
-				EditorConditionsList.Conditions.Add(conditionToUpdate, newCondition);
-			else
-				EditorConditionsList.Conditions.Add(EditorConditionsList.Conditions.Count, newCondition);
+			EditorConditionsList.Conditions.Add(_isUpdating ? _conditionToUpdate : EditorConditionsList.Conditions.Count, newCondition);
+
 			//Close form
 			Close();
 		}
@@ -342,7 +352,7 @@ namespace PlaneAlerter {
 		/// </summary>
 		private void propertyInfoButton_Click(object sender, EventArgs e) {
 			//Show property info form
-			PropertyInfoForm propertyInfoForm = new PropertyInfoForm();
+			var propertyInfoForm = new PropertyInfoForm();
 			propertyInfoForm.Show();
 		}
 
@@ -361,34 +371,37 @@ namespace PlaneAlerter {
 		}
 		
 		//Show add account dialog if add account is selected
-		private void twitterAccountComboBox_SelectedIndexChanged(object sender, EventArgs e) {
-			if (twitterAccountComboBox.Text == "Add Account") {
-				//Show add account dialog
-				Twitter.AddAccount();
-				
-				//Update accounts
-				twitterAccountComboBox.Items.Clear();
-				twitterAccountComboBox.Items.Add("Add Account");
-				twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
+		private void twitterAccountComboBox_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (twitterAccountComboBox.Text != "Add Account")
+				return;
 
-				//Clear selection
-				twitterAccountComboBox.SelectedIndex = -1;
-				twitterAccountComboBox.Text = "";
-			}
+			//Show add account dialog
+			Twitter.AddAccount();
+				
+			//Update accounts
+			twitterAccountComboBox.Items.Clear();
+			twitterAccountComboBox.Items.Add("Add Account");
+			twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
+
+			//Clear selection
+			twitterAccountComboBox.SelectedIndex = -1;
+			twitterAccountComboBox.Text = "";
 		}
 
 		private void triggerDataGridView_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e) {
 			//Ignore if clicking column header
-			if (e.RowIndex == -1) return;
+			if (e.RowIndex == -1)
+				return;
 
 			//Edit combobox on click
-			DataGridViewColumn column = triggerDataGridView.Columns[e.ColumnIndex];
+			var column = triggerDataGridView.Columns[e.ColumnIndex];
 			if (column is DataGridViewComboBoxColumn) {
-				DataGridViewComboBoxCell cell = (DataGridViewComboBoxCell)triggerDataGridView[e.ColumnIndex, e.RowIndex];
+				var cell = (DataGridViewComboBoxCell)triggerDataGridView[e.ColumnIndex, e.RowIndex];
 				triggerDataGridView.CurrentCell = cell;
 				triggerDataGridView.BeginEdit(true);
 
-				DataGridViewComboBoxEditingControl editingControl = (DataGridViewComboBoxEditingControl)triggerDataGridView.EditingControl;
+				var editingControl = (DataGridViewComboBoxEditingControl)triggerDataGridView.EditingControl;
 				editingControl.DroppedDown = true;
 			}
 		}
@@ -397,7 +410,8 @@ namespace PlaneAlerter {
 		/// Update enabled state and styling of UI based on settings
 		/// </summary>
 		private void UpdateUIState() {
-			Core.AlertType alertType = Core.AlertType.First_and_Last_Contact;
+			var alertType = Core.AlertType.First_and_Last_Contact;
+
 			if (!string.IsNullOrEmpty(alertTypeComboBox.Text)) {
 				alertType = (Core.AlertType)Enum.Parse(typeof(Core.AlertType), alertTypeComboBox.Text.Replace(' ', '_'));
 			}

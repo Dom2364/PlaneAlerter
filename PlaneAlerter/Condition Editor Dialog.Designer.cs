@@ -1,5 +1,5 @@
 ﻿namespace PlaneAlerter {
-	partial class Condition_Editor {
+	partial class ConditionEditorDialog {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -24,7 +24,7 @@
 		/// </summary>
 		private void InitializeComponent() {
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Condition_Editor));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConditionEditorDialog));
 			this.conditionNameTextBox = new System.Windows.Forms.TextBox();
 			this.conditionNameLabel = new System.Windows.Forms.Label();
 			this.triggerDataGridView = new System.Windows.Forms.DataGridView();
@@ -451,7 +451,7 @@
 			this.MaximizeBox = false;
 			this.MaximumSize = new System.Drawing.Size(521, 10000);
 			this.MinimumSize = new System.Drawing.Size(521, 369);
-			this.Name = "Condition_Editor";
+			this.Name = "ConditionEditorDialog";
 			this.Text = "PlaneAlerter Condition Editor";
 			((System.ComponentModel.ISupportInitialize)(this.triggerDataGridView)).EndInit();
 			this.tabControl.ResumeLayout(false);
