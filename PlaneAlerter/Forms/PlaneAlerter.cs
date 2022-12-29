@@ -13,6 +13,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using PlaneAlerter.Enums;
 
 namespace PlaneAlerter.Forms
 {
@@ -269,7 +270,7 @@ namespace PlaneAlerter.Forms
 		}
 
 		private void startToolStripMenuItem_Click(object sender, EventArgs e) {
-			if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Running || ThreadManager.threadStatus == ThreadManager.CheckerStatus.Waiting) {
+			if (ThreadManager.ThreadStatus == CheckerStatus.Running || ThreadManager.ThreadStatus == CheckerStatus.Waiting) {
 				ThreadManager.Stop();
 			}
 			else {

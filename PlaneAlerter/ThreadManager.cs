@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Text.RegularExpressions;
 using System.Drawing;
+using PlaneAlerter.Enums;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -10,19 +11,19 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Thread status of checker thread
 		/// </summary>
-		public static CheckerStatus threadStatus = CheckerStatus.WaitingForLoad;
+		public static CheckerStatus ThreadStatus { get; set; } = CheckerStatus.WaitingForLoad;
 
 		/// <summary>
 		/// Start threads
 		/// </summary>
 		public static void Start() {
-			if (Core.LoopThread != null || threadStatus == CheckerStatus.Running || threadStatus == CheckerStatus.Waiting) {
+			if (Core.LoopThread != null || ThreadStatus == CheckerStatus.Running || ThreadStatus == CheckerStatus.Waiting) {
 				Restart();
 				return;
 			}
 			
 			//Check for errors
-			bool error = false;
+			var error = false;
 			if (Core.Conditions.Count == 0) {
 				Core.Ui.WriteToConsole("No conditions, not running checks", Color.White);
 				error = true;
@@ -40,14 +41,14 @@ namespace PlaneAlerter {
 				error = true;
 			}
 			if (error) {
-				threadStatus = CheckerStatus.Stopped;
+				ThreadStatus = CheckerStatus.Stopped;
 				Core.Ui.statusLabel.Text = "Status: Idle";
 				return;
 			}
 			
 			//Start thread
-			threadStatus = CheckerStatus.Running;
-			Core.LoopThread = new Thread(new ThreadStart(Checker.Start));
+			ThreadStatus = CheckerStatus.Running;
+			Core.LoopThread = new Thread(Checker.Start);
 			Core.LoopThread.IsBackground = true;
 			Core.LoopThread.Name = "Checker Thread";
 			Core.LoopThread.Start();
@@ -60,47 +61,40 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Stop threads
 		/// </summary>
-		public static void Stop() {
-			if (threadStatus == CheckerStatus.Running || threadStatus == CheckerStatus.Waiting) {
-				threadStatus = CheckerStatus.Stopping;
-				Core.Ui.startToolStripMenuItem.Enabled = false;
-				Core.Ui.startToolStripMenuItem.Text = "Stopping";
-				Core.Ui.restartToolStripMenuItem.Enabled = false;
-				while (Core.LoopThread.ThreadState != ThreadState.Stopped) Thread.Sleep(200);
-				Core.LoopThread = null;
-				threadStatus = CheckerStatus.Stopped;
+		public static void Stop()
+		{
+			if (ThreadStatus != CheckerStatus.Running && ThreadStatus != CheckerStatus.Waiting)
+				return;
 
-				//Clear matches
-				Core.ActiveMatches.Clear();
+			ThreadStatus = CheckerStatus.Stopping;
+			Core.Ui.startToolStripMenuItem.Enabled = false;
+			Core.Ui.startToolStripMenuItem.Text = "Stopping";
+			Core.Ui.restartToolStripMenuItem.Enabled = false;
+			while (Core.LoopThread.ThreadState != ThreadState.Stopped) Thread.Sleep(200);
+			Core.LoopThread = null;
+			ThreadStatus = CheckerStatus.Stopped;
 
-				Stats.UpdateStats();
+			//Clear matches
+			Core.ActiveMatches.Clear();
 
-				Core.Ui.statusLabel.Text = "Status: Idle";
-				Core.Ui.startToolStripMenuItem.Text = "Start";
-				Core.Ui.startToolStripMenuItem.Enabled = true;
-				Core.Ui.WriteToConsole("Checker Stopped", Color.White);
-			}
+			Stats.UpdateStats();
+
+			Core.Ui.statusLabel.Text = "Status: Idle";
+			Core.Ui.startToolStripMenuItem.Text = "Start";
+			Core.Ui.startToolStripMenuItem.Enabled = true;
+			Core.Ui.WriteToConsole("Checker Stopped", Color.White);
 		}
 
 		/// <summary>
 		/// Restart threads
 		/// </summary>
-		public static void Restart() {
-			if (threadStatus == CheckerStatus.Running || threadStatus == CheckerStatus.Waiting) {
-				Stop();
-				Start();
-			}
-		}
+		public static void Restart()
+		{
+			if (ThreadStatus != CheckerStatus.Running && ThreadStatus != CheckerStatus.Waiting)
+				return;
 
-		/// <summary>
-		/// Enum for thread status
-		/// </summary>
-		public enum CheckerStatus {
-			WaitingForLoad,
-			Running,
-			Waiting,
-			Stopping,
-			Stopped
+			Stop();
+			Start();
 		}
 	}
 }

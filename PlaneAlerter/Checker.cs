@@ -18,7 +18,13 @@ namespace PlaneAlerter {
 	/// <summary>
 	/// Class for checking operations
 	/// </summary>
-	internal static class Checker {
+	internal static class Checker
+	{
+		/// <summary>
+		/// Have conditions loaded?
+		/// </summary>
+		public static bool ConditionsLoaded { get; set; } = false;
+
 		/// <summary>
 		/// Client for sending aircraftlist.json requests
 		/// </summary>
@@ -28,11 +34,6 @@ namespace PlaneAlerter {
 		/// Time of next check
 		/// </summary>
 		private static DateTime NextCheck;
-
-		/// <summary>
-		/// Have conditions loaded?
-		/// </summary>
-		public static bool ConditionsLoaded = false;
 
 		/// <summary>
 		/// How many checks ago were the trails requested
@@ -53,8 +54,8 @@ namespace PlaneAlerter {
 			//Set culture to invariant
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-			while (ThreadManager.threadStatus != ThreadManager.CheckerStatus.Stopping) {
-				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Running;
+			while (ThreadManager.ThreadStatus != CheckerStatus.Stopping) {
+				ThreadManager.ThreadStatus = CheckerStatus.Running;
 				//Set next check time
 				NextCheck = DateTime.Now.AddSeconds(Settings.RefreshRate);
 				//Notify user that aircraft info is being downloaded
@@ -192,7 +193,7 @@ namespace PlaneAlerter {
 								c.AircraftInfo = aircraft;
 
 						//Cancel if thread is supposed to stop
-						if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Stopping)
+						if (ThreadManager.ThreadStatus == CheckerStatus.Stopping)
 							return;
 					}
 					//Check if aircraft have lost signal and remove aircraft that have timed out
@@ -242,14 +243,14 @@ namespace PlaneAlerter {
 					}
 				}
 				//Cancel if thread is supposed to stop
-				if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Stopping) return;
+				if (ThreadManager.ThreadStatus == CheckerStatus.Stopping) return;
 				//Set thread status to waiting
 				Core.Ui.UpdateStatusLabel("Waiting for next check...");
-				ThreadManager.threadStatus = ThreadManager.CheckerStatus.Waiting;
+				ThreadManager.ThreadStatus = CheckerStatus.Waiting;
 				//Wait until the next check time
 				while (DateTime.Compare(DateTime.Now, NextCheck) < 0) {
 					//Cancel if thread is supposed to stop
-					if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.Stopping) return;
+					if (ThreadManager.ThreadStatus == CheckerStatus.Stopping) return;
 					Thread.Sleep(1000);
 				}
 			}
@@ -591,7 +592,7 @@ namespace PlaneAlerter {
 				Core.Ui.WriteToConsole("Conditions Loaded", Color.White);
 
 				//Restart threads
-				if (ThreadManager.threadStatus == ThreadManager.CheckerStatus.WaitingForLoad) 
+				if (ThreadManager.ThreadStatus == CheckerStatus.WaitingForLoad) 
 					ThreadManager.Restart();
 
 			}
