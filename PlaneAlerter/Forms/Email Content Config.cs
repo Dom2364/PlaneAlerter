@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using PlaneAlerter.Enums;
 
 namespace PlaneAlerter.Forms {
 	/// <summary>
@@ -24,17 +25,17 @@ namespace PlaneAlerter.Forms {
             twitterCheckBox.Checked = Settings.EmailContentConfig.TwitterOptimised;
 			kmlCheckbox.Checked = Settings.EmailContentConfig.KMLfile;
             switch (Settings.EmailContentConfig.PropertyList) {
-				case Core.PropertyListType.All:
+				case PropertyListType.All:
 					plAll.Checked = true;
 					plEssentials.Checked = false;
 					plHidden.Checked = false;
 					break;
-				case Core.PropertyListType.Essentials:
+				case PropertyListType.Essentials:
 					plAll.Checked = false;
 					plEssentials.Checked = true;
 					plHidden.Checked = false;
 					break;
-				case Core.PropertyListType.Hidden:
+				case PropertyListType.Hidden:
 					plAll.Checked = false;
 					plEssentials.Checked = false;
 					plHidden.Checked = true;
@@ -59,11 +60,11 @@ namespace PlaneAlerter.Forms {
             Settings.EmailContentConfig.TwitterOptimised = twitterCheckBox.Checked;
 			Settings.EmailContentConfig.KMLfile = kmlCheckbox.Checked;
             if (plAll.Checked)
-				Settings.EmailContentConfig.PropertyList = Core.PropertyListType.All;
+				Settings.EmailContentConfig.PropertyList = PropertyListType.All;
 			else if (plEssentials.Checked)
-				Settings.EmailContentConfig.PropertyList = Core.PropertyListType.Essentials;
+				Settings.EmailContentConfig.PropertyList = PropertyListType.Essentials;
 			else
-				Settings.EmailContentConfig.PropertyList = Core.PropertyListType.Hidden;
+				Settings.EmailContentConfig.PropertyList = PropertyListType.Hidden;
 
 			//Close form
 			Close();
