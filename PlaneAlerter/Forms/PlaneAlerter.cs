@@ -6,14 +6,15 @@
  * 
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
+
 using System;
-using System.Windows.Forms;
-using System.Threading;
 using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows.Forms;
 
-namespace PlaneAlerter
+namespace PlaneAlerter.Forms
 {
 	/// <summary>
 	/// Main form
@@ -240,7 +241,7 @@ namespace PlaneAlerter
 		/// <param name="e">Event Args</param>
 		private void emailContentConfigToolStripMenuItem_Click(object sender, EventArgs e) {
 			//Show email content config form
-			Email_Content_Config ecc = new Email_Content_Config();
+			EmailContentConfigForm ecc = new EmailContentConfigForm();
 			ecc.ShowDialog();
 		}
 

@@ -1,4 +1,4 @@
-﻿namespace PlaneAlerter {
+﻿namespace PlaneAlerter.Forms {
 	partial class ConditionEditorDialog {
 		/// <summary>
 		/// Required designer variable.

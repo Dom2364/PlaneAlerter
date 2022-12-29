@@ -59,7 +59,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Active form
 		/// </summary>
-		public static PlaneAlerter UI;
+		public static Forms.PlaneAlerter UI;
 
 		/// <summary>
 		/// Class to store aircraft information

@@ -1,4 +1,4 @@
-﻿namespace PlaneAlerter {
+﻿namespace PlaneAlerter.Forms {
 	partial class PinPromptDialog {
 		/// <summary>
 		/// Required designer variable.

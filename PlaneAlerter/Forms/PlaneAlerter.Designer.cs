@@ -1,4 +1,4 @@
-﻿namespace PlaneAlerter {
+﻿namespace PlaneAlerter.Forms {
 	partial class PlaneAlerter {
 		/// <summary>
 		/// Designer variable used to keep track of non-visual components.

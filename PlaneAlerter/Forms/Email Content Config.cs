@@ -1,15 +1,15 @@
-﻿using System; 
+﻿using System;
 using System.Windows.Forms;
 
-namespace PlaneAlerter {
+namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for changing email content config
 	/// </summary>
-	public partial class Email_Content_Config :Form {
+	public partial class EmailContentConfigForm :Form {
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public Email_Content_Config() {
+		public EmailContentConfigForm() {
 			//Initialise form components
 			InitializeComponent();
 

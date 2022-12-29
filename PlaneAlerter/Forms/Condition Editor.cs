@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.IO;
 
-namespace PlaneAlerter {
+namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for editing conditions
 	/// </summary>

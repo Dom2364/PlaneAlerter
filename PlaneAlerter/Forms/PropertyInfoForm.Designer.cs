@@ -1,4 +1,4 @@
-﻿namespace PlaneAlerter {
+﻿namespace PlaneAlerter.Forms {
 	partial class PropertyInfoForm {
 		/// <summary>
 		/// Required designer variable.

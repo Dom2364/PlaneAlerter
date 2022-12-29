@@ -1,5 +1,5 @@
-﻿namespace PlaneAlerter {
-	partial class Email_Content_Config {
+﻿namespace PlaneAlerter.Forms {
+	partial class EmailContentConfigForm {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -23,7 +23,7 @@
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Email_Content_Config));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EmailContentConfigForm));
 			this.receiverNameCheckBox = new System.Windows.Forms.CheckBox();
 			this.transponderTypeCheckBox = new System.Windows.Forms.CheckBox();
 			this.plHidden = new System.Windows.Forms.RadioButton();
@@ -216,7 +216,7 @@
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
-			this.Name = "Email_Content_Config";
+			this.Name = "EmailContentConfigForm";
 			this.Text = "Email Content Config";
 			this.propertyListGroupBox.ResumeLayout(false);
 			this.propertyListGroupBox.PerformLayout();
