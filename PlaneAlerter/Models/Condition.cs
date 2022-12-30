@@ -84,15 +84,6 @@ namespace PlaneAlerter.Models
 		public Dictionary<int, Trigger> Triggers = new Dictionary<int, Trigger>();
 
 		/// <summary>
-		/// Increase sent emails counter for condition and total alerts sent
-		/// </summary>
-		public void IncreaseSentAlerts()
-		{
-			AlertsThisSession++;
-			Stats.TotalAlertsSent++;
-		}
-
-		/// <summary>
 		/// Creates a new condition
 		/// </summary>
 		public Condition()

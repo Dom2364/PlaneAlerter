@@ -24,7 +24,11 @@ namespace PlaneAlerter.Forms
 	/// </summary>
 	internal partial class MainForm : Form
 	{
+		private readonly ISettingsManagerService _settingsManagerService;
+		private readonly ICheckerService _checkerService;
 		private readonly ITwitterService _twitterService;
+		private readonly IStatsService _statsService;
+		private readonly IThreadManagerService _threadManagerService;
 
 		/// <summary>
 		/// Send message to windows
@@ -53,8 +57,13 @@ namespace PlaneAlerter.Forms
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public MainForm(ITwitterService twitterService) {
+		public MainForm(ISettingsManagerService settingsManagerService, ICheckerService checkerService, ITwitterService twitterService,
+			IStatsService statsService, IThreadManagerService threadManagerService) {
+			_settingsManagerService = settingsManagerService;
+			_checkerService = checkerService;
 			_twitterService = twitterService;
+			_statsService = statsService;
+			_threadManagerService = threadManagerService;
 
 			//Stop the annoying cross-thread problems
 			//This is probably not a good thing but I'm too lazy
@@ -71,10 +80,10 @@ namespace PlaneAlerter.Forms
 
 			//When shown, wait until everything has loaded then start threads
 			Shown += delegate {
-				while (!Settings.SettingsLoaded || !Checker.ConditionsLoaded)
+				while (!_settingsManagerService.SettingsLoaded || !_checkerService.ConditionsLoaded)
 					Thread.Sleep(100);
-				if (Settings.StartOnStart) ThreadManager.Start();
-				Stats.UpdateStats();
+				if (_settingsManagerService.Settings.StartOnStart) _threadManagerService.Start();
+				_statsService.UpdateStats();
 			};
 		}
 
@@ -122,9 +131,9 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		public void UpdateTwitterAccounts() {
 			removeAccountToolStripMenuItem.DropDownItems.Clear();
-			removeAccountToolStripMenuItem.Enabled = Settings.TwitterUsers.Count > 0;
+			removeAccountToolStripMenuItem.Enabled = _settingsManagerService.Settings.TwitterUsers.Count > 0;
 
-			foreach (var screenName in Settings.TwitterUsers.Keys) {
+			foreach (var screenName in _settingsManagerService.Settings.TwitterUsers.Keys) {
 				var item = removeAccountToolStripMenuItem.DropDownItems.Add(screenName);
 				item.Click += (sender, args) =>
 				{
@@ -151,8 +160,8 @@ namespace PlaneAlerter.Forms
 		private void startConditionEditorToolStripMenuItem_Click(object sender, EventArgs e) {
 			var editor = Program.ServiceProvider.GetRequiredService<ConditionListForm>();
 			editor.Show();
-			editor.FormClosing += delegate { 
-				Checker.LoadConditions();
+			editor.FormClosing += delegate {
+				_checkerService.LoadConditions();
 				UpdateConditionList();
 			};		
 		}
@@ -173,7 +182,7 @@ namespace PlaneAlerter.Forms
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
 		private void RestartToolStripMenuItemClick(object sender, EventArgs e) {
-			ThreadManager.Restart();
+			_threadManagerService.Restart();
 		}
 		
 		/// <summary>
@@ -187,7 +196,7 @@ namespace PlaneAlerter.Forms
 				Core.StatsThread.Abort();
 			if (Core.LoopThread != null)
 				Core.LoopThread.Abort();
-			Settings.Save();
+			_settingsManagerService.Save();
 		}
 		
 		/// <summary>
@@ -223,7 +232,8 @@ namespace PlaneAlerter.Forms
 			//Show settings form then update settings
 			var settingsForm = Program.ServiceProvider.GetRequiredService<SettingsForm>();
 			settingsForm.ShowDialog();
-			Settings.UpdateSettings(true);
+			_settingsManagerService.UpdateSettings(true);
+			_threadManagerService.Restart();
 		}
 
 		/// <summary>
@@ -276,11 +286,11 @@ namespace PlaneAlerter.Forms
 		}
 
 		private void startToolStripMenuItem_Click(object sender, EventArgs e) {
-			if (ThreadManager.ThreadStatus == CheckerStatus.Running || ThreadManager.ThreadStatus == CheckerStatus.Waiting) {
-				ThreadManager.Stop();
+			if (_threadManagerService.ThreadStatus == CheckerStatus.Running) {
+				_threadManagerService.Stop();
 			}
 			else {
-				ThreadManager.Start();
+				_threadManagerService.Start();
 			}
 		}
 	}

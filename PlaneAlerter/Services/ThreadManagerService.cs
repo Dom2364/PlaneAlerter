@@ -1,23 +1,59 @@
-﻿using System.Threading;
+﻿using System.Drawing;
 using System.Text.RegularExpressions;
-using System.Drawing;
+using System.Threading;
 using PlaneAlerter.Enums;
 
-namespace PlaneAlerter {
-	/// <summary>
-	/// Class for managing threads
-	/// </summary>
-	internal class ThreadManager {
+namespace PlaneAlerter.Services {
+	internal interface IThreadManagerService
+	{
 		/// <summary>
 		/// Thread status of checker thread
 		/// </summary>
-		public static CheckerStatus ThreadStatus { get; set; } = CheckerStatus.WaitingForLoad;
+		CheckerStatus ThreadStatus { get; set; }
 
 		/// <summary>
 		/// Start threads
 		/// </summary>
-		public static void Start() {
-			if (Core.LoopThread != null || ThreadStatus == CheckerStatus.Running || ThreadStatus == CheckerStatus.Waiting) {
+		void Start();
+
+		/// <summary>
+		/// Stop threads
+		/// </summary>
+		void Stop();
+
+		/// <summary>
+		/// Restart threads
+		/// </summary>
+		void Restart();
+	}
+
+	/// <summary>
+	/// Class for managing threads
+	/// </summary>
+	internal class ThreadManagerService : IThreadManagerService
+	{
+		private readonly ISettingsManagerService _settingsManagerService;
+		private readonly ICheckerService _checkerService;
+		private readonly IStatsService _statsService;
+
+		public ThreadManagerService(ISettingsManagerService settingsManagerService,
+			ICheckerService checkerService, IStatsService statsService)
+		{
+			_settingsManagerService = settingsManagerService;
+			_checkerService = checkerService;
+			_statsService = statsService;
+		}
+
+		/// <summary>
+		/// Thread status of checker thread
+		/// </summary>
+		public CheckerStatus ThreadStatus { get; set; } = CheckerStatus.WaitingForLoad;
+
+		/// <summary>
+		/// Start threads
+		/// </summary>
+		public void Start() {
+			if (Core.LoopThread != null || ThreadStatus == CheckerStatus.Running) {
 				Restart();
 				return;
 			}
@@ -28,15 +64,15 @@ namespace PlaneAlerter {
 				Core.Ui.WriteToConsole("No conditions, not running checks", Color.White);
 				error = true;
 			}
-			if (Settings.AircraftListUrl == "") {
+			if (_settingsManagerService.Settings.AircraftListUrl == "") {
 				Core.Ui.WriteToConsole("ERROR: No AircraftList.json url specified, go to Options>Settings", Color.White);
 				error = true;
 			}
-			if (Settings.RadarUrl == "") {
+			if (_settingsManagerService.Settings.RadarUrl == "") {
 				Core.Ui.WriteToConsole("ERROR: No radar url specified, go to Options>Settings", Color.White);
 				error = true;
 			}
-			if (!Regex.IsMatch(Settings.AircraftListUrl, @"(http|https):\/\/.+?\/VirtualRadar\/AircraftList\.json.*", RegexOptions.IgnoreCase)) {
+			if (!Regex.IsMatch(_settingsManagerService.Settings.AircraftListUrl, @"(http|https):\/\/.+?\/VirtualRadar\/AircraftList\.json.*", RegexOptions.IgnoreCase)) {
 				Core.Ui.WriteToConsole("ERROR: AircraftList.json url invalid. Example: http://127.0.0.1/VirtualRadar/AircraftList.json", Color.White);
 				error = true;
 			}
@@ -48,7 +84,7 @@ namespace PlaneAlerter {
 			
 			//Start thread
 			ThreadStatus = CheckerStatus.Running;
-			Core.LoopThread = new Thread(Checker.Start);
+			Core.LoopThread = new Thread(_checkerService.Start);
 			Core.LoopThread.IsBackground = true;
 			Core.LoopThread.Name = "Checker Thread";
 			Core.LoopThread.Start();
@@ -61,9 +97,9 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Stop threads
 		/// </summary>
-		public static void Stop()
+		public void Stop()
 		{
-			if (ThreadStatus != CheckerStatus.Running && ThreadStatus != CheckerStatus.Waiting)
+			if (ThreadStatus != CheckerStatus.Running)
 				return;
 
 			ThreadStatus = CheckerStatus.Stopping;
@@ -77,7 +113,7 @@ namespace PlaneAlerter {
 			//Clear matches
 			Core.ActiveMatches.Clear();
 
-			Stats.UpdateStats();
+			_statsService.UpdateStats();
 
 			Core.Ui.statusLabel.Text = "Status: Idle";
 			Core.Ui.startToolStripMenuItem.Text = "Start";
@@ -88,9 +124,9 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Restart threads
 		/// </summary>
-		public static void Restart()
+		public void Restart()
 		{
-			if (ThreadStatus != CheckerStatus.Running && ThreadStatus != CheckerStatus.Waiting)
+			if (ThreadStatus != CheckerStatus.Running)
 				return;
 
 			Stop();

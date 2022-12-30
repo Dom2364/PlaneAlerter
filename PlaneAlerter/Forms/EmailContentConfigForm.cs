@@ -1,30 +1,35 @@
 ﻿using System;
 using System.Windows.Forms;
 using PlaneAlerter.Enums;
+using PlaneAlerter.Services;
 
 namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for changing email content config
 	/// </summary>
 	internal partial class EmailContentConfigForm :Form {
+		private readonly ISettingsManagerService _settingsManagerService;
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public EmailContentConfigForm() {
+		public EmailContentConfigForm(ISettingsManagerService settingsManagerService) {
+			_settingsManagerService = settingsManagerService;
+
 			//Initialise form components
 			InitializeComponent();
 
 			//Update form elements with current settings
-			receiverNameCheckBox.Checked = Settings.EmailContentConfig.ReceiverName;
-			transponderTypeCheckBox.Checked = Settings.EmailContentConfig.TransponderType;
-			radarLinkCheckBox.Checked = Settings.EmailContentConfig.RadarLink;
-			afLookupCheckBox.Checked = Settings.EmailContentConfig.AfLookup;
-			mapCheckBox.Checked = Settings.EmailContentConfig.Map;
-			photosCheckBox.Checked = Settings.EmailContentConfig.AircraftPhotos;
-			reportCheckBox.Checked = Settings.EmailContentConfig.ReportLink;
-            twitterCheckBox.Checked = Settings.EmailContentConfig.TwitterOptimised;
-			kmlCheckbox.Checked = Settings.EmailContentConfig.KMLfile;
-            switch (Settings.EmailContentConfig.PropertyList) {
+			receiverNameCheckBox.Checked = _settingsManagerService.EmailContentConfig.ReceiverName;
+			transponderTypeCheckBox.Checked = _settingsManagerService.EmailContentConfig.TransponderType;
+			radarLinkCheckBox.Checked = _settingsManagerService.EmailContentConfig.RadarLink;
+			afLookupCheckBox.Checked = _settingsManagerService.EmailContentConfig.AfLookup;
+			mapCheckBox.Checked = _settingsManagerService.EmailContentConfig.Map;
+			photosCheckBox.Checked = _settingsManagerService.EmailContentConfig.AircraftPhotos;
+			reportCheckBox.Checked = _settingsManagerService.EmailContentConfig.ReportLink;
+            twitterCheckBox.Checked = _settingsManagerService.EmailContentConfig.TwitterOptimised;
+			kmlCheckbox.Checked = _settingsManagerService.EmailContentConfig.KMLfile;
+            switch (_settingsManagerService.EmailContentConfig.PropertyList) {
 				case PropertyListType.All:
 					plAll.Checked = true;
 					plEssentials.Checked = false;
@@ -50,21 +55,21 @@ namespace PlaneAlerter.Forms {
 		/// <param name="e">Event Args</param>
 		private void saveButton_Click(object sender, EventArgs e) {
 			//Save settings to current settings
-			Settings.EmailContentConfig.ReceiverName = receiverNameCheckBox.Checked;
-			Settings.EmailContentConfig.TransponderType = transponderTypeCheckBox.Checked;
-			Settings.EmailContentConfig.RadarLink = radarLinkCheckBox.Checked;
-			Settings.EmailContentConfig.AfLookup = afLookupCheckBox.Checked;
-			Settings.EmailContentConfig.AircraftPhotos = photosCheckBox.Checked;
-			Settings.EmailContentConfig.Map = mapCheckBox.Checked;
-			Settings.EmailContentConfig.ReportLink = reportCheckBox.Checked;
-            Settings.EmailContentConfig.TwitterOptimised = twitterCheckBox.Checked;
-			Settings.EmailContentConfig.KMLfile = kmlCheckbox.Checked;
+			_settingsManagerService.EmailContentConfig.ReceiverName = receiverNameCheckBox.Checked;
+			_settingsManagerService.EmailContentConfig.TransponderType = transponderTypeCheckBox.Checked;
+			_settingsManagerService.EmailContentConfig.RadarLink = radarLinkCheckBox.Checked;
+			_settingsManagerService.EmailContentConfig.AfLookup = afLookupCheckBox.Checked;
+			_settingsManagerService.EmailContentConfig.AircraftPhotos = photosCheckBox.Checked;
+			_settingsManagerService.EmailContentConfig.Map = mapCheckBox.Checked;
+			_settingsManagerService.EmailContentConfig.ReportLink = reportCheckBox.Checked;
+            _settingsManagerService.EmailContentConfig.TwitterOptimised = twitterCheckBox.Checked;
+			_settingsManagerService.EmailContentConfig.KMLfile = kmlCheckbox.Checked;
             if (plAll.Checked)
-				Settings.EmailContentConfig.PropertyList = PropertyListType.All;
+				_settingsManagerService.EmailContentConfig.PropertyList = PropertyListType.All;
 			else if (plEssentials.Checked)
-				Settings.EmailContentConfig.PropertyList = PropertyListType.Essentials;
+				_settingsManagerService.EmailContentConfig.PropertyList = PropertyListType.Essentials;
 			else
-				Settings.EmailContentConfig.PropertyList = PropertyListType.Hidden;
+				_settingsManagerService.EmailContentConfig.PropertyList = PropertyListType.Hidden;
 
 			//Close form
 			Close();

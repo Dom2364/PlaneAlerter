@@ -7,7 +7,6 @@
 	{
 		WaitingForLoad,
 		Running,
-		Waiting,
 		Stopping,
 		Stopped
 	}

@@ -2,27 +2,46 @@
 using System.Windows.Forms;
 using PlaneAlerter.Enums;
 
-namespace PlaneAlerter {
-	/// <summary>
-	/// Class for statistic operations
-	/// </summary>
-	internal static class Stats {
+namespace PlaneAlerter.Services {
+	internal interface IStatsService
+	{
 		/// <summary>
 		/// Counter for total alerts sent
 		/// </summary>
-		public static int TotalAlertsSent { get; set; } = 0;
+		int TotalAlertsSent { get; set; }
 
 		/// <summary>
 		/// Time planealerter started
 		/// </summary>
-		public static DateTime TimeStarted { get; set; } = DateTime.Now;
+		DateTime TimeStarted { get; set; }
 
 		/// <summary>
 		/// Update the UI with all the stats
 		/// </summary>
-		public static void UpdateStats() {
+		void UpdateStats();
+	}
+
+	/// <summary>
+	/// Class for statistic operations
+	/// </summary>
+	internal class StatsService : IStatsService
+	{
+		/// <summary>
+		/// Counter for total alerts sent
+		/// </summary>
+		public int TotalAlertsSent { get; set; } = 0;
+
+		/// <summary>
+		/// Time planealerter started
+		/// </summary>
+		public DateTime TimeStarted { get; set; } = DateTime.Now;
+
+		/// <summary>
+		/// Update the UI with all the stats
+		/// </summary>
+		public void UpdateStats() {
 			//Cancel if UI or other things are not in a state for displaying stuff
-			if (Core.Ui.conditionTreeView.IsDisposed || ThreadManager.ThreadStatus == CheckerStatus.Stopping)
+			if (Core.Ui.conditionTreeView.IsDisposed)
 				return;
 
 			Core.Ui.conditionTreeView.Invoke((MethodInvoker)delegate {

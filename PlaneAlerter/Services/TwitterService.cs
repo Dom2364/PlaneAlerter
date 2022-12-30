@@ -36,12 +36,19 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class TwitterService : ITwitterService
 	{
+		private readonly ISettingsManagerService _settingsManagerService;
+
 		//Don't even think about it
 		private const string Key = "U1dYZUhZT0RqOG1hV25xRzczMXZ6Y3k3NA==";
 		private const string SecretKey = "UWlBcGtJaXJFdnpZaFhVb0FGVE93R003dnR0YnhJdWI1Y1BzVmxxSktuZGlmSkZvMzA=";
 
 		private static readonly string ConsumerKey = Encoding.UTF8.GetString(Convert.FromBase64String(Key));
 		private static readonly string ConsumerSecretKey = Encoding.UTF8.GetString(Convert.FromBase64String(SecretKey));
+
+		public TwitterService(ISettingsManagerService settingsManagerService)
+		{
+			_settingsManagerService = settingsManagerService;
+		}
 
 		/// <summary>
 		/// Posts a tweet
@@ -182,13 +189,13 @@ namespace PlaneAlerter.Services {
 			var screenName = user.ScreenName;
 
 			//Check if users list already contains user that was just authenticated
-			if (Settings.TwitterUsers.ContainsKey(screenName)) {
+			if (_settingsManagerService.Settings.TwitterUsers.ContainsKey(screenName)) {
 				MessageBox.Show("User '" + screenName + "' already added", "User already added");
 				return;
 			}
 
 			//Add user
-			Settings.TwitterUsers.Add(screenName, new[] { userCredentials.AccessToken, userCredentials.AccessTokenSecret });
+			_settingsManagerService.Settings.TwitterUsers.Add(screenName, new[] { userCredentials.AccessToken, userCredentials.AccessTokenSecret });
 			MessageBox.Show("Twitter user '" + screenName + "' authorized!", "User Authorized");
 			Core.Ui.UpdateTwitterAccounts();
 		}
@@ -198,13 +205,13 @@ namespace PlaneAlerter.Services {
 		/// </summary>
 		public void RemoveAccount(string screenName) {
 			//Check if users list contains user
-			if (!Settings.TwitterUsers.ContainsKey(screenName)) {
+			if (!_settingsManagerService.Settings.TwitterUsers.ContainsKey(screenName)) {
 				MessageBox.Show("User '" + screenName + "' does not exist", "User doesn't exist");
 				return;
 			}
 
 			//Remove user
-			Settings.TwitterUsers.Remove(screenName);
+			_settingsManagerService.Settings.TwitterUsers.Remove(screenName);
 			MessageBox.Show("Twitter user '" + screenName + "' removed!", "User Removed");
 			Core.Ui.UpdateTwitterAccounts();
 		}

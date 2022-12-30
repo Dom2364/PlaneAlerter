@@ -4,12 +4,16 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using PlaneAlerter.Services;
 
 namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for changing settings
 	/// </summary>
 	internal partial class SettingsForm :Form {
+		private readonly ISettingsManagerService _settingsManagerService;
+		private readonly ICheckerService _checkerService;
+
 		/// <summary>
 		/// Smtp host info
 		/// </summary>
@@ -18,7 +22,10 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public SettingsForm() {
+		public SettingsForm(ISettingsManagerService settingsManagerService, ICheckerService checkerService) {
+			_settingsManagerService = settingsManagerService;
+			_checkerService = checkerService;
+
 			//Initialise form elements
 			InitializeComponent();
 
@@ -43,54 +50,54 @@ namespace PlaneAlerter.Forms {
 			UpdateReceivers();
 
 			//Set settings from current settings
-			senderEmailTextBox.Text = Settings.SenderEmail;
-			aircraftListTextBox.Text = Settings.AircraftListUrl;
-			radarURLTextBox.Text = Settings.RadarUrl;
-			VRSUsrTextBox.Text = Settings.VRSUser;
-			VRSPwdTextBox.Text = Settings.VRSPassword;
-			latTextBox.Value = Settings.Lat;
-			longTextBox.Value = Settings.Long;
-			removalTimeoutTextBox.Value = Settings.RemovalTimeout;
-			refreshTextBox.Value = Settings.RefreshRate;
-			startOnStartCheckBox.Checked = Settings.StartOnStart;
-			soundAlertsCheckBox.Checked = Settings.SoundAlerts;
-			notificationsCheckBox.Checked = Settings.ShowNotifications;
-			centreAircraftRadioButton.Checked = Settings.CentreMapOnAircraft;
-			centreLatLngRadioButton.Checked = !Settings.CentreMapOnAircraft;
-			smtpHostComboBox.Text = Settings.SMTPHost;
-			smtpHostPortTextBox.Value = Settings.SMTPPort;
-			smtpUsrTextBox.Text = Settings.SMTPUser;
-			smtpPwdTextBox.Text = Settings.SMTPPassword;
-			smtpSSLCheckBox.Checked = Settings.SMTPSSL;
-			timeoutTextBox.Value = Settings.Timeout;
-			filterDstCheckBox.Checked = Settings.FilterDistance;
+			senderEmailTextBox.Text = _settingsManagerService.Settings.SenderEmail;
+			aircraftListTextBox.Text = _settingsManagerService.Settings.AircraftListUrl;
+			radarURLTextBox.Text = _settingsManagerService.Settings.RadarUrl;
+			VRSUsrTextBox.Text = _settingsManagerService.Settings.VRSUser;
+			VRSPwdTextBox.Text = _settingsManagerService.Settings.VRSPassword;
+			latTextBox.Value = _settingsManagerService.Settings.Lat;
+			longTextBox.Value = _settingsManagerService.Settings.Long;
+			removalTimeoutTextBox.Value = _settingsManagerService.Settings.RemovalTimeout;
+			refreshTextBox.Value = _settingsManagerService.Settings.RefreshRate;
+			startOnStartCheckBox.Checked = _settingsManagerService.Settings.StartOnStart;
+			soundAlertsCheckBox.Checked = _settingsManagerService.Settings.SoundAlerts;
+			notificationsCheckBox.Checked = _settingsManagerService.Settings.ShowNotifications;
+			centreAircraftRadioButton.Checked = _settingsManagerService.Settings.CentreMapOnAircraft;
+			centreLatLngRadioButton.Checked = !_settingsManagerService.Settings.CentreMapOnAircraft;
+			smtpHostComboBox.Text = _settingsManagerService.Settings.SMTPHost;
+			smtpHostPortTextBox.Value = _settingsManagerService.Settings.SMTPPort;
+			smtpUsrTextBox.Text = _settingsManagerService.Settings.SMTPUser;
+			smtpPwdTextBox.Text = _settingsManagerService.Settings.SMTPPassword;
+			smtpSSLCheckBox.Checked = _settingsManagerService.Settings.SMTPSSL;
+			timeoutTextBox.Value = _settingsManagerService.Settings.Timeout;
+			filterDstCheckBox.Checked = _settingsManagerService.Settings.FilterDistance;
 			filterDstCheckBox_CheckedChanged(this, new EventArgs());
-			filterAltCheckBox.Checked = Settings.FilterAltitude;
+			filterAltCheckBox.Checked = _settingsManagerService.Settings.FilterAltitude;
 			filterAltCheckBox_CheckedChanged(this, new EventArgs());
-			ignoreModeSCheckBox.Checked = Settings.IgnoreModeS;
-			ignoreDistTextBox.Value = Convert.ToDecimal(Settings.IgnoreDistance);
-			ignoreAltTextBox.Value = Settings.IgnoreAltitude;
-			if (filterReceiverCheckBox.Checked) filterReceiverCheckBox.Checked = Settings.FilterReceiver; //Will be unchecked if there was an error getting receivers
+			ignoreModeSCheckBox.Checked = _settingsManagerService.Settings.IgnoreModeS;
+			ignoreDistTextBox.Value = Convert.ToDecimal(_settingsManagerService.Settings.IgnoreDistance);
+			ignoreAltTextBox.Value = _settingsManagerService.Settings.IgnoreAltitude;
+			if (filterReceiverCheckBox.Checked) filterReceiverCheckBox.Checked = _settingsManagerService.Settings.FilterReceiver; //Will be unchecked if there was an error getting receivers
 			filterReceiverCheckBox_CheckedChanged(this, new EventArgs());
-			trailsAgeNumericUpDown.Value = Settings.TrailsUpdateFrequency;
+			trailsAgeNumericUpDown.Value = _settingsManagerService.Settings.TrailsUpdateFrequency;
 		}
 
 		private async void UpdateReceivers() {
-			if (string.IsNullOrWhiteSpace(Settings.AircraftListUrl)) {
+			if (string.IsNullOrWhiteSpace(_settingsManagerService.Settings.AircraftListUrl)) {
 				receiverComboBox.DataSource = null;
 				receiverComboBox.Items.Clear();
 				filterReceiverCheckBox.Checked = false;
 				return;
 			}
 
-			var receivers = await Task.Run(Checker.GetReceivers);
+			var receivers = await Task.Run(_checkerService.GetReceivers);
 			if (receivers != null) {
 				receivers = receivers.OrderBy(x => x.Value, StringComparer.Ordinal).ToDictionary(x => x.Key, x => x.Value);
 
 				receiverComboBox.DataSource = new BindingSource(receivers, null);
 				receiverComboBox.DisplayMember = "Value";
 				receiverComboBox.ValueMember = "Key";
-				receiverComboBox.SelectedValue = Settings.FilterReceiverId.ToString();
+				receiverComboBox.SelectedValue = _settingsManagerService.Settings.FilterReceiverId.ToString();
 			}
 			else {
 				receiverComboBox.DataSource = null;
@@ -121,34 +128,34 @@ namespace PlaneAlerter.Forms {
 		/// <param name="e">Event Args</param>
 		private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
 			//Set settings to form element values
-			Settings.SenderEmail = senderEmailTextBox.Text;
-			Settings.AircraftListUrl = aircraftListTextBox.Text;
-			Settings.RadarUrl = radarURLTextBox.Text;
-			Settings.VRSUser = VRSUsrTextBox.Text;
-			Settings.VRSPassword = VRSPwdTextBox.Text;
-			Settings.Lat = latTextBox.Value;
-			Settings.Long = longTextBox.Value;
-			Settings.RemovalTimeout = Convert.ToInt32(removalTimeoutTextBox.Value);
-			Settings.RefreshRate = Convert.ToInt32(refreshTextBox.Value);
-			Settings.StartOnStart = startOnStartCheckBox.Checked;
-			Settings.SoundAlerts = soundAlertsCheckBox.Checked;
-			Settings.ShowNotifications = notificationsCheckBox.Checked;
-			Settings.CentreMapOnAircraft = centreAircraftRadioButton.Checked;
-			Settings.SMTPHost = smtpHostComboBox.Text;
-			Settings.SMTPPort = Convert.ToInt32(smtpHostPortTextBox.Value);
-			Settings.SMTPUser = smtpUsrTextBox.Text;
-			Settings.SMTPPassword = smtpPwdTextBox.Text;
-			Settings.SMTPSSL = smtpSSLCheckBox.Checked;
-			Settings.Timeout = Convert.ToInt32(timeoutTextBox.Value);
-			Settings.FilterDistance = filterDstCheckBox.Checked;
-			Settings.FilterAltitude = filterAltCheckBox.Checked;
-			Settings.IgnoreModeS = ignoreModeSCheckBox.Checked;
-			Settings.IgnoreAltitude = Convert.ToInt32(ignoreAltTextBox.Value);
-			Settings.IgnoreDistance = Convert.ToDouble(ignoreDistTextBox.Value);
-			Settings.FilterReceiver = filterReceiverCheckBox.Checked;
-			Settings.FilterReceiverId = Convert.ToInt32(receiverComboBox.SelectedValue);
-			Settings.TrailsUpdateFrequency = Convert.ToInt32(trailsAgeNumericUpDown.Value);
-			Settings.Save();
+			_settingsManagerService.Settings.SenderEmail = senderEmailTextBox.Text;
+			_settingsManagerService.Settings.AircraftListUrl = aircraftListTextBox.Text;
+			_settingsManagerService.Settings.RadarUrl = radarURLTextBox.Text;
+			_settingsManagerService.Settings.VRSUser = VRSUsrTextBox.Text;
+			_settingsManagerService.Settings.VRSPassword = VRSPwdTextBox.Text;
+			_settingsManagerService.Settings.Lat = latTextBox.Value;
+			_settingsManagerService.Settings.Long = longTextBox.Value;
+			_settingsManagerService.Settings.RemovalTimeout = Convert.ToInt32(removalTimeoutTextBox.Value);
+			_settingsManagerService.Settings.RefreshRate = Convert.ToInt32(refreshTextBox.Value);
+			_settingsManagerService.Settings.StartOnStart = startOnStartCheckBox.Checked;
+			_settingsManagerService.Settings.SoundAlerts = soundAlertsCheckBox.Checked;
+			_settingsManagerService.Settings.ShowNotifications = notificationsCheckBox.Checked;
+			_settingsManagerService.Settings.CentreMapOnAircraft = centreAircraftRadioButton.Checked;
+			_settingsManagerService.Settings.SMTPHost = smtpHostComboBox.Text;
+			_settingsManagerService.Settings.SMTPPort = Convert.ToInt32(smtpHostPortTextBox.Value);
+			_settingsManagerService.Settings.SMTPUser = smtpUsrTextBox.Text;
+			_settingsManagerService.Settings.SMTPPassword = smtpPwdTextBox.Text;
+			_settingsManagerService.Settings.SMTPSSL = smtpSSLCheckBox.Checked;
+			_settingsManagerService.Settings.Timeout = Convert.ToInt32(timeoutTextBox.Value);
+			_settingsManagerService.Settings.FilterDistance = filterDstCheckBox.Checked;
+			_settingsManagerService.Settings.FilterAltitude = filterAltCheckBox.Checked;
+			_settingsManagerService.Settings.IgnoreModeS = ignoreModeSCheckBox.Checked;
+			_settingsManagerService.Settings.IgnoreAltitude = Convert.ToInt32(ignoreAltTextBox.Value);
+			_settingsManagerService.Settings.IgnoreDistance = Convert.ToDouble(ignoreDistTextBox.Value);
+			_settingsManagerService.Settings.FilterReceiver = filterReceiverCheckBox.Checked;
+			_settingsManagerService.Settings.FilterReceiverId = Convert.ToInt32(receiverComboBox.SelectedValue);
+			_settingsManagerService.Settings.TrailsUpdateFrequency = Convert.ToInt32(trailsAgeNumericUpDown.Value);
+			_settingsManagerService.Save();
 		}
 
 		/// <summary>
@@ -189,7 +196,7 @@ namespace PlaneAlerter.Forms {
 		}
 
 		private void refreshReceiversButton_Click(object sender, EventArgs e) {
-			Settings.AircraftListUrl = aircraftListTextBox.Text;
+			_settingsManagerService.Settings.AircraftListUrl = aircraftListTextBox.Text;
 			UpdateReceivers();
 		}
 	}

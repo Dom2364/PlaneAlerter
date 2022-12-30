@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using Microsoft.Extensions.DependencyInjection;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
 using PlaneAlerter.Services;
@@ -12,6 +13,7 @@ namespace PlaneAlerter.Forms {
 	/// Form for editing conditions
 	/// </summary>
 	internal partial class ConditionEditorForm :Form {
+		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly ITwitterService _twitterService;
 
 		/// <summary>
@@ -27,7 +29,8 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// Initialise form with no existing condition
 		/// </summary>
-		public ConditionEditorForm(ITwitterService twitterService) {
+		public ConditionEditorForm(ISettingsManagerService settingsManagerService, ITwitterService twitterService) {
+			_settingsManagerService = settingsManagerService;
 			_twitterService = twitterService;
 			
 			//Initialise form elements
@@ -52,7 +55,7 @@ namespace PlaneAlerter.Forms {
 
 			//Add twitter accounts to combobox
 			twitterAccountComboBox.Items.Add("Add Account");
-			twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
+			twitterAccountComboBox.Items.AddRange(_settingsManagerService.Settings.TwitterUsers.Keys.ToArray());
 
 			//Set Defaults
 			conditionNameTextBox.Text = "New Condition";
@@ -347,7 +350,7 @@ namespace PlaneAlerter.Forms {
 		/// </summary>
 		private void propertyInfoButton_Click(object sender, EventArgs e) {
 			//Show property info form
-			var propertyInfoForm = new PropertyInfoForm();
+			var propertyInfoForm = Program.ServiceProvider.GetRequiredService<PropertyInfoForm>();
 			propertyInfoForm.Show();
 		}
 
@@ -377,7 +380,7 @@ namespace PlaneAlerter.Forms {
 			//Update accounts
 			twitterAccountComboBox.Items.Clear();
 			twitterAccountComboBox.Items.Add("Add Account");
-			twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
+			twitterAccountComboBox.Items.AddRange(_settingsManagerService.Settings.TwitterUsers.Keys.ToArray());
 
 			//Clear selection
 			twitterAccountComboBox.SelectedIndex = -1;

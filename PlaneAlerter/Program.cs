@@ -48,7 +48,13 @@ namespace PlaneAlerter {
 					services.AddTransient<SettingsForm>();
 
 					//Services
+					services.AddSingleton<ISettingsManagerService, SettingsManagerService>();
+					services.AddSingleton<ICheckerService, CheckerService>();
 					services.AddSingleton<ITwitterService, TwitterService>();
+					services.AddSingleton<IEmailService, EmailService>();
+					services.AddSingleton<IUrlBuilderService, UrlBuilderService>();
+					services.AddSingleton<IStatsService, StatsService>();
+					services.AddSingleton<IThreadManagerService, ThreadManagerService>();
 				});
 		}
 	}

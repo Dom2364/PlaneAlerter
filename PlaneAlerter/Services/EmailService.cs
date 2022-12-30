@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Text;
-using System.Net.Mail;
-using System.Net;
+using System.Drawing;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Drawing;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
 
-namespace PlaneAlerter {
-	/// <summary>
-	/// Class for email operations
-	/// </summary>
-	internal static class Email {
+namespace PlaneAlerter.Services {
+	internal interface IEmailService
+	{
 		/// <summary>
 		/// Send alert email
 		/// </summary>
@@ -22,11 +20,37 @@ namespace PlaneAlerter {
 		/// <param name="aircraft">Aircraft information for matched aircraft</param>
 		/// <param name="receiverName">Name of receiver that got the last aircraft information</param>
 		/// <param name="isDetection">Is this a detection, not a removal?</param>
-		public static void SendEmail(string emailAddress, Condition condition, Aircraft aircraft, string receiverName, bool isDetection) {
-            var mailClient = new SmtpClient(Settings.SMTPHost);
-            mailClient.Port = Settings.SMTPPort;
-            mailClient.Credentials = new NetworkCredential(Settings.SMTPUser, Settings.SMTPPassword);
-            mailClient.EnableSsl = Settings.SMTPSSL;
+		void SendEmail(string emailAddress, Condition condition, Aircraft aircraft, string receiverName, bool isDetection);
+	}
+
+	/// <summary>
+	/// Class for email operations
+	/// </summary>
+	internal class EmailService : IEmailService
+	{
+        private readonly ISettingsManagerService _settingsManagerService;
+        private readonly IUrlBuilderService _urlBuilderService;
+
+		public EmailService(ISettingsManagerService settingsManagerService, IUrlBuilderService urlBuilderService)
+		{
+			_settingsManagerService = settingsManagerService;
+			_urlBuilderService = urlBuilderService;
+		}
+
+		/// <summary>
+		/// Send alert email
+		/// </summary>
+		/// <param name="emailAddress">Email address to send to</param>
+		/// <param name="condition">Condition that triggered alert</param>
+		/// <param name="aircraft">Aircraft information for matched aircraft</param>
+		/// <param name="receiverName">Name of receiver that got the last aircraft information</param>
+		/// <param name="isDetection">Is this a detection, not a removal?</param>
+		public void SendEmail(string emailAddress, Condition condition, Aircraft aircraft, string receiverName, bool isDetection) {
+            var mailClient = new SmtpClient(_settingsManagerService.Settings.SMTPHost);
+            mailClient.Port = _settingsManagerService.Settings.SMTPPort;
+            mailClient.Credentials = new NetworkCredential(_settingsManagerService.Settings.SMTPUser,
+	            _settingsManagerService.Settings.SMTPPassword);
+            mailClient.EnableSsl = _settingsManagerService.Settings.SMTPSSL;
             
 			//Transponder type from aircraft info
 			var transponderName = "Unknown";
@@ -56,17 +80,17 @@ namespace PlaneAlerter {
 
 			//Set sender email to the one set in settings
 			try {
-				message.From = new MailAddress(Settings.SenderEmail, "PlaneAlerter Alerts");
+				message.From = new MailAddress(_settingsManagerService.Settings.SenderEmail, "PlaneAlerter Alerts");
 			}
 			catch {
-				Core.Ui.WriteToConsole("ERROR: Email to send from is invalid (" + Settings.SenderEmail + ")", Color.Red);
+				Core.Ui.WriteToConsole("ERROR: Email to send from is invalid (" + _settingsManagerService.Settings.SenderEmail + ")", Color.Red);
 				return;
 			}
 
             //Set subject
             message.Subject = Core.ParseCustomFormatString(isDetection ? condition.EmailFirstFormat : condition.EmailLastFormat, aircraft, condition);
 
-            if (Settings.EmailContentConfig.TwitterOptimised) {
+            if (_settingsManagerService.EmailContentConfig.TwitterOptimised) {
                 var typeString = "First Contact";
                 var regoString = "No rego, ";
                 var callsignString = "No callsign, ";
@@ -84,19 +108,22 @@ namespace PlaneAlerter {
 				if(aircraft.GetProperty("OpIcao") != null) {
 					operatorString = aircraft.GetProperty("OpIcao") + ", ";
 				}
-                message.Body = "[" + typeString + "] " + condition.Name + ", " + regoString + operatorString + aircraft.GetProperty("Type") + ", " + callsignString + Settings.RadarUrl;
+                message.Body = "[" + typeString + "] " + condition.Name + ", " + regoString + operatorString + aircraft.GetProperty("Type") + ", " + callsignString +
+                               _settingsManagerService.Settings.RadarUrl;
                 //[Last Contact] USAF (RCH9701), 79-1951, RCH, DC10, RCH9701 http://aussieadsb.com
             }
             else {
                 //Create request for aircraft image urls
-                var request = (HttpWebRequest)WebRequest.Create(Settings.AircraftListUrl.Substring(0, Settings.AircraftListUrl.LastIndexOf("/") + 1) + "AirportDataThumbnails.json?icao=" + aircraft.Icao + "&numThumbs=" + imageLinks.Length);
+                var request = (HttpWebRequest)WebRequest.Create(_settingsManagerService.Settings.AircraftListUrl.Substring(0,
+	                _settingsManagerService.Settings.AircraftListUrl.LastIndexOf("/") + 1) + "AirportDataThumbnails.json?icao=" + aircraft.Icao + "&numThumbs=" + imageLinks.Length);
                 request.Method = "GET";
                 request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
                 request.Timeout = 5000;
 
                 //If vrs authentication is used, add credentials to request
-                if (Settings.VRSAuthenticate) {
-                    var encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(Settings.VRSUser + ":" + Settings.VRSPassword));
+                if (_settingsManagerService.Settings.VRSAuthenticate) {
+                    var encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(
+	                    _settingsManagerService.Settings.VRSUser + ":" + _settingsManagerService.Settings.VRSPassword));
                     request.Headers.Add("Authorization", "Basic " + encoded);
                 }
 
@@ -160,7 +187,7 @@ namespace PlaneAlerter {
                             continue;
                     }
                     //If parameter is set (not in vrs property info list) and property list type is set to essentials, skip this property
-                    if (parameter != "UNKNOWN_PARAMETER" && Settings.EmailContentConfig.PropertyList == PropertyListType.Essentials)
+                    if (parameter != "UNKNOWN_PARAMETER" && _settingsManagerService.EmailContentConfig.PropertyList == PropertyListType.Essentials)
                         continue;
                     //Get parameter information from vrs property info
                     if (parameter == "UNKNOWN_PARAMETER") {
@@ -170,7 +197,7 @@ namespace PlaneAlerter {
 		                        continue;
 	                        
 	                        //If property list type is essentials and this property is not in the list of essentials, leave this property as unknown so it can be skipped
-	                        if (Settings.EmailContentConfig.PropertyList == PropertyListType.Essentials && !Core.EssentialProperties.Contains(property))
+	                        if (_settingsManagerService.EmailContentConfig.PropertyList == PropertyListType.Essentials && !Core.EssentialProperties.Contains(property))
 		                        continue;
 	                        parameter = property.ToString();
                         }
@@ -211,36 +238,36 @@ namespace PlaneAlerter {
                 //Condition name
                 message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Condition: " + condition.Name + "</h2>";
                 //Receiver name
-                if (Settings.EmailContentConfig.ReceiverName)
+                if (_settingsManagerService.EmailContentConfig.ReceiverName)
                     message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Reciever: " + receiverName + "</h2>";
                 //Transponder type
-                if (Settings.EmailContentConfig.TransponderType)
+                if (_settingsManagerService.EmailContentConfig.TransponderType)
                     message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Transponder: " + transponderName + "</h2>";
                 //Radar url
-                if (Settings.EmailContentConfig.RadarLink)
-                    message.Body += $"<h3><a style='text-decoration: none;' href='{Settings.RadarUrl}?icao={aircraft.Icao}'>Goto Radar</a></h3>";
+                if (_settingsManagerService.EmailContentConfig.RadarLink)
+                    message.Body += $"<h3><a style='text-decoration: none;' href='{_settingsManagerService.Settings.RadarUrl}?icao={aircraft.Icao}'>Goto Radar</a></h3>";
                 //Report url
-                if (Settings.EmailContentConfig.ReportLink)
-                    message.Body += $"<h3>VRS Report: <a style='text-decoration: none;' href='{Core.GenerateReportUrl(aircraft.Icao, false)}'>Desktop</a>   <a style='text-decoration: none;' href='{Core.GenerateReportUrl(aircraft.Icao, true)}'>Mobile</a></h3>";
+                if (_settingsManagerService.EmailContentConfig.ReportLink)
+                    message.Body += $"<h3>VRS Report: <a style='text-decoration: none;' href='{_urlBuilderService.GenerateReportUrl(aircraft.Icao, false)}'>Desktop</a>   <a style='text-decoration: none;' href='{_urlBuilderService.GenerateReportUrl(aircraft.Icao, true)}'>Mobile</a></h3>";
                 //Airframes.org url
-                if (Settings.EmailContentConfig.AfLookup)
+                if (_settingsManagerService.EmailContentConfig.AfLookup)
                     message.Body += airframesUrl;
 
                 message.Body += "<table><tr><td>";
                 //Property list
-                if (Settings.EmailContentConfig.PropertyList != PropertyListType.Hidden)
+                if (_settingsManagerService.EmailContentConfig.PropertyList != PropertyListType.Hidden)
                     message.Body += aircraftTable;
                 message.Body += "</td><td style='padding-left: 10px;vertical-align: top;'>";
                 //Aircraft photos
-                if (Settings.EmailContentConfig.AircraftPhotos)
+                if (_settingsManagerService.EmailContentConfig.AircraftPhotos)
                     message.Body += imageHtml;
                 //Map
-                if (Settings.EmailContentConfig.Map && aircraft.GetProperty("Lat") != null) {
+                if (_settingsManagerService.EmailContentConfig.Map && aircraft.GetProperty("Lat") != null) {
                     message.Body += "<h3 style='margin: 0px'><a style='text-decoration: none' href=" + googleMapsUrl + ">Open in Google Maps</a></h3><br />" +
-                    "<img style='border: 2px solid #444;' alt='Loading Map...' src='" + Core.GenerateMapUrl(aircraft).Replace("&", "&amp;") + "' />";
+                    "<img style='border: 2px solid #444;' alt='Loading Map...' src='" + _urlBuilderService.GenerateMapUrl(aircraft).Replace("&", "&amp;") + "' />";
                 }
                 //KML
-                if (Settings.EmailContentConfig.KMLfile && aircraft.GetProperty("Lat") != null)
+                if (_settingsManagerService.EmailContentConfig.KMLfile && aircraft.GetProperty("Lat") != null)
                     message.Attachments.Add(Attachment.CreateAttachmentFromString(Core.GenerateKml(aircraft), aircraft.Icao + ".kml"));
                 
 
