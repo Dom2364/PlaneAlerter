@@ -13,7 +13,9 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Extensions.DependencyInjection;
 using PlaneAlerter.Enums;
+using PlaneAlerter.Services;
 
 namespace PlaneAlerter.Forms
 {
@@ -22,6 +24,8 @@ namespace PlaneAlerter.Forms
 	/// </summary>
 	internal partial class MainForm : Form
 	{
+		private readonly ITwitterService _twitterService;
+
 		/// <summary>
 		/// Send message to windows
 		/// </summary>
@@ -49,7 +53,9 @@ namespace PlaneAlerter.Forms
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public MainForm() {
+		public MainForm(ITwitterService twitterService) {
+			_twitterService = twitterService;
+
 			//Stop the annoying cross-thread problems
 			//This is probably not a good thing but I'm too lazy
 			CheckForIllegalCrossThreadCalls = false;
@@ -126,7 +132,7 @@ namespace PlaneAlerter.Forms
 						return;
 
 					var clickedItem = (ToolStripItem)sender;
-					Twitter.RemoveAccount(clickedItem.Text);
+					_twitterService.RemoveAccount(clickedItem.Text);
 				};
 			}
 		}
@@ -143,7 +149,7 @@ namespace PlaneAlerter.Forms
 		}
 
 		private void startConditionEditorToolStripMenuItem_Click(object sender, EventArgs e) {
-			var editor = new ConditionListForm();
+			var editor = Program.ServiceProvider.GetRequiredService<ConditionListForm>();
 			editor.Show();
 			editor.FormClosing += delegate { 
 				Checker.LoadConditions();
@@ -215,7 +221,7 @@ namespace PlaneAlerter.Forms
 		/// <param name="e">Event Args</param>
 		private void settingsToolStripMenuItem_Click(object sender, EventArgs e) {
 			//Show settings form then update settings
-			var settingsForm = new SettingsForm();
+			var settingsForm = Program.ServiceProvider.GetRequiredService<SettingsForm>();
 			settingsForm.ShowDialog();
 			Settings.UpdateSettings(true);
 		}
@@ -227,7 +233,7 @@ namespace PlaneAlerter.Forms
 		/// <param name="e">Event Args</param>
 		private void propertyInfoToolStripMenuItem_Click(object sender, EventArgs e) {
 			//Show property info form
-			var propertyInfoForm = new PropertyInfoForm();
+			var propertyInfoForm = Program.ServiceProvider.GetRequiredService<PropertyInfoForm>();
 			propertyInfoForm.Show();
 		}
 
@@ -248,7 +254,7 @@ namespace PlaneAlerter.Forms
 		/// <param name="e">Event Args</param>
 		private void emailContentConfigToolStripMenuItem_Click(object sender, EventArgs e) {
 			//Show email content config form
-			var ecc = new EmailContentConfigForm();
+			var ecc = Program.ServiceProvider.GetRequiredService<EmailContentConfigForm>();
 			ecc.ShowDialog();
 		}
 
@@ -266,7 +272,7 @@ namespace PlaneAlerter.Forms
 		}
 
 		private void addAccountToolStripMenuItem_Click(object sender, EventArgs e) {
-			Twitter.AddAccount();
+			_twitterService.AddAccount();
 		}
 
 		private void startToolStripMenuItem_Click(object sender, EventArgs e) {

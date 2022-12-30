@@ -1,21 +1,41 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using Tweetinvi;
-using Tweetinvi.Models;
-using Tweetinvi.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using PlaneAlerter.Forms;
+using Tweetinvi;
+using Tweetinvi.Exceptions;
+using Tweetinvi.Models;
 
-namespace PlaneAlerter {
+namespace PlaneAlerter.Services {
+	internal interface ITwitterService
+	{
+		/// <summary>
+		/// Posts a tweet
+		/// </summary>
+		Task<bool> Tweet(string token, string tokenSecret, string content, string mediaUrl);
+
+		/// <summary>
+		/// Authenticate account and add to accounts list
+		/// </summary>
+		void AddAccount();
+
+		/// <summary>
+		/// Remove a specific account
+		/// </summary>
+		void RemoveAccount(string screenName);
+	}
+
 	/// <summary>
 	/// Class for twitter related stuff
 	/// </summary>
-	internal static class Twitter {
+	internal class TwitterService : ITwitterService
+	{
 		//Don't even think about it
 		private const string Key = "U1dYZUhZT0RqOG1hV25xRzczMXZ6Y3k3NA==";
 		private const string SecretKey = "UWlBcGtJaXJFdnpZaFhVb0FGVE93R003dnR0YnhJdWI1Y1BzVmxxSktuZGlmSkZvMzA=";
@@ -26,7 +46,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Posts a tweet
 		/// </summary>
-		public static async Task<bool> Tweet(string token, string tokenSecret, string content, string mediaUrl) {
+		public async Task<bool> Tweet(string token, string tokenSecret, string content, string mediaUrl) {
 			if (content.Contains("@")) {
 				Core.Ui.WriteToConsole("ERROR: Mentions are not allowed in tweets", System.Drawing.Color.Red);
 				return false;
@@ -108,7 +128,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Authenticate account and add to accounts list
 		/// </summary>
-		public static async void AddAccount() {
+		public async void AddAccount() {
 			var appClient = new TwitterClient(ConsumerKey, ConsumerSecretKey);
 
 			//Authenticate PlaneAlerter
@@ -133,7 +153,7 @@ namespace PlaneAlerter {
 			Process.Start(new ProcessStartInfo(authenticationRequest.AuthorizationURL) { UseShellExecute = true });
 
 			//Show dialog for user to enter pin
-			var dialog = new PinPromptDialog();
+			var dialog = Program.ServiceProvider.GetRequiredService<PinPromptDialog>();
 			if (dialog.ShowDialog() != DialogResult.OK)
 				return;
 			
@@ -176,7 +196,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Remove a specific account
 		/// </summary>
-		public static void RemoveAccount(string screenName) {
+		public void RemoveAccount(string screenName) {
 			//Check if users list contains user
 			if (!Settings.TwitterUsers.ContainsKey(screenName)) {
 				MessageBox.Show("User '" + screenName + "' does not exist", "User doesn't exist");

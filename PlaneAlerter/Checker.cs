@@ -11,8 +11,10 @@ using System.Net;
 using System.Threading;
 using System.Windows.Forms;
 using System.Globalization;
+using Microsoft.Extensions.DependencyInjection;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
+using PlaneAlerter.Services;
 
 namespace PlaneAlerter {
 	/// <summary>
@@ -20,6 +22,8 @@ namespace PlaneAlerter {
 	/// </summary>
 	internal static class Checker
 	{
+		private static readonly ITwitterService _twitterService;
+
 		/// <summary>
 		/// Have conditions loaded?
 		/// </summary>
@@ -320,7 +324,7 @@ namespace PlaneAlerter {
 				var mapUrl = condition.TweetMap?Core.GenerateMapUrl(aircraft) :"";
 
 				//Send tweet
-				var success = Twitter.Tweet(credentials[0], credentials[1], content, mapUrl).Result;
+				var success = _twitterService.Tweet(credentials[0], credentials[1], content, mapUrl).Result;
 				if (success) {
 					Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.Name, Color.LightBlue);
 				}
@@ -604,7 +608,10 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		static Checker() {
+		static Checker()
+		{
+			_twitterService = Program.ServiceProvider.GetRequiredService<ITwitterService>();
+
 			//Create conditions file if one doesnt exist
 			if (!File.Exists("conditions.json")) {
 				Core.Ui.WriteToConsole("No conditions file! Creating one...", Color.White);

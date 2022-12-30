@@ -5,32 +5,73 @@ using System.Linq;
 using System.Windows.Forms;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
+using PlaneAlerter.Services;
 
 namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for editing conditions
 	/// </summary>
 	internal partial class ConditionEditorForm :Form {
+		private readonly ITwitterService _twitterService;
+
 		/// <summary>
 		/// Id of condition to update
 		/// </summary>
-		private readonly int _conditionToUpdate;
+		private int _conditionToUpdate;
 
 		/// <summary>
 		/// Is this updating the condition?
 		/// </summary>
-		private readonly bool _isUpdating = false;
-
+		private bool _isUpdating = false;
+		
 		/// <summary>
-		/// Initialise form with a condition to update
+		/// Initialise form with no existing condition
 		/// </summary>
-		/// <param name="conditionToUpdate"></param>
-		public ConditionEditorForm(int conditionToUpdate) {
-			_isUpdating = true;
-			_conditionToUpdate = conditionToUpdate;
+		public ConditionEditorForm(ITwitterService twitterService) {
+			_twitterService = twitterService;
+			
+			//Initialise form elements
+			InitializeComponent();
 
-			//Initialise form options
-			Initialise();
+			//Add vrs properties to triggers table
+			var rows = triggerDataGridView.Rows.Cast<DataGridViewRow>();
+			foreach (var row in rows)
+			{
+				var comboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
+				foreach (VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
+					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
+			}
+
+			//Add alert types to combobox
+			foreach (AlertType property in Enum.GetValues(typeof(AlertType)))
+				alertTypeComboBox.Items.Add(property.ToString().Replace('_', ' '));
+
+			//Add tweet link types
+			foreach (TweetLink linkType in Enum.GetValues(typeof(TweetLink)))
+				tweetLinkComboBox.Items.Add(linkType.ToString().Replace('_', ' '));
+
+			//Add twitter accounts to combobox
+			twitterAccountComboBox.Items.Add("Add Account");
+			twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
+
+			//Set Defaults
+			conditionNameTextBox.Text = "New Condition";
+			tweetFirstFormatTextBox.Text = "";
+			emailCheckBox.Checked = false;
+			emailFirstFormatTextBox.Text = "First Contact Alert! [conditionname]: [reg]";
+			emailLastFormatTextBox.Text = "Last Contact Alert! [conditionname]: [reg]";
+			twitterCheckBox.Checked = false;
+			twitterAccountComboBox.Text = "";
+			tweetLinkComboBox.SelectedIndex = 0;
+			tweetFirstFormatTextBox.Text = "Alert! Registration: [Reg], Callsign: [Call]";
+			tweetLastFormatTextBox.Text = "Aircraft out of range, Registration: [Reg], Callsign: [Call]";
+			alertTypeComboBox.SelectedIndex = 1;
+		}
+
+		public void LoadCondition(int conditionId)
+		{
+			_isUpdating = true;
+			_conditionToUpdate = conditionId;
 
 			//Set form element values from condition info
 			var c = ConditionListForm.Conditions[_conditionToUpdate];
@@ -48,7 +89,8 @@ namespace PlaneAlerter.Forms {
 			tweetLinkComboBox.Text = c.TweetLink.ToString().Replace('_', ' ');
 			alertTypeComboBox.Text = c.AlertType.ToString().Replace('_', ' ');
 
-			foreach (var trigger in c.Triggers.Values) {
+			foreach (var trigger in c.Triggers.Values)
+			{
 				triggerDataGridView.Rows.Add();
 				var newRow = triggerDataGridView.Rows[triggerDataGridView.Rows.Count - 2];
 
@@ -60,55 +102,6 @@ namespace PlaneAlerter.Forms {
 				newRow.Cells[1].Value = trigger.ComparisonType;
 				newRow.Cells[2].Value = trigger.Value;
 			}
-		}
-		
-		/// <summary>
-		/// Initialise form with no existing condition
-		/// </summary>
-		public ConditionEditorForm() {
-			//Initialise form options
-			Initialise();
-
-			//Set Defaults
-			conditionNameTextBox.Text = "New Condition";
-			tweetFirstFormatTextBox.Text = "";
-			emailCheckBox.Checked = false;
-			emailFirstFormatTextBox.Text = "First Contact Alert! [conditionname]: [reg]";
-			emailLastFormatTextBox.Text = "Last Contact Alert! [conditionname]: [reg]";
-			twitterCheckBox.Checked = false;
-			twitterAccountComboBox.Text = "";
-			tweetLinkComboBox.SelectedIndex = 0;
-			tweetFirstFormatTextBox.Text = "Alert! Registration: [Reg], Callsign: [Call]";
-			tweetLastFormatTextBox.Text = "Aircraft out of range, Registration: [Reg], Callsign: [Call]";
-			alertTypeComboBox.SelectedIndex = 1;
-		}
-		
-		/// <summary>
-		/// Initialise form options
-		/// </summary>
-		public void Initialise() {
-			//Initialise form elements
-			InitializeComponent();
-
-			//Add vrs properties to triggers table
-			var rows = triggerDataGridView.Rows.Cast<DataGridViewRow>();
-            foreach(var row in rows) {
-				var comboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
-				foreach(VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
-					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
-			}
-
-			//Add alert types to combobox
-			foreach(AlertType property in Enum.GetValues(typeof(AlertType)))
-				alertTypeComboBox.Items.Add(property.ToString().Replace('_', ' '));
-
-			//Add tweet link types
-			foreach (TweetLink linkType in Enum.GetValues(typeof(TweetLink)))
-				tweetLinkComboBox.Items.Add(linkType.ToString().Replace('_', ' '));
-
-			//Add twitter accounts to combobox
-			twitterAccountComboBox.Items.Add("Add Account");
-			twitterAccountComboBox.Items.AddRange(Settings.TwitterUsers.Keys.ToArray());
 		}
 		
 		/// <summary>
@@ -379,7 +372,7 @@ namespace PlaneAlerter.Forms {
 				return;
 
 			//Show add account dialog
-			Twitter.AddAccount();
+			_twitterService.AddAccount();
 				
 			//Update accounts
 			twitterAccountComboBox.Items.Clear();

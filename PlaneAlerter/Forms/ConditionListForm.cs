@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlaneAlerter.Enums;
@@ -107,7 +108,7 @@ namespace PlaneAlerter.Forms {
 		/// <param name="e">Event Args</param>
 		private void addConditionButton_Click(object sender, EventArgs e) {
 			//Show editor dialog then update condition list
-			var editor = new ConditionEditorForm();
+			var editor = Program.ServiceProvider.GetRequiredService<ConditionEditorForm>();
 			editor.ShowDialog();
 			UpdateConditionList();
 		}
@@ -198,9 +199,10 @@ namespace PlaneAlerter.Forms {
 			//Check if node is valid
 			if (node?.Tag == null || node.Tag.ToString() == "")
 				return;
-			
+
 			//Open editor, update list once closed
-			var editor = new ConditionEditorForm(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
+			var editor = Program.ServiceProvider.GetRequiredService<ConditionEditorForm>();
+			editor.LoadCondition(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
 			editor.ShowDialog();
 			UpdateConditionList();
 		}
