@@ -29,11 +29,6 @@ namespace PlaneAlerter {
 		public static Dictionary<string, Match> ActiveMatches { get; set; } = new Dictionary<string, Match>();
 
 		/// <summary>
-		/// Active form
-		/// </summary>
-		public static Forms.MainForm Ui { get; set; }
-
-		/// <summary>
 		/// Core static constructor
 		/// </summary>
 		static Core() {

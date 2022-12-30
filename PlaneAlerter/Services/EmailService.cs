@@ -7,6 +7,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlaneAlerter.Enums;
+using PlaneAlerter.Forms;
 using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services {
@@ -32,14 +33,16 @@ namespace PlaneAlerter.Services {
         private readonly IUrlBuilderService _urlBuilderService;
         private readonly IStringFormatterService _stringFormatterService;
         private readonly IKmlService _kmlService;
+        private readonly ILoggerWithQueue _logger;
 
 		public EmailService(ISettingsManagerService settingsManagerService, IUrlBuilderService urlBuilderService,
-			IStringFormatterService stringFormatterService, IKmlService kmlService)
+			IStringFormatterService stringFormatterService, IKmlService kmlService, ILoggerWithQueue logger)
 		{
 			_settingsManagerService = settingsManagerService;
 			_urlBuilderService = urlBuilderService;
 			_stringFormatterService = stringFormatterService;
 			_kmlService = kmlService;
+            _logger = logger;
 		}
 
 		/// <summary>
@@ -79,7 +82,7 @@ namespace PlaneAlerter.Services {
 				message.To.Add(emailAddress);
 			}
 			catch {
-				Core.Ui.WriteToConsole("ERROR: Email to send to is invalid (" + emailAddress + ")", Color.Red);
+				_logger.Log("ERROR: Email to send to is invalid (" + emailAddress + ")", Color.Red);
 				return;
 			}
 
@@ -88,7 +91,7 @@ namespace PlaneAlerter.Services {
 				message.From = new MailAddress(_settingsManagerService.Settings.SenderEmail, "PlaneAlerter Alerts");
 			}
 			catch {
-				Core.Ui.WriteToConsole("ERROR: Email to send from is invalid (" + _settingsManagerService.Settings.SenderEmail + ")", Color.Red);
+				_logger.Log("ERROR: Email to send from is invalid (" + _settingsManagerService.Settings.SenderEmail + ")", Color.Red);
 				return;
 			}
 
@@ -165,8 +168,8 @@ namespace PlaneAlerter.Services {
                     transponderName = convertedTrtValue;
                 }
 
-                //Write to UI
-                Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
+				//Write to UI
+				_logger.Log(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
 
                 //Generate aircraft property value table
                 var aircraftPropertyKeys = aircraft.GetPropertyKeys();
@@ -285,23 +288,25 @@ namespace PlaneAlerter.Services {
 			}
 			catch(SmtpException e) {
 				if(e.InnerException != null) {
-					Core.Ui.WriteToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
+					_logger.Log("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
 					return;
 				}
-				Core.Ui.WriteToConsole("SMTP ERROR: " + e.Message, Color.Red);
+
+				_logger.Log("SMTP ERROR: " + e.Message, Color.Red);
 				return;
 			}
 			catch (InvalidOperationException e) {
 				if (e.InnerException != null) {
-					Core.Ui.WriteToConsole("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
+					_logger.Log("SMTP ERROR: " + e.Message + " (" + e.InnerException.Message + ")", Color.Red);
 					return;
 				}
-				Core.Ui.WriteToConsole("SMTP ERROR: " + e.Message, Color.Red);
+
+				_logger.Log("SMTP ERROR: " + e.Message, Color.Red);
 				return;
 			}
 
 			//Log to UI
-			Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
+			_logger.Log(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.Icao + " | " + message.Subject, Color.LightBlue);
 		}
 	}
 }

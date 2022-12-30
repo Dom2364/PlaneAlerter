@@ -1,7 +1,9 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Threading;
 using PlaneAlerter.Enums;
+using PlaneAlerter.Forms;
 
 namespace PlaneAlerter.Services {
 	internal interface IThreadManagerService
@@ -15,6 +17,8 @@ namespace PlaneAlerter.Services {
 		/// Thread for the checker loop
 		/// </summary>
 		Thread? CheckerThread { get; set; }
+
+		event EventHandler StatusChanged;
 
 		/// <summary>
 		/// Start threads
@@ -37,24 +41,35 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class ThreadManagerService : IThreadManagerService
 	{
+		public event EventHandler StatusChanged;
+
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly IConditionManagerService _conditionManagerService;
 		private readonly ICheckerService _checkerService;
-		private readonly IStatsService _statsService;
+		private readonly ILoggerWithQueue _logger;
 
 		public ThreadManagerService(ISettingsManagerService settingsManagerService, IConditionManagerService conditionManagerService,
-			ICheckerService checkerService, IStatsService statsService)
+			ICheckerService checkerService, ILoggerWithQueue logger)
 		{
 			_settingsManagerService = settingsManagerService;
 			_conditionManagerService = conditionManagerService;
 			_checkerService = checkerService;
-			_statsService = statsService;
+			_logger = logger;
 		}
 
 		/// <summary>
 		/// Thread status of checker thread
 		/// </summary>
-		public CheckerStatus ThreadStatus { get; set; } = CheckerStatus.WaitingForLoad;
+		private CheckerStatus _threadStatus = CheckerStatus.Stopped;
+		public CheckerStatus ThreadStatus
+		{
+			get => _threadStatus;
+			set
+			{
+				_threadStatus = value;
+				StatusChanged?.Invoke(this, EventArgs.Empty);
+			}
+		}
 
 		/// <summary>
 		/// Thread for checking operations
@@ -73,37 +88,35 @@ namespace PlaneAlerter.Services {
 			//Check for errors
 			var error = false;
 			if (_conditionManagerService.Conditions.Count == 0) {
-				Core.Ui.WriteToConsole("No conditions, not running checks", Color.White);
+				_logger.Log("No conditions, not running checks", Color.White);
 				error = true;
 			}
 			if (_settingsManagerService.Settings.AircraftListUrl == "") {
-				Core.Ui.WriteToConsole("ERROR: No AircraftList.json url specified, go to Options>Settings", Color.White);
+				_logger.Log("ERROR: No AircraftList.json url specified, go to Options>Settings", Color.White);
 				error = true;
 			}
 			if (_settingsManagerService.Settings.RadarUrl == "") {
-				Core.Ui.WriteToConsole("ERROR: No radar url specified, go to Options>Settings", Color.White);
+				_logger.Log("ERROR: No radar url specified, go to Options>Settings", Color.White);
 				error = true;
 			}
 			if (!Regex.IsMatch(_settingsManagerService.Settings.AircraftListUrl, @"(http|https):\/\/.+?\/VirtualRadar\/AircraftList\.json.*", RegexOptions.IgnoreCase)) {
-				Core.Ui.WriteToConsole("ERROR: AircraftList.json url invalid. Example: http://127.0.0.1/VirtualRadar/AircraftList.json", Color.White);
+				_logger.Log("ERROR: AircraftList.json url invalid. Example: http://127.0.0.1/VirtualRadar/AircraftList.json", Color.White);
 				error = true;
 			}
 			if (error) {
 				ThreadStatus = CheckerStatus.Stopped;
-				Core.Ui.statusLabel.Text = "Status: Idle";
 				return;
 			}
 			
 			//Start thread
-			ThreadStatus = CheckerStatus.Running;
 			CheckerThread = new Thread(_checkerService.Start);
 			CheckerThread.IsBackground = true;
 			CheckerThread.Name = "Checker Thread";
 			CheckerThread.Start();
 			
-			Core.Ui.WriteToConsole("Checker Started", Color.White);
-			Core.Ui.restartToolStripMenuItem.Enabled = true;
-			Core.Ui.startToolStripMenuItem.Text = "Stop";
+			_logger.Log("Checker Started", Color.White);
+
+			ThreadStatus = CheckerStatus.Running;
 		}
 
 		/// <summary>
@@ -115,22 +128,17 @@ namespace PlaneAlerter.Services {
 				return;
 
 			_checkerService.Stop();
-			Core.Ui.startToolStripMenuItem.Enabled = false;
-			Core.Ui.startToolStripMenuItem.Text = "Stopping";
-			Core.Ui.restartToolStripMenuItem.Enabled = false;
+			ThreadStatus = CheckerStatus.Stopping;
+			
 			while (CheckerThread.ThreadState != ThreadState.Stopped) Thread.Sleep(200);
+
 			CheckerThread = null;
 			ThreadStatus = CheckerStatus.Stopped;
 
 			//Clear matches
 			Core.ActiveMatches.Clear();
-
-			_statsService.UpdateStats();
-
-			Core.Ui.statusLabel.Text = "Status: Idle";
-			Core.Ui.startToolStripMenuItem.Text = "Start";
-			Core.Ui.startToolStripMenuItem.Enabled = true;
-			Core.Ui.WriteToConsole("Checker Stopped", Color.White);
+			
+			_logger.Log("Checker Stopped", Color.White);
 		}
 
 		/// <summary>

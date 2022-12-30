@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Linq;
+using PlaneAlerter.Forms;
 using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services
@@ -20,10 +21,12 @@ namespace PlaneAlerter.Services
 	internal class UrlBuilderService : IUrlBuilderService
 	{
 		private readonly ISettingsManagerService _settingsManagerService;
+		private readonly ILoggerWithQueue _logger;
 
-		public UrlBuilderService(ISettingsManagerService settingsManagerService)
+		public UrlBuilderService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
 		{
 			_settingsManagerService = settingsManagerService;
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -34,12 +37,12 @@ namespace PlaneAlerter.Services
 			var reportUrl = "";
 			if (string.IsNullOrWhiteSpace(_settingsManagerService.Settings.RadarUrl))
 			{
-				Core.Ui.WriteToConsole("ERROR: Please enter radar URL in settings", Color.Red);
+				_logger.Log("ERROR: Please enter radar URL in settings", Color.Red);
 				return "";
 			}
 			if (!_settingsManagerService.Settings.RadarUrl.ToLower().Contains("virtualradar"))
 			{
-				Core.Ui.WriteToConsole("WARNING: Radar URL must end with /VirtualRadar/ for report links to work", Color.Orange);
+				_logger.Log("WARNING: Radar URL must end with /VirtualRadar/ for report links to work", Color.Orange);
 				return "";
 			}
 

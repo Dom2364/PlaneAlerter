@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using PlaneAlerter.Forms;
 
 namespace PlaneAlerter.Services
 {
@@ -35,6 +36,7 @@ namespace PlaneAlerter.Services
 	internal class VrsService : IVrsService
 	{
 		private readonly ISettingsManagerService _settingsManagerService;
+		private readonly ILoggerWithQueue _logger;
 
 		/// <summary>
 		/// List of current aircraft
@@ -56,9 +58,10 @@ namespace PlaneAlerter.Services
 		/// </summary>
 		private HttpWebRequest? _request;
 
-		public VrsService(ISettingsManagerService settingsManagerService)
+		public VrsService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
 		{
 			_settingsManagerService	= settingsManagerService;
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -108,14 +111,14 @@ namespace PlaneAlerter.Services
 				}
 				catch (Exception e)
 				{
-					Core.Ui.WriteToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
+					_logger.Log("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					return;
 				}
 
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null)
 				{
-					Core.Ui.WriteToConsole("ERROR: Invalid response received from server", Color.Red);
+					_logger.Log("ERROR: Invalid response received from server", Color.Red);
 					return;
 				}
 
@@ -172,22 +175,22 @@ namespace PlaneAlerter.Services
 			}
 			catch (UriFormatException)
 			{
-				Core.Ui.WriteToConsole("ERROR: AircraftList.json url invalid (" + _settingsManagerService.Settings.AircraftListUrl + ")", Color.Red);
+				_logger.Log("ERROR: AircraftList.json url invalid (" + _settingsManagerService.Settings.AircraftListUrl + ")", Color.Red);
 				return;
 			}
 			catch (InvalidDataException)
 			{
-				Core.Ui.WriteToConsole("ERROR: Data returned from " + _settingsManagerService.Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
+				_logger.Log("ERROR: Data returned from " + _settingsManagerService.Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
 				return;
 			}
 			catch (WebException e)
 			{
-				Core.Ui.WriteToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
+				_logger.Log("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
 				return;
 			}
 			catch (JsonReaderException e)
 			{
-				Core.Ui.WriteToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
+				_logger.Log("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
 				return;
 			}
 		}
@@ -231,14 +234,14 @@ namespace PlaneAlerter.Services
 				}
 				catch (Exception e)
 				{
-					Core.Ui.WriteToConsole("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
+					_logger.Log("ERROR: " + e.GetType() + " while downloading AircraftList.json: " + e.Message, Color.Red);
 					return null;
 				}
 
 				//Check if we actually got aircraft data
 				if (responseJson["acList"] == null)
 				{
-					Core.Ui.WriteToConsole("ERROR: Invalid response recieved from server", Color.Red);
+					_logger.Log("ERROR: Invalid response recieved from server", Color.Red);
 					return null;
 				}
 				//Throw error if server time was not parsed
@@ -257,22 +260,22 @@ namespace PlaneAlerter.Services
 			}
 			catch (UriFormatException)
 			{
-				Core.Ui.WriteToConsole("ERROR: AircraftList.json url invalid (" + _settingsManagerService.Settings.AircraftListUrl + ")", Color.Red);
+				_logger.Log("ERROR: AircraftList.json url invalid (" + _settingsManagerService.Settings.AircraftListUrl + ")", Color.Red);
 				return null;
 			}
 			catch (InvalidDataException)
 			{
-				Core.Ui.WriteToConsole("ERROR: Data returned from " + _settingsManagerService.Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
+				_logger.Log("ERROR: Data returned from " + _settingsManagerService.Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
 				return null;
 			}
 			catch (WebException e)
 			{
-				Core.Ui.WriteToConsole("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
+				_logger.Log("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
 				return null;
 			}
 			catch (JsonReaderException e)
 			{
-				Core.Ui.WriteToConsole("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
+				_logger.Log("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
 				return null;
 			}
 

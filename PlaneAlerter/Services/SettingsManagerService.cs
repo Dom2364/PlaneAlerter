@@ -15,17 +15,6 @@ namespace PlaneAlerter.Services {
 		EmailContentConfig EmailContentConfig { get; set; }
 
 		/// <summary>
-		/// Are the settings loaded?
-		/// </summary>
-		bool SettingsLoaded { get; }
-
-		/// <summary>
-		/// Update settings
-		/// </summary>
-		/// <param name="update">Is this an update?</param>
-		void UpdateSettings(bool update);
-
-		/// <summary>
 		/// Save Settings
 		/// </summary>
 		void Save();
@@ -41,18 +30,15 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class SettingsManagerService : ISettingsManagerService
 	{
+		private readonly ILoggerWithQueue _logger;
+
 		public Settings Settings { get; set; } = new Settings();
 		public EmailContentConfig EmailContentConfig { get; set; } = new EmailContentConfig();
 
-		/// <summary>
-		/// Are the settings loaded?
-		/// </summary>
-		public bool SettingsLoaded { get; private set; } = false;
-
 		//Constructor
-		public SettingsManagerService()
+		public SettingsManagerService(ILoggerWithQueue logger)
 		{
-			
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -113,44 +99,6 @@ namespace PlaneAlerter.Services {
 			};
 		}
 
-		/// <summary>
-		/// Update settings
-		/// </summary>
-		/// <param name="update">Is this an update?</param>
-		public void UpdateSettings(bool update) {
-			if (update)
-				Core.Ui.WriteToConsole("Reloading Settings...", Color.White);
-
-			Settings.VRSAuthenticate = (Settings.VRSUser != "");
-
-			//Update UI
-			foreach (TreeNode settingsGroupNode in Core.Ui.conditionTreeView.Nodes[1].Nodes)
-				settingsGroupNode.Nodes.Clear();
-
-			Core.Ui.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("Sender Email: " + Settings.SenderEmail);
-			Core.Ui.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP Host: " + Settings.SMTPHost + ":" +
-			                                                      Settings.SMTPPort);
-			Core.Ui.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP SSL: " + Settings.SMTPSSL);
-			Core.Ui.conditionTreeView.Nodes[1].Nodes[0].Nodes.Add("SMTP Username: " + Settings.SMTPUser);
-
-			Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("AircraftList.json Url: " +
-			                                                      Settings.AircraftListUrl);
-			Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Radar Url: " + Settings.RadarUrl);
-			if (Settings.VRSAuthenticate) {
-				Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " +
-				                                                      Settings.VRSAuthenticate);
-				Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Username: " + Settings.VRSUser);
-			}
-			else
-				Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("VRS Authentication: " +
-				                                                      Settings.VRSAuthenticate);
-			Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Removal Timeout: " + Settings.RemovalTimeout + " secs");
-			Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Ignore aircraft further than: " +
-			                                                      Settings.IgnoreDistance + " km away");
-			Core.Ui.conditionTreeView.Nodes[1].Nodes[1].Nodes.Add("Ignore aircraft higher than: " +
-				                                                      Settings.IgnoreAltitude + " ft");
-		}
-
         /// <summary>
         /// Load default ecc settings
         /// </summary>
@@ -192,7 +140,7 @@ namespace PlaneAlerter.Services {
 			//Create settings file if one does not exist
 			if (!File.Exists("settings.json"))
 			{
-				Core.Ui.WriteToConsole("No settings file! Creating one...", Color.White);
+				_logger.Log("No settings file! Creating one...", Color.White);
 				File.WriteAllText("settings.json", JsonConvert.SerializeObject(new Dictionary<string, object>(), Formatting.Indented));
 			}
 
@@ -263,12 +211,12 @@ namespace PlaneAlerter.Services {
 			}
 
 			//Log to UI
-			Core.Ui.WriteToConsole("Settings Loaded", Color.White);
+			_logger.Log("Settings Loaded", Color.White);
 
 			//If email content config file does not exist, create one
 			if (!File.Exists("emailconfig.json"))
 			{
-				Core.Ui.WriteToConsole("No email content config file! Creating one...", Color.White);
+				_logger.Log("No email content config file! Creating one...", Color.White);
 				LoadECCDefaults();
 			}
 
@@ -303,15 +251,7 @@ namespace PlaneAlerter.Services {
 			eccJson.RemoveAll();
 
 			//Log to UI
-			Core.Ui.WriteToConsole("Email Content Config Loaded", Color.White);
-
-			//Update settings
-			UpdateSettings(false);
-
-			//Update twitter accounts list
-			Core.Ui.UpdateTwitterAccounts();
-
-			SettingsLoaded = true;
+			_logger.Log("Email Content Config Loaded", Color.White);
 		}
 	}
 }

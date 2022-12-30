@@ -15,6 +15,8 @@ using Tweetinvi.Models;
 namespace PlaneAlerter.Services {
 	internal interface ITwitterService
 	{
+		event EventHandler AccountsUpdated;
+
 		/// <summary>
 		/// Posts a tweet
 		/// </summary>
@@ -36,7 +38,10 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class TwitterService : ITwitterService
 	{
+		public event EventHandler AccountsUpdated;
+
 		private readonly ISettingsManagerService _settingsManagerService;
+		private readonly ILoggerWithQueue _logger;
 
 		//Don't even think about it
 		private const string Key = "U1dYZUhZT0RqOG1hV25xRzczMXZ6Y3k3NA==";
@@ -45,9 +50,10 @@ namespace PlaneAlerter.Services {
 		private static readonly string ConsumerKey = Encoding.UTF8.GetString(Convert.FromBase64String(Key));
 		private static readonly string ConsumerSecretKey = Encoding.UTF8.GetString(Convert.FromBase64String(SecretKey));
 
-		public TwitterService(ISettingsManagerService settingsManagerService)
+		public TwitterService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
 		{
 			_settingsManagerService = settingsManagerService;
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -55,7 +61,7 @@ namespace PlaneAlerter.Services {
 		/// </summary>
 		public async Task<bool> Tweet(string token, string tokenSecret, string content, string mediaUrl) {
 			if (content.Contains("@")) {
-				Core.Ui.WriteToConsole("ERROR: Mentions are not allowed in tweets", System.Drawing.Color.Red);
+				_logger.Log("ERROR: Mentions are not allowed in tweets", System.Drawing.Color.Red);
 				return false;
 			}
 
@@ -76,7 +82,7 @@ namespace PlaneAlerter.Services {
 					await res.GetResponseStream().CopyToAsync(ms);
 				}
 				catch (Exception e) {
-					Core.Ui.WriteToConsole($"ERROR: {e.GetType()} error downloading map image from Google: {e.Message}", System.Drawing.Color.Red);
+					_logger.Log($"ERROR: {e.GetType()} error downloading map image from Google: {e.Message}", System.Drawing.Color.Red);
 					return false;
 				}
 
@@ -88,13 +94,13 @@ namespace PlaneAlerter.Services {
 
 					//Check if it was uploaded properly
 					if (media.HasBeenUploaded) mediaId = media.Id;
-					else Core.Ui.WriteToConsole("ERROR: Error uploading map", System.Drawing.Color.Red);
+					else _logger.Log("ERROR: Error uploading map", System.Drawing.Color.Red);
 				}
 				catch (TwitterException e) {
-					Core.Ui.WriteToConsole($"ERROR: Error uploading map image to Twitter: {e}", System.Drawing.Color.Red);
+					_logger.Log($"ERROR: Error uploading map image to Twitter: {e}", System.Drawing.Color.Red);
 				}
 				catch (Exception e) { 
-					Core.Ui.WriteToConsole($"ERROR: {e.GetType()} error uploading map image to Twitter: {e.Message}", System.Drawing.Color.Red);
+					_logger.Log($"ERROR: {e.GetType()} error uploading map image to Twitter: {e.Message}", System.Drawing.Color.Red);
 				}
 			}
 
@@ -121,11 +127,11 @@ namespace PlaneAlerter.Services {
 					detailedContent = contentJson["detail"]?.ToString();
 				}
 
-				Core.Ui.WriteToConsole($"ERROR: Error publishing tweet: {(detailedContent != null ? detailedContent + Environment.NewLine : "")}{e.ToString()}", System.Drawing.Color.Red);
+				_logger.Log($"ERROR: Error publishing tweet: {(detailedContent != null ? detailedContent + Environment.NewLine : "")}{e.ToString()}", System.Drawing.Color.Red);
 				return false;
 			}
 			catch (Exception e) {
-				Core.Ui.WriteToConsole($"ERROR: {e.GetType()} error publishing tweet: " + e.Message, System.Drawing.Color.Red);
+				_logger.Log($"ERROR: {e.GetType()} error publishing tweet: " + e.Message, System.Drawing.Color.Red);
 				return false;
 			}
 
@@ -197,7 +203,8 @@ namespace PlaneAlerter.Services {
 			//Add user
 			_settingsManagerService.Settings.TwitterUsers.Add(screenName, new[] { userCredentials.AccessToken, userCredentials.AccessTokenSecret });
 			MessageBox.Show("Twitter user '" + screenName + "' authorized!", "User Authorized");
-			Core.Ui.UpdateTwitterAccounts();
+			
+			AccountsUpdated?.Invoke(this, EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -213,7 +220,8 @@ namespace PlaneAlerter.Services {
 			//Remove user
 			_settingsManagerService.Settings.TwitterUsers.Remove(screenName);
 			MessageBox.Show("Twitter user '" + screenName + "' removed!", "User Removed");
-			Core.Ui.UpdateTwitterAccounts();
+			
+			AccountsUpdated?.Invoke(this, EventArgs.Empty);
 		}
 	}
 }

@@ -5,7 +5,6 @@
 	/// </summary>
 	public enum CheckerStatus
 	{
-		WaitingForLoad,
 		Running,
 		Stopping,
 		Stopped

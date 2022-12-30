@@ -1,20 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows.Forms;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
 using Match = PlaneAlerter.Models.Match;
 
 namespace PlaneAlerter.Services {
 	internal interface ICheckerService
-	{	
+	{
+		delegate void AlertSentEventHandler(Condition condition, Aircraft aircraft, string receiver, bool isFirst);
+		event AlertSentEventHandler SendingAlert;
+		event EventHandler<string> StatusChanged;
 		void Start();
 		void Stop();
 	}
@@ -24,6 +24,10 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class CheckerService : ICheckerService
 	{
+		public event ICheckerService.AlertSentEventHandler SendingAlert;
+
+		public event EventHandler<string> StatusChanged;
+
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly IConditionManagerService _conditionManagerService;
 		private readonly IVrsService _vrsService;
@@ -32,6 +36,7 @@ namespace PlaneAlerter.Services {
 		private readonly IUrlBuilderService _urlBuilderService;
 		private readonly IStatsService _statsService;
 		private readonly IStringFormatterService _stringFormatterService;
+		private readonly ILoggerWithQueue _logger;
 
 		/// <summary>
 		/// Time of next check
@@ -47,7 +52,8 @@ namespace PlaneAlerter.Services {
 		/// Constructor
 		/// </summary>
 		public CheckerService(ISettingsManagerService settingsManagerService, IConditionManagerService conditionManagerService, IVrsService vrsService,
-			IEmailService emailService, ITwitterService twitterService, IUrlBuilderService urlBuilderService, IStatsService statsService, IStringFormatterService stringFormatterService)
+			IEmailService emailService, ITwitterService twitterService, IUrlBuilderService urlBuilderService, IStatsService statsService,
+			IStringFormatterService stringFormatterService, ILoggerWithQueue logger)
 		{
 			_settingsManagerService = settingsManagerService;
 			_conditionManagerService = conditionManagerService;
@@ -57,6 +63,7 @@ namespace PlaneAlerter.Services {
 			_urlBuilderService = urlBuilderService;
 			_statsService = statsService;
 			_stringFormatterService = stringFormatterService;
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -77,7 +84,7 @@ namespace PlaneAlerter.Services {
 				//Set next check time
 				_nextCheck = DateTime.Now.AddSeconds(_settingsManagerService.Settings.RefreshRate);
 				//Notify user that aircraft info is being downloaded
-				Core.Ui.UpdateStatusLabel("Downloading Aircraft Info...");
+				StatusChanged?.Invoke(this, "Downloading Aircraft Info...");
 				receiverName = "";
 				//Get latest aircraft information
 				_vrsService.GetAircraft(false, true);
@@ -95,8 +102,7 @@ namespace PlaneAlerter.Services {
 					var updatedTrailsAvailable = false;
 					foreach (var aircraft in _vrsService.AircraftList.ToList()) {
 						//Update UI with aircraft being checked
-						Core.Ui.UpdateStatusLabel("Checking conditions for aircraft " + aircraftCount + " of " +
-						                          _vrsService.AircraftList.Count());
+						StatusChanged?.Invoke(this, $"Checking conditions for aircraft {aircraftCount} of {_vrsService.AircraftList.Count}");
 						aircraftCount++;
 
 						if (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].IgnoreFollowing) continue;
@@ -197,9 +203,8 @@ namespace PlaneAlerter.Services {
 									}
 								}
 
-								//Update stats and log to console
-								_statsService.UpdateStats();
-								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " + condition.Name, Color.LightGreen);
+								//Log to console
+								_logger.Log(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " + condition.Name, Color.LightGreen);
 
 								//Send Alert
 								if (condition.AlertType == AlertType.First_and_Last_Contact || condition.AlertType == AlertType.First_Contact)
@@ -216,8 +221,10 @@ namespace PlaneAlerter.Services {
 						if (_stopping)
 							return;
 					}
+					
 					//Check if aircraft have lost signal and remove aircraft that have timed out
-					Core.Ui.UpdateStatusLabel("Checking aircraft are still on radar...");
+					StatusChanged?.Invoke(this, "Checking aircraft are still on radar...");
+
 					//Iterate active matches
 					foreach (var match in Core.ActiveMatches.Values.ToList()) {
 						//Iterate match conditions
@@ -227,9 +234,8 @@ namespace PlaneAlerter.Services {
 								    _settingsManagerService.Settings.RemovalTimeout - (_settingsManagerService.Settings.RemovalTimeout * 2)))) < 0) {
 								//Remove from active matches
 								Core.ActiveMatches.Remove(match.Icao);
-								//Update stats and log to console
-								_statsService.UpdateStats();
-								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
+								//Log to console
+								_logger.Log(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
 								//Update aircraft info
 								var aircraft = c.AircraftInfo;
 
@@ -255,19 +261,22 @@ namespace PlaneAlerter.Services {
 							if (!stillActive && match.SignalLost == false) {
 								Core.ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
 								Core.ActiveMatches[match.Icao].SignalLost = true;
-								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+								_logger.Log(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 							}
 							if (stillActive && match.SignalLost) {
 								Core.ActiveMatches[match.Icao].SignalLost = false;
-								Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+								_logger.Log(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 							}
 						}
 					}
 				}
+
 				//Cancel if thread is supposed to stop
 				if (_stopping) return;
+
 				//Set thread status to waiting
-				Core.Ui.UpdateStatusLabel("Waiting for next check...");
+				StatusChanged?.Invoke(this, "Waiting for next check...");
+
 				//Wait until the next check time
 				while (DateTime.Compare(DateTime.Now, _nextCheck) < 0) {
 					//Cancel if thread is supposed to stop
@@ -283,8 +292,7 @@ namespace PlaneAlerter.Services {
 		}
 
 		private void SendAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
-			//Show notification
-			if (_settingsManagerService.Settings.ShowNotifications) Core.Ui.notifyIcon.ShowBalloonTip(5000, "Plane Alert!", $"Condition: {condition.Name}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}", ToolTipIcon.Info);
+			SendingAlert?.Invoke(condition, aircraft, receiver, isFirst);
 
 			//Make a ding noise
 			if (_settingsManagerService.Settings.SoundAlerts) SystemSounds.Exclamation.Play();
@@ -304,15 +312,15 @@ namespace PlaneAlerter.Services {
 
 				//Check if selected account is valid
 				if (string.IsNullOrWhiteSpace(condition.TwitterAccount)) {
-					Core.Ui.WriteToConsole("ERROR: Please select Twitter account in condition editor", Color.Red);
+					_logger.Log("ERROR: Please select Twitter account in condition editor", Color.Red);
 					return;
 				}
 				if (!_settingsManagerService.Settings.TwitterUsers.ContainsKey(condition.TwitterAccount)) {
-					Core.Ui.WriteToConsole("ERROR: Selected Twitter account (" + condition.TwitterAccount + ") has not been authenticated", Color.Red);
+					_logger.Log("ERROR: Selected Twitter account (" + condition.TwitterAccount + ") has not been authenticated", Color.Red);
 					return;
 				}
 				if (string.IsNullOrEmpty(content)) {
-					Core.Ui.WriteToConsole("ERROR: Tweet content can't be empty. Tweet content can be configured in the condition editor.", Color.Red);
+					_logger.Log("ERROR: Tweet content can't be empty. Tweet content can be configured in the condition editor.", Color.Red);
 					return;
 				}
 
@@ -324,7 +332,7 @@ namespace PlaneAlerter.Services {
 				if (content.Length > 250) {
 					var charsOver = content.Length - 250;
 					content = content.Substring(0, 250) + "...";
-					Core.Ui.WriteToConsole("WARNING: Tweet content is " + charsOver + " characters over the limit of 280, removing end of message", Color.Orange);
+					_logger.Log("WARNING: Tweet content is " + charsOver + " characters over the limit of 280, removing end of message", Color.Orange);
 				}
 					
 				//Add link to tweet
@@ -348,17 +356,16 @@ namespace PlaneAlerter.Services {
 				//Send tweet
 				var success = _twitterService.Tweet(credentials[0], credentials[1], content, mapUrl).Result;
 				if (success) {
-					Core.Ui.WriteToConsole(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.Name, Color.LightBlue);
+					_logger.Log(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.Name, Color.LightBlue);
 				}
 			}
 
 			//Increase sent alerts for condition and update stats
 			condition.AlertsThisSession++;
 			_statsService.TotalAlertsSent++;
-			_statsService.UpdateStats();
 		}
 
-		public static void LogAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst)
+		public void LogAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst)
 		{
 			try
 			{
@@ -371,7 +378,7 @@ namespace PlaneAlerter.Services {
 			}
 			catch (Exception e)
 			{
-				Core.Ui.WriteToConsole("ERROR: Error writing to alerts.log file: " + e.Message, Color.Red);
+				_logger.Log("ERROR: Error writing to alerts.log file: " + e.Message, Color.Red);
 			}
 		}
 	}

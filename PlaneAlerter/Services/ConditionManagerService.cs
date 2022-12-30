@@ -18,11 +18,6 @@ namespace PlaneAlerter.Services
 		Dictionary<int, Condition> Conditions { get; set; }
 
 		/// <summary>
-		/// Have conditions loaded?
-		/// </summary>
-		bool ConditionsLoaded { get; set; }
-
-		/// <summary>
 		/// Load conditions
 		/// </summary>
 		void LoadConditions();
@@ -30,15 +25,17 @@ namespace PlaneAlerter.Services
 
 	internal class ConditionManagerService : IConditionManagerService
 	{
+		private readonly ILoggerWithQueue _logger;
+
+		public ConditionManagerService(ILoggerWithQueue logger)
+		{
+			_logger = logger;
+		}
+
 		/// <summary>
 		/// List of current conditions
 		/// </summary>
 		public Dictionary<int, Condition> Conditions { get; set; } = new Dictionary<int, Condition>();
-
-		/// <summary>
-		/// Have conditions loaded?
-		/// </summary>
-		public bool ConditionsLoaded { get; set; } = false;
 
 		/// <summary>
 		/// Load conditions
@@ -54,7 +51,7 @@ namespace PlaneAlerter.Services
 				//Create conditions file if one doesnt exist
 				if (!File.Exists("conditions.json"))
 				{
-					Core.Ui.WriteToConsole("No conditions file! Creating one...", Color.White);
+					_logger.Log("No conditions file! Creating one...", Color.White);
 					File.WriteAllText("conditions.json", "{\n}");
 				}
 
@@ -107,8 +104,6 @@ namespace PlaneAlerter.Services
 					Conditions.Add(conditionId, newCondition);
 				}
 
-				ConditionsLoaded = true;
-
 				//Try to clean up json parsing
 				conditionJson.RemoveAll();
 
@@ -116,14 +111,8 @@ namespace PlaneAlerter.Services
 				var conditionsJson = JsonConvert.SerializeObject(Conditions, Formatting.Indented);
 				File.WriteAllText("conditions.json", conditionsJson);
 
-				//Update condition list
-				Core.Ui.Invoke((MethodInvoker)(() => {
-					Core.Ui.UpdateConditionList();
-				}));
-				Core.Ui.conditionTreeView.Nodes[0].Expand();
-
 				//Log to UI
-				Core.Ui.WriteToConsole("Conditions Loaded", Color.White);
+				_logger.Log("Conditions Loaded", Color.White);
 
 				//Notify user if no conditions are found
 				if (Conditions.Count == 0)

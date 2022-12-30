@@ -59,6 +59,7 @@ namespace PlaneAlerter {
 					services.AddSingleton<IThreadManagerService, ThreadManagerService>();
 					services.AddSingleton<IStringFormatterService, StringFormatterService>();
 					services.AddSingleton<IKmlService, KmlService>();
+					services.AddSingleton<ILoggerWithQueue, LoggerWithQueue>();
 				});
 		}
 	}
