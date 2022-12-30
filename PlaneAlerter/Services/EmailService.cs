@@ -7,7 +7,6 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlaneAlerter.Enums;
-using PlaneAlerter.Forms;
 using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services {
@@ -34,15 +33,18 @@ namespace PlaneAlerter.Services {
         private readonly IStringFormatterService _stringFormatterService;
         private readonly IKmlService _kmlService;
         private readonly ILoggerWithQueue _logger;
+        private readonly IVrsEnumService _vrsEnumService;
 
 		public EmailService(ISettingsManagerService settingsManagerService, IUrlBuilderService urlBuilderService,
-			IStringFormatterService stringFormatterService, IKmlService kmlService, ILoggerWithQueue logger)
+			IStringFormatterService stringFormatterService, IKmlService kmlService, ILoggerWithQueue logger,
+			IVrsEnumService vrsEnumService)
 		{
 			_settingsManagerService = settingsManagerService;
 			_urlBuilderService = urlBuilderService;
 			_stringFormatterService = stringFormatterService;
 			_kmlService = kmlService;
             _logger = logger;
+            _vrsEnumService = vrsEnumService;
 		}
 
 		/// <summary>
@@ -164,7 +166,7 @@ namespace PlaneAlerter.Services {
                     airframesUrl = "<h3><a style='text-decoration: none;' href='http://www.airframes.org/reg/" + aircraft.GetProperty("Reg").Replace("-", "").ToUpper() + "'>Airframes.org Lookup</a></h3>";
 
                 //Get name of transponder type
-                if (EnumUtils.TryGetConvertedValue("Trt", aircraft.GetProperty("Trt"), out string convertedTrtValue)) {
+                if (_vrsEnumService.TryToString("Trt", aircraft.GetProperty("Trt"), out var convertedTrtValue)) {
                     transponderName = convertedTrtValue;
                 }
 
@@ -216,7 +218,7 @@ namespace PlaneAlerter.Services {
                     //Get value
                     var value = aircraft.GetProperty(propertyKey);
                     //Add string conversions of enum values
-                    if (EnumUtils.TryGetConvertedValue(propertyKey, value, out string convertedValue)) {
+                    if (_vrsEnumService.TryToString(propertyKey, value, out var convertedValue)) {
                         value += " (" + convertedValue + ")";
 					}
                     //If rcvr, add receiver name

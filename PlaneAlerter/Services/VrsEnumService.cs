@@ -1,43 +1,58 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace PlaneAlerter {
+namespace PlaneAlerter.Services
+{
+	internal interface IVrsEnumService
+	{
+		bool TryToString(string propertyKey, string value, out string? convertedValue);
+	}
+
 	/// <summary>
-	/// Enumerations used in VRS properties
-	/// </summary>
-	internal static class EnumUtils {
-        public static bool TryGetConvertedValue(string propertyKey, string value, out string? convertedValue) {
-            switch (propertyKey) {
+    /// Enumerations used in VRS properties
+    /// </summary>
+    internal class VrsEnumService : IVrsEnumService
+	{
+        public bool TryToString(string propertyKey, string value, out string? convertedValue)
+        {
+            if (!int.TryParse(value, out var result))
+            {
+                convertedValue = null;
+                return false;
+            }
+
+            switch (propertyKey)
+            {
                 case "Trt":
-                    convertedValue = TransponderTypes[Convert.ToInt32(value)];
+                    convertedValue = TransponderTypes[result];
                     return true;
                 case "Species":
-                    convertedValue = Species[Convert.ToInt32(value)];
+                    convertedValue = Species[result];
                     return true;
                 case "EngType":
-                    convertedValue = EngineType[Convert.ToInt32(value)];
+                    convertedValue = EngineType[result];
                     return true;
                 case "EngMount":
-                    convertedValue = EnginePlacement[Convert.ToInt32(value)];
+                    convertedValue = EnginePlacement[result];
                     return true;
                 case "WTC":
-                    convertedValue = WakeTurbulenceCategory[Convert.ToInt32(value)];
+                    convertedValue = WakeTurbulenceCategory[result];
                     return true;
                 case "AltT":
-                    convertedValue = AltitudeType[Convert.ToInt32(value)];
+                    convertedValue = AltitudeType[result];
                     return true;
                 case "SpdTyp":
-                    convertedValue = SpeedType[Convert.ToInt32(value)];
+                    convertedValue = SpeedType[result];
                     return true;
                 case "VsiT":
-                    convertedValue = VerticalSpeedType[Convert.ToInt32(value)];
+                    convertedValue = VerticalSpeedType[result];
                     return true;
             }
+
             convertedValue = null;
             return false;
         }
 
-        private static Dictionary<int, string> TransponderTypes = new()
+        private static readonly Dictionary<int, string> TransponderTypes = new()
         {
             {0, "Unknown" },
             {1, "Mode S" },
@@ -47,7 +62,7 @@ namespace PlaneAlerter {
             {5, "ADS-B v2" },
         };
 
-        private static Dictionary<int, string> Species = new()
+        private static readonly Dictionary<int, string> Species = new()
         {
             { 0, "None" },
             { 1, "Land Plane" },
@@ -60,7 +75,7 @@ namespace PlaneAlerter {
             { 8, "Tower" },
         };
 
-        private static Dictionary<int, string> EngineType = new()
+        private static readonly Dictionary<int, string> EngineType = new()
         {
             { 0, "None" },
             { 1, "Piston" },
@@ -70,7 +85,7 @@ namespace PlaneAlerter {
             { 5, "Rocket" },
         };
 
-        private static Dictionary<int, string> EnginePlacement = new()
+        private static readonly Dictionary<int, string> EnginePlacement = new()
         {
             { 0, "Unknown" },
             { 1, "Aft Mounted" },
@@ -80,7 +95,7 @@ namespace PlaneAlerter {
             { 5, "Wing Mounted" },
         };
 
-        private static Dictionary<int, string> WakeTurbulenceCategory = new()
+        private static readonly Dictionary<int, string> WakeTurbulenceCategory = new()
         {
             { 0, "None" },
             { 1, "Light" },
@@ -88,13 +103,13 @@ namespace PlaneAlerter {
             { 3, "Heavy" },
         };
 
-        private static Dictionary<int, string> AltitudeType = new()
+        private static readonly Dictionary<int, string> AltitudeType = new()
         {
             { 0, "Standard Pressure Altitude" },
             { 1, "Indicated Altitude" }
         };
 
-        private static Dictionary<int, string> SpeedType = new()
+        private static readonly Dictionary<int, string> SpeedType = new()
         {
             { 0, "Ground Speed" },
             { 1, "Ground Speed, Reversing" },
@@ -102,7 +117,7 @@ namespace PlaneAlerter {
             { 3, "True Air Speed" },
         };
 
-        private static Dictionary<int, string> VerticalSpeedType = new()
+        private static readonly Dictionary<int, string> VerticalSpeedType = new()
         {
             { 0, "Barometric Vertical Speed" },
             { 1, "Geometric Vertical Speed" },

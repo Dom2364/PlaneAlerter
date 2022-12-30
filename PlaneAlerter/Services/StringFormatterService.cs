@@ -17,10 +17,12 @@ namespace PlaneAlerter.Services
 	internal class StringFormatterService : IStringFormatterService
 	{
 		private readonly IVrsService _vrsService;
+		private readonly IVrsEnumService _vrsEnumService;
 
-		public StringFormatterService(IVrsService vrsService)
+		public StringFormatterService(IVrsService vrsService, IVrsEnumService vrsEnumService)
 		{
 			_vrsService = vrsService;
+			_vrsEnumService = vrsEnumService;
 		}
 
 		/// <summary>
@@ -64,7 +66,7 @@ namespace PlaneAlerter.Services
 				var value = aircraft.GetProperty(info[2]) ?? "";
 
 				//If enum, replace with string value
-				if (EnumUtils.TryGetConvertedValue(info[2], value, out string convertedValue))
+				if (_vrsEnumService.TryToString(info[2], value, out var convertedValue))
 				{
 					value = convertedValue;
 				}
