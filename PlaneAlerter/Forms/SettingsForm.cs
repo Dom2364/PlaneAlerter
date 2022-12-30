@@ -12,7 +12,7 @@ namespace PlaneAlerter.Forms {
 	/// </summary>
 	internal partial class SettingsForm :Form {
 		private readonly ISettingsManagerService _settingsManagerService;
-		private readonly ICheckerService _checkerService;
+		private readonly IVrsService _vrsService;
 
 		/// <summary>
 		/// Smtp host info
@@ -22,9 +22,9 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public SettingsForm(ISettingsManagerService settingsManagerService, ICheckerService checkerService) {
+		public SettingsForm(ISettingsManagerService settingsManagerService, IVrsService vrsService) {
 			_settingsManagerService = settingsManagerService;
-			_checkerService = checkerService;
+			_vrsService = vrsService;
 
 			//Initialise form elements
 			InitializeComponent();
@@ -90,7 +90,7 @@ namespace PlaneAlerter.Forms {
 				return;
 			}
 
-			var receivers = await Task.Run(_checkerService.GetReceivers);
+			var receivers = await Task.Run(_vrsService.GetReceivers);
 			if (receivers != null) {
 				receivers = receivers.OrderBy(x => x.Value, StringComparer.Ordinal).ToDictionary(x => x.Key, x => x.Value);
 

@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.IO;
 using System.Drawing;
-using System.Linq;
-using System.Text.RegularExpressions;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
-using PlaneAlerter.Services;
 using Match = PlaneAlerter.Models.Match;
 
 namespace PlaneAlerter {
@@ -15,16 +11,6 @@ namespace PlaneAlerter {
 	/// Important variables and things
 	/// </summary>
 	internal static class Core {
-
-		/// <summary>
-		/// List of current aircraft
-		/// </summary>
-		public static List<Aircraft> AircraftList { get; set; } = new List<Aircraft>();
-
-		/// <summary>
-		/// List of receivers from the last aircraftlist.json response
-		/// </summary>
-		public static Dictionary<string, string> Receivers { get; set; } = new Dictionary<string, string>();
 
 		/// <summary>
 		/// VRS property descriptions
@@ -45,11 +31,6 @@ namespace PlaneAlerter {
 		/// List of current matches
 		/// </summary>
 		public static Dictionary<string, Match> ActiveMatches { get; set; } = new Dictionary<string, Match>();
-
-		/// <summary>
-		/// Thread for updating statistics
-		/// </summary>
-		public static Thread? StatsThread { get; set; }
 
 		/// <summary>
 		/// Active form
@@ -161,48 +142,6 @@ namespace PlaneAlerter {
 			catch (Exception e) {
 				Ui.WriteToConsole("ERROR: Error writing to alerts.log file: " + e.Message, Color.Red);
 			}
-		}
-
-		/// <summary>
-		/// Parse a custom format string to replace property names with values
-		/// </summary>
-		/// <returns>Parsed string</returns>
-		public static string ParseCustomFormatString(string format, Aircraft aircraft, Condition condition) {
-			var variables = new Dictionary<string, string> {
-				{ "ConditionName", condition.Name },
-				{ "RcvrName", Receivers.ContainsKey(aircraft.GetProperty("Rcvr")) ? Receivers[aircraft.GetProperty("Rcvr")] : "" },
-				{ "Date", DateTime.Now.ToString("d") },
-				{ "Time", DateTime.Now.ToString("t") },
-			};
-
-			//Iterate variables
-			foreach (var varKey in variables.Keys) {
-				//Check if content contains keyword
-				if (format.ToLower().Contains(@"[" + varKey.ToLower() + @"]")) {
-					//Replace keyword with value
-					format = Regex.Replace(format, @"\[" + varKey + @"\]", variables[varKey], RegexOptions.IgnoreCase);
-				}
-			}
-
-			//Iterate properties
-			foreach (var info in VrsPropertyData.Values)
-			{
-				//Check if content contains keyword
-				if (!format.ToLower().Contains(@"[" + info[2].ToLower() + @"]"))
-					continue;
-
-				//Replace keyword with value
-				var value = aircraft.GetProperty(info[2]) ?? "";
-
-				//If enum, replace with string value
-				if (EnumUtils.TryGetConvertedValue(info[2], value, out string convertedValue)) {
-					value = convertedValue;
-				}
-
-				format = Regex.Replace(format, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);
-			}
-
-			return format;
 		}
 
 		/// <summary>

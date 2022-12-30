@@ -199,10 +199,8 @@ namespace PlaneAlerter.Forms
 		/// <param name="e">Event Args</param>
 		private void PlaneAlerterFormClosing(object sender, FormClosingEventArgs e) {
 			//Abort threads if running
-			if (Core.StatsThread != null)
-				Core.StatsThread.Abort();
-			if (_threadManagerService.CheckerThread != null)
-				_threadManagerService.CheckerThread.Abort();
+			_threadManagerService.CheckerThread?.Abort();
+
 			_settingsManagerService.Save();
 		}
 		

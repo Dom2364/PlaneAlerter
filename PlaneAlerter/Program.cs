@@ -50,6 +50,7 @@ namespace PlaneAlerter {
 					//Services
 					services.AddSingleton<ISettingsManagerService, SettingsManagerService>();
 					services.AddSingleton<IConditionManagerService, ConditionManagerService>();
+					services.AddSingleton<IVrsService, VrsService>();
 					services.AddSingleton<ICheckerService, CheckerService>();
 					services.AddSingleton<ITwitterService, TwitterService>();
 					services.AddSingleton<IEmailService, EmailService>();
