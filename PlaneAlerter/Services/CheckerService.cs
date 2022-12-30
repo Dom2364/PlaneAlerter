@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Media;
 using System.Text.RegularExpressions;
@@ -289,7 +290,7 @@ namespace PlaneAlerter.Services {
 			if (_settingsManagerService.Settings.SoundAlerts) SystemSounds.Exclamation.Play();
 
 			//Log
-			Core.LogAlert(condition, aircraft, receiver, isFirst);
+			LogAlert(condition, aircraft, receiver, isFirst);
 
 			if (condition.EmailEnabled) {
 				//Send emails
@@ -355,6 +356,23 @@ namespace PlaneAlerter.Services {
 			condition.AlertsThisSession++;
 			_statsService.TotalAlertsSent++;
 			_statsService.UpdateStats();
+		}
+
+		public static void LogAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst)
+		{
+			try
+			{
+				var message =
+					$"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")} | {condition.Name} | {receiver} | {(isFirst ? "FIRST" : "LAST")} CONTACT ALERT: " +
+					Environment.NewLine;
+				message += aircraft.ToJson() + Environment.NewLine + Environment.NewLine;
+
+				File.AppendAllText("alerts.log", message);
+			}
+			catch (Exception e)
+			{
+				Core.Ui.WriteToConsole("ERROR: Error writing to alerts.log file: " + e.Message, Color.Red);
+			}
 		}
 	}
 }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using PlaneAlerter.Enums;
-using PlaneAlerter.Models;
 using Match = PlaneAlerter.Models.Match;
 
 namespace PlaneAlerter {
@@ -130,18 +126,6 @@ namespace PlaneAlerter {
 			ComparisonTypes.Add("C", new[] { "Equals", "Not Equals" });
 			ComparisonTypes.Add("D", new[] { "Starts With", "Ends With" });
 			ComparisonTypes.Add("E", new[] { "Contains" });
-		}
-
-		public static void LogAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
-			try {
-				var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")} | {condition.Name} | {receiver} | {(isFirst?"FIRST":"LAST")} CONTACT ALERT: " + Environment.NewLine;
-				message += aircraft.ToJson() + Environment.NewLine + Environment.NewLine;
-
-				File.AppendAllText("alerts.log", message);
-			}
-			catch (Exception e) {
-				Ui.WriteToConsole("ERROR: Error writing to alerts.log file: " + e.Message, Color.Red);
-			}
 		}
 	}
 }
