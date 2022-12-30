@@ -11,13 +11,13 @@ namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for editing conditions
 	/// </summary>
-	internal partial class ConditionEditor :Form {
+	internal partial class ConditionListForm :Form {
 		/// <summary>
 		/// List of conditions
 		/// </summary>
 		public static SortedDictionary<int, Condition> Conditions = new SortedDictionary<int, Condition>();
 
-		public ConditionEditor() {
+		public ConditionListForm() {
 			//Initialise form elements
 			InitializeComponent();
 			
@@ -107,7 +107,7 @@ namespace PlaneAlerter.Forms {
 		/// <param name="e">Event Args</param>
 		private void addConditionButton_Click(object sender, EventArgs e) {
 			//Show editor dialog then update condition list
-			var editor = new ConditionEditorDialog();
+			var editor = new ConditionEditorForm();
 			editor.ShowDialog();
 			UpdateConditionList();
 		}
@@ -200,7 +200,7 @@ namespace PlaneAlerter.Forms {
 				return;
 			
 			//Open editor, update list once closed
-			var editor = new ConditionEditorDialog(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
+			var editor = new ConditionEditorForm(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
 			editor.ShowDialog();
 			UpdateConditionList();
 		}

@@ -20,7 +20,7 @@ namespace PlaneAlerter.Forms
 	/// <summary>
 	/// Main form
 	/// </summary>
-	internal partial class PlaneAlerter : Form
+	internal partial class MainForm : Form
 	{
 		/// <summary>
 		/// Send message to windows
@@ -49,7 +49,7 @@ namespace PlaneAlerter.Forms
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public PlaneAlerter() {
+		public MainForm() {
 			//Stop the annoying cross-thread problems
 			//This is probably not a good thing but I'm too lazy
 			CheckForIllegalCrossThreadCalls = false;
@@ -143,7 +143,7 @@ namespace PlaneAlerter.Forms
 		}
 
 		private void startConditionEditorToolStripMenuItem_Click(object sender, EventArgs e) {
-			var editor = new ConditionEditor();
+			var editor = new ConditionListForm();
 			editor.Show();
 			editor.FormClosing += delegate { 
 				Checker.LoadConditions();

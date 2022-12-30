@@ -1,5 +1,5 @@
 ﻿namespace PlaneAlerter.Forms {
-	partial class ConditionEditorDialog {
+	partial class ConditionEditorForm {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -24,7 +24,7 @@
 		/// </summary>
 		private void InitializeComponent() {
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConditionEditorDialog));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConditionEditorForm));
 			this.conditionNameTextBox = new System.Windows.Forms.TextBox();
 			this.conditionNameLabel = new System.Windows.Forms.Label();
 			this.triggerDataGridView = new System.Windows.Forms.DataGridView();

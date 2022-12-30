@@ -1,5 +1,5 @@
 ﻿namespace PlaneAlerter.Forms {
-	partial class PlaneAlerter {
+	partial class MainForm {
 		/// <summary>
 		/// Designer variable used to keep track of non-visual components.
 		/// </summary>
@@ -42,7 +42,7 @@
             treeNode6,
             treeNode7,
             treeNode8});
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PlaneAlerter));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
 			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.console = new System.Windows.Forms.RichTextBox();
@@ -397,7 +397,7 @@
 			this.Controls.Add(this.menuStrip1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip1;
-			this.Name = "PlaneAlerter";
+			this.Name = "MainForm";
 			this.Text = "PlaneAlerter";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PlaneAlerterFormClosing);
 			this.menuStrip1.ResumeLayout(false);

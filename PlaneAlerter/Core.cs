@@ -62,7 +62,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Active form
 		/// </summary>
-		public static Forms.PlaneAlerter Ui { get; set; }
+		public static Forms.MainForm Ui { get; set; }
 
 		/// <summary>
 		/// Core static constructor
