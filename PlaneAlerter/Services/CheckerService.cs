@@ -16,21 +16,11 @@ using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services {
 	internal interface ICheckerService
-	{
-		/// <summary>
-		/// Have conditions loaded?
-		/// </summary>
-		bool ConditionsLoaded { get; set; }
-		
+	{	
 		void Start();
 		void Stop();
 
 		Dictionary<string, string>? GetReceivers();
-
-		/// <summary>
-		/// Load conditions
-		/// </summary>
-		void LoadConditions();
 	}
 
 	/// <summary>
@@ -39,16 +29,11 @@ namespace PlaneAlerter.Services {
 	internal class CheckerService : ICheckerService
 	{
 		private readonly ISettingsManagerService _settingsManagerService;
+		private readonly IConditionManagerService _conditionManagerService;
 		private readonly IEmailService _emailService;
 		private readonly ITwitterService _twitterService;
 		private readonly IUrlBuilderService _urlBuilderService;
 		private readonly IStatsService _statsService;
-		private readonly IThreadManagerService _threadManagerService;
-
-		/// <summary>
-		/// Have conditions loaded?
-		/// </summary>
-		public bool ConditionsLoaded { get; set; } = false;
 
 		/// <summary>
 		/// Client for sending aircraftlist.json requests
@@ -73,34 +58,15 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public CheckerService(ISettingsManagerService settingsManagerService, IEmailService emailService,
-			ITwitterService twitterService, IUrlBuilderService urlBuilderService, IStatsService statsService,
-			IThreadManagerService threadManagerService)
+		public CheckerService(ISettingsManagerService settingsManagerService, IConditionManagerService conditionManagerService,
+			IEmailService emailService, ITwitterService twitterService, IUrlBuilderService urlBuilderService, IStatsService statsService)
 		{
 			_settingsManagerService = settingsManagerService;
+			_conditionManagerService = conditionManagerService;
 			_emailService = emailService;
 			_twitterService = twitterService;
 			_urlBuilderService = urlBuilderService;
 			_statsService = statsService;
-			_threadManagerService = threadManagerService;
-
-			//Create conditions file if one doesnt exist
-			if (!File.Exists("conditions.json"))
-			{
-				Core.Ui.WriteToConsole("No conditions file! Creating one...", Color.White);
-				File.WriteAllText("conditions.json", "{\n}");
-			}
-
-			//Load conditions
-			LoadConditions();
-			//Notify user if no conditions are found
-			if (Core.Conditions.Count == 0)
-			{
-				MessageBox.Show("No Conditions! Click Options then Open Condition Editor to add conditions.",
-					"No Conditions!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-			}
-
-			ConditionsLoaded = true;
 		}
 
 		/// <summary>
@@ -117,7 +83,7 @@ namespace PlaneAlerter.Services {
 			//Set culture to invariant
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-			while (_threadManagerService.ThreadStatus != CheckerStatus.Stopping) {
+			while (!_stopping) {
 				//Set next check time
 				_nextCheck = DateTime.Now.AddSeconds(_settingsManagerService.Settings.RefreshRate);
 				//Notify user that aircraft info is being downloaded
@@ -147,8 +113,8 @@ namespace PlaneAlerter.Services {
 							continue;
 
 						//Iterate conditions
-						foreach (var conditionId in Core.Conditions.Keys.ToList()) {
-							condition = Core.Conditions[conditionId];
+						foreach (var conditionId in _conditionManagerService.Conditions.Keys.ToList()) {
+							condition = _conditionManagerService.Conditions[conditionId];
 							//Skip if condition is disabled or condition is already matched
 							if (condition.AlertType == AlertType.Disabled || (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionId == conditionId)))
 								continue;
@@ -255,7 +221,7 @@ namespace PlaneAlerter.Services {
 								c.AircraftInfo = aircraft;
 
 						//Cancel if thread is supposed to stop
-						if (_threadManagerService.ThreadStatus == CheckerStatus.Stopping)
+						if (_stopping)
 							return;
 					}
 					//Check if aircraft have lost signal and remove aircraft that have timed out
@@ -306,13 +272,13 @@ namespace PlaneAlerter.Services {
 					}
 				}
 				//Cancel if thread is supposed to stop
-				if (_threadManagerService.ThreadStatus == CheckerStatus.Stopping) return;
+				if (_stopping) return;
 				//Set thread status to waiting
 				Core.Ui.UpdateStatusLabel("Waiting for next check...");
 				//Wait until the next check time
 				while (DateTime.Compare(DateTime.Now, _nextCheck) < 0) {
 					//Cancel if thread is supposed to stop
-					if (_threadManagerService.ThreadStatus == CheckerStatus.Stopping) return;
+					if (_stopping) return;
 					Thread.Sleep(1000);
 				}
 			}
@@ -588,86 +554,6 @@ namespace PlaneAlerter.Services {
 			}
 
 			return Core.Receivers;
-		}
-
-		/// <summary>
-		/// Load conditions
-		/// </summary>
-		public void LoadConditions() {
-			try {
-				//Clear conditions and active matches
-				Core.Conditions.Clear();
-				Core.ActiveMatches.Clear();
-
-				//Parse conditions file
-				JObject? conditionJson;
-				using (var fileStream = new FileStream("conditions.json", FileMode.Open))
-					using (var reader = new StreamReader(fileStream))
-						using (var jsonReader = new JsonTextReader(reader))
-							conditionJson = JsonSerializer.Create().Deserialize<JObject>(jsonReader);
-
-				if (conditionJson == null)
-					return;
-
-				//Iterate parsed conditions
-				for (var conditionId = 0; conditionId < conditionJson.Count; conditionId++) {
-					var condition = conditionJson[conditionId.ToString()];
-
-					//Create condition and copy values
-					var newCondition = new Condition {
-						Name = condition["conditionName"].ToString(),
-						AlertType = (AlertType)Enum.Parse(typeof(AlertType), condition["alertType"].ToString()),
-						IgnoreFollowing = (bool)condition["ignoreFollowing"],
-						EmailEnabled = (bool)(condition["emailEnabled"]??true),
-						EmailFirstFormat = (condition["emailFirstFormat"] ?? "").ToString(),
-						EmailLastFormat = (condition["emailLastFormat"] ?? "").ToString(),
-						TwitterEnabled = (bool)(condition["twitterEnabled"]??false),
-						TwitterAccount = (condition["twitterAccount"]??"").ToString(),
-						TweetFirstFormat = (condition["tweetFirstFormat"]??"").ToString(),
-						TweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
-						TweetMap = (bool)(condition["tweetMap"] ?? true),
-						TweetLink = (TweetLink)Enum.Parse(typeof(TweetLink), (condition["tweetLink"]??TweetLink.None.ToString()).ToString())
-					};
-
-					if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString())) {
-						var emailProperty = (VrsProperty)Enum.Parse(typeof(VrsProperty), (condition["emailProperty"] ?? VrsProperty.Registration.ToString()).ToString());
-						newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
-						newCondition.EmailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
-					}
-
-					var emailsArray = new List<string>();
-					foreach (var email in condition["recieverEmails"])
-						emailsArray.Add(email.ToString());
-					newCondition.ReceiverEmails = emailsArray;
-					foreach (var trigger in condition["triggers"].Values())
-						newCondition.Triggers.Add(newCondition.Triggers.Count, new Trigger((VrsProperty)Enum.Parse(typeof(VrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
-					//Add condition to list
-					Core.Conditions.Add(conditionId, newCondition);
-				}
-				//Try to clean up json parsing
-				conditionJson.RemoveAll();
-				
-				//Save to file again in case some defaults were set
-				var conditionsJson = JsonConvert.SerializeObject(Core.Conditions, Formatting.Indented);
-				File.WriteAllText("conditions.json", conditionsJson);
-
-				//Update condition list
-				Core.Ui.Invoke((MethodInvoker)(() => {
-					Core.Ui.UpdateConditionList();
-				}));
-				Core.Ui.conditionTreeView.Nodes[0].Expand();
-
-				//Log to UI
-				Core.Ui.WriteToConsole("Conditions Loaded", Color.White);
-
-				//Restart threads
-				if (_threadManagerService.ThreadStatus == CheckerStatus.WaitingForLoad)
-					_threadManagerService.Restart();
-
-			}
-			catch (Exception e) {
-				MessageBox.Show(e.Message + "\n\n" + e.StackTrace);
-			}
 		}
 	}
 }

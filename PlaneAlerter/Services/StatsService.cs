@@ -26,6 +26,8 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class StatsService : IStatsService
 	{
+		private readonly IConditionManagerService _conditionManagerService;
+
 		/// <summary>
 		/// Counter for total alerts sent
 		/// </summary>
@@ -35,6 +37,11 @@ namespace PlaneAlerter.Services {
 		/// Time planealerter started
 		/// </summary>
 		public DateTime TimeStarted { get; set; } = DateTime.Now;
+
+		public StatsService(IConditionManagerService conditionManagerService)
+		{
+			_conditionManagerService = conditionManagerService;
+		}
 
 		/// <summary>
 		/// Update the UI with all the stats
@@ -48,12 +55,12 @@ namespace PlaneAlerter.Services {
 				try {
 					Core.Ui.conditionTreeView.BeginUpdate();
 					Core.Ui.conditionTreeView.Nodes[2].Nodes[0].Text = "Total Emails Sent: " + TotalAlertsSent;
-					Core.Ui.conditionTreeView.Nodes[2].Nodes[1].Text = "Total Conditions: " + Core.Conditions.Count;
+					Core.Ui.conditionTreeView.Nodes[2].Nodes[1].Text = "Total Conditions: " + _conditionManagerService.Conditions.Count;
 					Core.Ui.conditionTreeView.Nodes[2].Nodes[2].Text = "Time Started: " + TimeStarted;
 
 					foreach (TreeNode conditionNode in Core.Ui.conditionTreeView.Nodes[0].Nodes) {
 						var conditionId = Convert.ToInt32(conditionNode.Tag.ToString());
-						conditionNode.Nodes[5].Text = "Alerts Sent: " + Core.Conditions[conditionId].AlertsThisSession;
+						conditionNode.Nodes[5].Text = "Alerts Sent: " + _conditionManagerService.Conditions[conditionId].AlertsThisSession;
 					}
 					Core.Ui.conditionTreeView.EndUpdate();
 					

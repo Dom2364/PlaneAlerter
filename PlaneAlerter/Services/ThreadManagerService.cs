@@ -12,6 +12,11 @@ namespace PlaneAlerter.Services {
 		CheckerStatus ThreadStatus { get; set; }
 
 		/// <summary>
+		/// Thread for the checker loop
+		/// </summary>
+		Thread? CheckerThread { get; set; }
+
+		/// <summary>
 		/// Start threads
 		/// </summary>
 		void Start();
@@ -33,13 +38,15 @@ namespace PlaneAlerter.Services {
 	internal class ThreadManagerService : IThreadManagerService
 	{
 		private readonly ISettingsManagerService _settingsManagerService;
+		private readonly IConditionManagerService _conditionManagerService;
 		private readonly ICheckerService _checkerService;
 		private readonly IStatsService _statsService;
 
-		public ThreadManagerService(ISettingsManagerService settingsManagerService,
+		public ThreadManagerService(ISettingsManagerService settingsManagerService, IConditionManagerService conditionManagerService,
 			ICheckerService checkerService, IStatsService statsService)
 		{
 			_settingsManagerService = settingsManagerService;
+			_conditionManagerService = conditionManagerService;
 			_checkerService = checkerService;
 			_statsService = statsService;
 		}
@@ -50,17 +57,22 @@ namespace PlaneAlerter.Services {
 		public CheckerStatus ThreadStatus { get; set; } = CheckerStatus.WaitingForLoad;
 
 		/// <summary>
+		/// Thread for checking operations
+		/// </summary>
+		public Thread? CheckerThread { get; set; }
+
+		/// <summary>
 		/// Start threads
 		/// </summary>
 		public void Start() {
-			if (Core.LoopThread != null || ThreadStatus == CheckerStatus.Running) {
+			if (CheckerThread != null || ThreadStatus == CheckerStatus.Running) {
 				Restart();
 				return;
 			}
 			
 			//Check for errors
 			var error = false;
-			if (Core.Conditions.Count == 0) {
+			if (_conditionManagerService.Conditions.Count == 0) {
 				Core.Ui.WriteToConsole("No conditions, not running checks", Color.White);
 				error = true;
 			}
@@ -84,10 +96,10 @@ namespace PlaneAlerter.Services {
 			
 			//Start thread
 			ThreadStatus = CheckerStatus.Running;
-			Core.LoopThread = new Thread(_checkerService.Start);
-			Core.LoopThread.IsBackground = true;
-			Core.LoopThread.Name = "Checker Thread";
-			Core.LoopThread.Start();
+			CheckerThread = new Thread(_checkerService.Start);
+			CheckerThread.IsBackground = true;
+			CheckerThread.Name = "Checker Thread";
+			CheckerThread.Start();
 			
 			Core.Ui.WriteToConsole("Checker Started", Color.White);
 			Core.Ui.restartToolStripMenuItem.Enabled = true;
@@ -102,12 +114,12 @@ namespace PlaneAlerter.Services {
 			if (ThreadStatus != CheckerStatus.Running)
 				return;
 
-			ThreadStatus = CheckerStatus.Stopping;
+			_checkerService.Stop();
 			Core.Ui.startToolStripMenuItem.Enabled = false;
 			Core.Ui.startToolStripMenuItem.Text = "Stopping";
 			Core.Ui.restartToolStripMenuItem.Enabled = false;
-			while (Core.LoopThread.ThreadState != ThreadState.Stopped) Thread.Sleep(200);
-			Core.LoopThread = null;
+			while (CheckerThread.ThreadState != ThreadState.Stopped) Thread.Sleep(200);
+			CheckerThread = null;
 			ThreadStatus = CheckerStatus.Stopped;
 
 			//Clear matches

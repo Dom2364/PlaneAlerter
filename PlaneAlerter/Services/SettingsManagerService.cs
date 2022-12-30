@@ -29,6 +29,11 @@ namespace PlaneAlerter.Services {
 		/// Save Settings
 		/// </summary>
 		void Save();
+
+		/// <summary>
+		/// Load Settings
+		/// </summary>
+		void Load();
 	}
 
 	/// <summary>
@@ -42,20 +47,12 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// Are the settings loaded?
 		/// </summary>
-		public bool SettingsLoaded { get; } = false;
+		public bool SettingsLoaded { get; private set; } = false;
 
 		//Constructor
 		public SettingsManagerService()
 		{
-			Load();
-
-			//Update settings
-			UpdateSettings(false);
-
-			//Update twitter accounts list
-			Core.Ui.UpdateTwitterAccounts();
-
-			SettingsLoaded = true;
+			
 		}
 
 		/// <summary>
@@ -121,8 +118,9 @@ namespace PlaneAlerter.Services {
 		/// </summary>
 		/// <param name="update">Is this an update?</param>
 		public void UpdateSettings(bool update) {
-			if (Core.LoopThread != null)
+			if (update)
 				Core.Ui.WriteToConsole("Reloading Settings...", Color.White);
+
 			Settings.VRSAuthenticate = (Settings.VRSUser != "");
 
 			//Update UI
@@ -186,7 +184,7 @@ namespace PlaneAlerter.Services {
 			File.WriteAllText("emailconfig.json", serialisedEcc);
 		}
 
-		private void Load()
+		public void Load()
 		{
 			//Initialise aircraftlist.json url as empty
 			Settings.AircraftListUrl = "";
@@ -306,6 +304,14 @@ namespace PlaneAlerter.Services {
 
 			//Log to UI
 			Core.Ui.WriteToConsole("Email Content Config Loaded", Color.White);
+
+			//Update settings
+			UpdateSettings(false);
+
+			//Update twitter accounts list
+			Core.Ui.UpdateTwitterAccounts();
+
+			SettingsLoaded = true;
 		}
 	}
 }

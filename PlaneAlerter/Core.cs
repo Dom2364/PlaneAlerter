@@ -15,10 +15,6 @@ namespace PlaneAlerter {
 	/// Important variables and things
 	/// </summary>
 	internal static class Core {
-		/// <summary>
-		/// List of current conditions
-		/// </summary>
-		public static Dictionary<int, Condition> Conditions { get; set; } = new Dictionary<int, Condition>();
 
 		/// <summary>
 		/// List of current aircraft
@@ -49,11 +45,6 @@ namespace PlaneAlerter {
 		/// List of current matches
 		/// </summary>
 		public static Dictionary<string, Match> ActiveMatches { get; set; } = new Dictionary<string, Match>();
-
-		/// <summary>
-		/// Thread for checking operations
-		/// </summary>
-		public static Thread? LoopThread { get; set; }
 
 		/// <summary>
 		/// Thread for updating statistics

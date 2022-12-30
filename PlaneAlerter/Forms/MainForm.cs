@@ -25,6 +25,7 @@ namespace PlaneAlerter.Forms
 	internal partial class MainForm : Form
 	{
 		private readonly ISettingsManagerService _settingsManagerService;
+		private readonly IConditionManagerService _conditionManagerService;
 		private readonly ICheckerService _checkerService;
 		private readonly ITwitterService _twitterService;
 		private readonly IStatsService _statsService;
@@ -57,9 +58,11 @@ namespace PlaneAlerter.Forms
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public MainForm(ISettingsManagerService settingsManagerService, ICheckerService checkerService, ITwitterService twitterService,
-			IStatsService statsService, IThreadManagerService threadManagerService) {
+		public MainForm(ISettingsManagerService settingsManagerService, IConditionManagerService conditionManagerService,
+			ICheckerService checkerService, ITwitterService twitterService, IStatsService statsService,
+			IThreadManagerService threadManagerService) {
 			_settingsManagerService = settingsManagerService;
+			_conditionManagerService = conditionManagerService;
 			_checkerService = checkerService;
 			_twitterService = twitterService;
 			_statsService = statsService;
@@ -79,10 +82,14 @@ namespace PlaneAlerter.Forms
 			Core.Ui = this;
 
 			//When shown, wait until everything has loaded then start threads
-			Shown += delegate {
-				while (!_settingsManagerService.SettingsLoaded || !_checkerService.ConditionsLoaded)
-					Thread.Sleep(100);
-				if (_settingsManagerService.Settings.StartOnStart) _threadManagerService.Start();
+			Shown += delegate
+			{
+				_settingsManagerService.Load();
+				_conditionManagerService.LoadConditions();
+
+				if (_settingsManagerService.Settings.StartOnStart)
+					_threadManagerService.Start();
+
 				_statsService.UpdateStats();
 			};
 		}
@@ -108,8 +115,8 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		public void UpdateConditionList() {
 			conditionTreeView.Nodes[0].Nodes.Clear();
-			foreach(var conditionId in Core.Conditions.Keys) {
-				var c = Core.Conditions[conditionId];
+			foreach(var conditionId in _conditionManagerService.Conditions.Keys) {
+				var c = _conditionManagerService.Conditions[conditionId];
 
 				var conditionNode = conditionTreeView.Nodes[0].Nodes.Add("Name: " + c.Name);
 				conditionNode.Tag = conditionId;
@@ -161,7 +168,7 @@ namespace PlaneAlerter.Forms
 			var editor = Program.ServiceProvider.GetRequiredService<ConditionListForm>();
 			editor.Show();
 			editor.FormClosing += delegate {
-				_checkerService.LoadConditions();
+				_conditionManagerService.LoadConditions();
 				UpdateConditionList();
 			};		
 		}
@@ -194,8 +201,8 @@ namespace PlaneAlerter.Forms
 			//Abort threads if running
 			if (Core.StatsThread != null)
 				Core.StatsThread.Abort();
-			if (Core.LoopThread != null)
-				Core.LoopThread.Abort();
+			if (_threadManagerService.CheckerThread != null)
+				_threadManagerService.CheckerThread.Abort();
 			_settingsManagerService.Save();
 		}
 		
