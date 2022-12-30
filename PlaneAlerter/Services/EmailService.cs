@@ -30,11 +30,16 @@ namespace PlaneAlerter.Services {
 	{
         private readonly ISettingsManagerService _settingsManagerService;
         private readonly IUrlBuilderService _urlBuilderService;
+        private readonly IStringFormatterService _stringFormatterService;
+        private readonly IKmlService _kmlService;
 
-		public EmailService(ISettingsManagerService settingsManagerService, IUrlBuilderService urlBuilderService)
+		public EmailService(ISettingsManagerService settingsManagerService, IUrlBuilderService urlBuilderService,
+			IStringFormatterService stringFormatterService, IKmlService kmlService)
 		{
 			_settingsManagerService = settingsManagerService;
 			_urlBuilderService = urlBuilderService;
+			_stringFormatterService = stringFormatterService;
+			_kmlService = kmlService;
 		}
 
 		/// <summary>
@@ -88,7 +93,7 @@ namespace PlaneAlerter.Services {
 			}
 
             //Set subject
-            message.Subject = Core.ParseCustomFormatString(isDetection ? condition.EmailFirstFormat : condition.EmailLastFormat, aircraft, condition);
+            message.Subject = _stringFormatterService.Format(isDetection ? condition.EmailFirstFormat : condition.EmailLastFormat, aircraft, condition);
 
             if (_settingsManagerService.EmailContentConfig.TwitterOptimised) {
                 var typeString = "First Contact";
@@ -268,7 +273,7 @@ namespace PlaneAlerter.Services {
                 }
                 //KML
                 if (_settingsManagerService.EmailContentConfig.KMLfile && aircraft.GetProperty("Lat") != null)
-                    message.Attachments.Add(Attachment.CreateAttachmentFromString(Core.GenerateKml(aircraft), aircraft.Icao + ".kml"));
+                    message.Attachments.Add(Attachment.CreateAttachmentFromString(_kmlService.GenerateTrailKml(aircraft), aircraft.Icao + ".kml"));
                 
 
                 message.Body += "</td></tr></table></body></html>";

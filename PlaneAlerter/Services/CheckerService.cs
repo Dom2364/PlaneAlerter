@@ -30,6 +30,7 @@ namespace PlaneAlerter.Services {
 		private readonly ITwitterService _twitterService;
 		private readonly IUrlBuilderService _urlBuilderService;
 		private readonly IStatsService _statsService;
+		private readonly IStringFormatterService _stringFormatterService;
 
 		/// <summary>
 		/// Time of next check
@@ -45,7 +46,7 @@ namespace PlaneAlerter.Services {
 		/// Constructor
 		/// </summary>
 		public CheckerService(ISettingsManagerService settingsManagerService, IConditionManagerService conditionManagerService, IVrsService vrsService,
-			IEmailService emailService, ITwitterService twitterService, IUrlBuilderService urlBuilderService, IStatsService statsService)
+			IEmailService emailService, ITwitterService twitterService, IUrlBuilderService urlBuilderService, IStatsService statsService, IStringFormatterService stringFormatterService)
 		{
 			_settingsManagerService = settingsManagerService;
 			_conditionManagerService = conditionManagerService;
@@ -54,6 +55,7 @@ namespace PlaneAlerter.Services {
 			_twitterService = twitterService;
 			_urlBuilderService = urlBuilderService;
 			_statsService = statsService;
+			_stringFormatterService = stringFormatterService;
 		}
 
 		/// <summary>
@@ -317,7 +319,7 @@ namespace PlaneAlerter.Services {
 				var credentials = _settingsManagerService.Settings.TwitterUsers[condition.TwitterAccount];
 
 				//Replace keywords in content
-				content = Core.ParseCustomFormatString(content, aircraft, condition);
+				content = _stringFormatterService.Format(content, aircraft, condition);
 				if (content.Length > 250) {
 					var charsOver = content.Length - 250;
 					content = content.Substring(0, 250) + "...";
@@ -353,56 +355,6 @@ namespace PlaneAlerter.Services {
 			condition.AlertsThisSession++;
 			_statsService.TotalAlertsSent++;
 			_statsService.UpdateStats();
-		}
-
-		/// <summary>
-		/// Parse a custom format string to replace property names with values
-		/// </summary>
-		/// <returns>Parsed string</returns>
-		public string ParseCustomFormatString(string format, Aircraft aircraft, Condition condition)
-		{
-			var variables = new Dictionary<string, string>
-			{
-				{ "ConditionName", condition.Name },
-				{
-					"RcvrName",
-					_vrsService.Receivers.ContainsKey(aircraft.GetProperty("Rcvr")) ? _vrsService.Receivers[aircraft.GetProperty("Rcvr")] : ""
-				},
-				{ "Date", DateTime.Now.ToString("d") },
-				{ "Time", DateTime.Now.ToString("t") },
-			};
-
-			//Iterate variables
-			foreach (var varKey in variables.Keys)
-			{
-				//Check if content contains keyword
-				if (format.ToLower().Contains(@"[" + varKey.ToLower() + @"]"))
-				{
-					//Replace keyword with value
-					format = Regex.Replace(format, @"\[" + varKey + @"\]", variables[varKey], RegexOptions.IgnoreCase);
-				}
-			}
-
-			//Iterate properties
-			foreach (var info in Core.VrsPropertyData.Values)
-			{
-				//Check if content contains keyword
-				if (!format.ToLower().Contains(@"[" + info[2].ToLower() + @"]"))
-					continue;
-
-				//Replace keyword with value
-				var value = aircraft.GetProperty(info[2]) ?? "";
-
-				//If enum, replace with string value
-				if (EnumUtils.TryGetConvertedValue(info[2], value, out string convertedValue))
-				{
-					value = convertedValue;
-				}
-
-				format = Regex.Replace(format, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);
-			}
-
-			return format;
 		}
 	}
 }
