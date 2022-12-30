@@ -76,7 +76,7 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// Update condition list
 		/// </summary>
-		public void UpdateConditionList() {
+		private void UpdateConditionList() {
 			conditionEditorTreeView.Nodes.Clear();
 
 			foreach (var conditionId in Conditions.Keys) {
