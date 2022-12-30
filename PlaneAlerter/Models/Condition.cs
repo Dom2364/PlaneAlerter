@@ -31,7 +31,7 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Emails to send alert to
 		/// </summary>
-		public List<string> ReceiverEmails { get; set; } = new List<string>();
+		public List<string> RecieverEmails { get; set; } = new List<string>();
 
 		/// <summary>
 		/// Email first contact alert format

@@ -35,7 +35,7 @@
 			this.saveButton = new System.Windows.Forms.Button();
 			this.alertTypeComboBox = new System.Windows.Forms.ComboBox();
 			this.emailToSendToLabel = new System.Windows.Forms.Label();
-			this.recieverEmailTextBox = new System.Windows.Forms.TextBox();
+			this.receiverEmailTextBox = new System.Windows.Forms.TextBox();
 			this.propertyInfoButton = new System.Windows.Forms.Button();
 			this.helpLabel = new System.Windows.Forms.Label();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
@@ -167,16 +167,16 @@
 			this.emailToSendToLabel.Text = "Emails to send to (One each line): ";
 			this.toolTip.SetToolTip(this.emailToSendToLabel, "The emails that will receive alert messages (Separated by commas)");
 			// 
-			// recieverEmailTextBox
+			// receiverEmailTextBox
 			// 
-			this.recieverEmailTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.receiverEmailTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.recieverEmailTextBox.Location = new System.Drawing.Point(6, 131);
-			this.recieverEmailTextBox.Multiline = true;
-			this.recieverEmailTextBox.Name = "recieverEmailTextBox";
-			this.recieverEmailTextBox.Size = new System.Drawing.Size(484, 63);
-			this.recieverEmailTextBox.TabIndex = 1;
+			this.receiverEmailTextBox.Location = new System.Drawing.Point(6, 131);
+			this.receiverEmailTextBox.Multiline = true;
+			this.receiverEmailTextBox.Name = "receiverEmailTextBox";
+			this.receiverEmailTextBox.Size = new System.Drawing.Size(484, 63);
+			this.receiverEmailTextBox.TabIndex = 1;
 			// 
 			// propertyInfoButton
 			// 
@@ -305,7 +305,7 @@
 			this.emailTabPage.Controls.Add(this.label1);
 			this.emailTabPage.Controls.Add(this.emailFirstFormatTextBox);
 			this.emailTabPage.Controls.Add(this.emailCheckBox);
-			this.emailTabPage.Controls.Add(this.recieverEmailTextBox);
+			this.emailTabPage.Controls.Add(this.receiverEmailTextBox);
 			this.emailTabPage.Controls.Add(this.emailToSendToLabel);
 			this.emailTabPage.Location = new System.Drawing.Point(4, 22);
 			this.emailTabPage.Name = "emailTabPage";
@@ -477,7 +477,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn valueColumn;
 		private System.Windows.Forms.ComboBox alertTypeComboBox;
 		private System.Windows.Forms.Label emailToSendToLabel;
-		private System.Windows.Forms.TextBox recieverEmailTextBox;
+		private System.Windows.Forms.TextBox receiverEmailTextBox;
 		private System.Windows.Forms.Button propertyInfoButton;
 		private System.Windows.Forms.Label helpLabel;
 		private System.Windows.Forms.ToolTip toolTip;

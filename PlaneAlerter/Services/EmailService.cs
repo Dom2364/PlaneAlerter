@@ -249,7 +249,7 @@ namespace PlaneAlerter.Services {
                 message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Condition: " + condition.Name + "</h2>";
                 //Receiver name
                 if (_settingsManagerService.EmailContentConfig.ReceiverName)
-                    message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Reciever: " + receiverName + "</h2>";
+                    message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Receiver: " + receiverName + "</h2>";
                 //Transponder type
                 if (_settingsManagerService.EmailContentConfig.TransponderType)
                     message.Body += "<h2 style='margin: 0px;margin-bottom: 2px;'>Transponder: " + transponderName + "</h2>";

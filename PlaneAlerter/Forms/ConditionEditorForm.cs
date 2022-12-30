@@ -83,7 +83,7 @@ namespace PlaneAlerter.Forms {
 			emailCheckBox.Checked = c.EmailEnabled;
 			emailFirstFormatTextBox.Text = c.EmailFirstFormat;
 			emailLastFormatTextBox.Text = c.EmailLastFormat;
-			recieverEmailTextBox.Text = string.Join(Environment.NewLine, c.ReceiverEmails.ToArray());
+			receiverEmailTextBox.Text = string.Join(Environment.NewLine, c.RecieverEmails.ToArray());
 			twitterCheckBox.Checked = c.TwitterEnabled;
 			twitterAccountComboBox.Text = c.TwitterAccount;
 			tweetFirstFormatTextBox.Text = c.TweetFirstFormat;
@@ -225,7 +225,7 @@ namespace PlaneAlerter.Forms {
 					emailLastFormatTextBox.ForeColor = SystemColors.ControlText;
 				}
 
-				if (recieverEmailTextBox.Text == "") {
+				if (receiverEmailTextBox.Text == "") {
 					emailToSendToLabel.ForeColor = Color.Red;
 					cancelSave = true;
 				}
@@ -284,9 +284,9 @@ namespace PlaneAlerter.Forms {
 				triggerDataGridView.BackgroundColor = SystemColors.AppWorkspace;
 			}
 			//Trim empty lines from email textbox
-			recieverEmailTextBox.Text = recieverEmailTextBox.Text.TrimEnd('\r', '\n');
+			receiverEmailTextBox.Text = receiverEmailTextBox.Text.TrimEnd('\r', '\n');
 			//Check if emails are valid
-			foreach (var line in recieverEmailTextBox.Lines) {
+			foreach (var line in receiverEmailTextBox.Lines) {
 				try {
 					new System.Net.Mail.MailAddress(line);
 				}
@@ -321,7 +321,7 @@ namespace PlaneAlerter.Forms {
 				EmailEnabled = emailCheckBox.Checked,
 				EmailFirstFormat = emailFirstFormatTextBox.Text,
 				EmailLastFormat = emailLastFormatTextBox.Text,
-				ReceiverEmails = recieverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
+				RecieverEmails = receiverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
 				TwitterEnabled = twitterCheckBox.Checked,
 				TwitterAccount = twitterAccountComboBox.Text,
 				TweetFirstFormat = tweetFirstFormatTextBox.Text,
@@ -416,7 +416,7 @@ namespace PlaneAlerter.Forms {
 			
 			emailFirstFormatTextBox.Enabled = emailCheckBox.Checked && (alertType != AlertType.Last_Contact);
 			emailLastFormatTextBox.Enabled = emailCheckBox.Checked && (alertType != AlertType.First_Contact);
-			recieverEmailTextBox.Enabled = emailCheckBox.Checked;
+			receiverEmailTextBox.Enabled = emailCheckBox.Checked;
 
 			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
 			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked && (alertType != AlertType.Last_Contact);

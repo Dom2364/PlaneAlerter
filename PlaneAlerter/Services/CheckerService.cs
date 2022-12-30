@@ -302,7 +302,7 @@ namespace PlaneAlerter.Services {
 
 			if (condition.EmailEnabled) {
 				//Send emails
-				foreach (var email in condition.ReceiverEmails) {
+				foreach (var email in condition.RecieverEmails) {
 					_emailService.SendEmail(email, condition, aircraft, receiver, isFirst);
 				}
 			}

@@ -60,7 +60,7 @@ namespace PlaneAlerter.Forms {
 						var emailsArray = new List<string>();
 						foreach (var email in condition["recieverEmails"])
 							emailsArray.Add(email.ToString());
-						newCondition.ReceiverEmails = emailsArray;
+						newCondition.RecieverEmails = emailsArray;
 
 						foreach (var trigger in condition["triggers"].Values())
 							newCondition.Triggers.Add(newCondition.Triggers.Count, new Trigger((VrsProperty)Enum.Parse(typeof(VrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
