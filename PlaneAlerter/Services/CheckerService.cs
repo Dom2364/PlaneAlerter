@@ -95,8 +95,9 @@ namespace PlaneAlerter.Services {
 				StatusChanged?.Invoke(this, "Downloading Aircraft Info...");
 				receiverName = "";
 				//Get latest aircraft information
-				_vrsService.GetAircraft(false, true);
-				if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS) _vrsService.GetAircraft(true, false);
+				_vrsService.GetAircraft(false, true, ActiveMatches.Count == 0);
+				if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS)
+					_vrsService.GetAircraft(true, false, ActiveMatches.Count == 0);
 
 				//Check if there are aircraft to check
 				if (_vrsService.AircraftList.Count != 0) {
@@ -192,8 +193,9 @@ namespace PlaneAlerter.Services {
 
 								//Get trails if they haven't been requested due to no matches
 								if (ActiveMatches.Count == 1 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0) {
-									_vrsService.GetAircraft(false, true, true);
-									if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS) _vrsService.GetAircraft(true, false, true);
+									_vrsService.GetAircraft(false, true, false, true);
+									if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS)
+										_vrsService.GetAircraft(true, false, false, true);
 									updatedTrailsAvailable = true;
 								}
 

@@ -303,6 +303,7 @@ namespace PlaneAlerter.Forms
 			editor.Show();
 			editor.FormClosing += delegate {
 				_conditionManagerService.LoadConditions();
+				_checkerService.ActiveMatches.Clear();
 				UpdateConditionList();
 				conditionTreeView.Nodes[0].Expand();
 			};		

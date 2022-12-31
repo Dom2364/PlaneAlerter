@@ -35,12 +35,10 @@ namespace PlaneAlerter.Services
 
 	internal class ConditionManagerService : IConditionManagerService
 	{
-		private readonly ICheckerService _checkerService;
 		private readonly ILoggerWithQueue _logger;
 
-		public ConditionManagerService(ICheckerService checkerService, ILoggerWithQueue logger)
+		public ConditionManagerService(ILoggerWithQueue logger)
 		{
-			_checkerService = checkerService;
 			_logger = logger;
 		}
 
@@ -75,7 +73,6 @@ namespace PlaneAlerter.Services
 			{
 				//Clear conditions and active matches
 				Conditions.Clear();
-				_checkerService.ActiveMatches.Clear();
 
 				//Create conditions file if one doesnt exist
 				if (!File.Exists("conditions.json"))

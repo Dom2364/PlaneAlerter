@@ -99,7 +99,4 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="; Move all assemblies and related files to lib folder&#xD;&#xA;ROBOCOPY &quot;$(TargetDir) &quot; &quot;$(TargetDir)lib\ &quot; *.dll /XD lib /E /MOVE&#xD;&#xA;IF %25ERRORLEVEL%25 LEQ 4 exit 0 else exit ERRORLEVEL" />
-  </Target>
 </Project>

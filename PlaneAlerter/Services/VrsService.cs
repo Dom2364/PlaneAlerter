@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using PlaneAlerter.Forms;
 
 namespace PlaneAlerter.Services
 {
@@ -28,14 +27,13 @@ namespace PlaneAlerter.Services
 		/// <summary>
 		/// Get latest aircraftlist.json
 		/// </summary>
-		void GetAircraft(bool modeSOnly, bool clearExisting, bool forceRequestTrails = false);
+		void GetAircraft(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false);
 
 		Dictionary<string, string>? GetReceivers();
 	}
 
 	internal class VrsService : IVrsService
 	{
-		private readonly ICheckerService _checkerService;
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly ILoggerWithQueue _logger;
 
@@ -59,9 +57,8 @@ namespace PlaneAlerter.Services
 		/// </summary>
 		private HttpWebRequest? _request;
 
-		public VrsService(ICheckerService checkerService, ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
+		public VrsService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
 		{
-			_checkerService = checkerService;
 			_settingsManagerService	= settingsManagerService;
 			_logger = logger;
 		}
@@ -69,7 +66,7 @@ namespace PlaneAlerter.Services
 		/// <summary>
 		/// Get latest aircraftlist.json
 		/// </summary>
-		public void GetAircraft(bool modeSOnly, bool clearExisting, bool forceRequestTrails = false)
+		public void GetAircraft(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false)
 		{
 			var requestTrails = _settingsManagerService.Settings.TrailsUpdateFrequency == 1;
 
@@ -79,7 +76,7 @@ namespace PlaneAlerter.Services
 				requestTrails = true;
 			}
 			//No matches so we don't need trails
-			else if (_checkerService.ActiveMatches.Count == 0)
+			else if (noActiveMatches)
 			{
 				requestTrails = false;
 			}
