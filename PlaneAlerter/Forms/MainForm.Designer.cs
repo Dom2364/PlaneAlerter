@@ -430,22 +430,22 @@
 		private System.Windows.Forms.ToolStripMenuItem propertyInfoToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem emailContentConfigToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem donateToolStripMenuItem;
-		public System.Windows.Forms.TreeView conditionTreeView;
-		public System.Windows.Forms.ToolStripStatusLabel statusLabel;
-		public System.Windows.Forms.NotifyIcon notifyIcon;
-		public System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
+		private System.Windows.Forms.TreeView conditionTreeView;
+		private System.Windows.Forms.ToolStripStatusLabel statusLabel;
+		private System.Windows.Forms.NotifyIcon notifyIcon;
+		private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem twitterToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem removeAccountToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem addAccountToolStripMenuItem;
 		private System.Windows.Forms.SplitContainer splitContainer1;
 		private System.Windows.Forms.SplitContainer splitContainer2;
-		public System.Windows.Forms.DataGridView activeMatchesDataGridView;
+		private System.Windows.Forms.DataGridView activeMatchesDataGridView;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
-		public System.Windows.Forms.ToolStripMenuItem startToolStripMenuItem;
-		public System.Windows.Forms.Label activeAlertsLabel;
+		private System.Windows.Forms.ToolStripMenuItem startToolStripMenuItem;
+		private System.Windows.Forms.Label activeAlertsLabel;
 	}
 }
