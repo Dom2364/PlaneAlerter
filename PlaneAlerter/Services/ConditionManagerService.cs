@@ -18,6 +18,16 @@ namespace PlaneAlerter.Services
 		Dictionary<int, Condition> Conditions { get; set; }
 
 		/// <summary>
+		/// List of conditions being edited
+		/// </summary>
+		SortedDictionary<int, Condition> EditorConditions { get; set; }
+
+		/// <summary>
+		/// Save the conditions in the editor
+		/// </summary>
+		void SaveEditorConditions();
+
+		/// <summary>
 		/// Load conditions
 		/// </summary>
 		void LoadConditions();
@@ -36,6 +46,23 @@ namespace PlaneAlerter.Services
 		/// List of current conditions
 		/// </summary>
 		public Dictionary<int, Condition> Conditions { get; set; } = new Dictionary<int, Condition>();
+
+		/// <summary>
+		/// List of conditions being edited
+		/// </summary>
+		public SortedDictionary<int, Condition> EditorConditions { get; set; } = new SortedDictionary<int, Condition>();
+
+		/// <summary>
+		/// Save the conditions in the editor
+		/// </summary>
+		public void SaveEditorConditions()
+		{
+			//Save conditions to file then close
+			var conditionsJson =
+				JsonConvert.SerializeObject(EditorConditions, Formatting.Indented);
+			File.WriteAllText("conditions.json", conditionsJson);
+			EditorConditions.Clear();
+		}
 
 		/// <summary>
 		/// Load conditions

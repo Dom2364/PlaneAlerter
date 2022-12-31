@@ -1,75 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
+using PlaneAlerter.Services;
 
 namespace PlaneAlerter.Forms {
 	/// <summary>
 	/// Form for editing conditions
 	/// </summary>
 	internal partial class ConditionListForm :Form {
-		/// <summary>
-		/// List of conditions
-		/// </summary>
-		public static SortedDictionary<int, Condition> Conditions = new SortedDictionary<int, Condition>();
+		private readonly IConditionManagerService _conditionManagerService;
 
-		public ConditionListForm() {
+		public ConditionListForm(IConditionManagerService conditionManagerService) {
+			_conditionManagerService = conditionManagerService;
+
 			//Initialise form elements
 			InitializeComponent();
 			
 			//Load conditions
-			if (File.Exists("conditions.json")) {
-				Conditions.Clear();
-
-				//Parse json
-				var conditionsJsonText = File.ReadAllText("conditions.json");
-				var conditionJson = (JObject?)JsonConvert.DeserializeObject(conditionsJsonText);
-
-				if (conditionJson != null) {
-					//Iterate parsed conditions
-					for (var conditionId = 0; conditionId < conditionJson.Count; conditionId++) {
-						var condition = conditionJson[conditionId.ToString()];
-
-						//Create condition from parsed json
-						var newCondition = new Condition {
-							Name = condition["conditionName"].ToString(),
-							AlertType = (AlertType)Enum.Parse(typeof(AlertType), condition["alertType"].ToString()),
-							IgnoreFollowing = (bool)condition["ignoreFollowing"],
-							EmailEnabled = (bool)(condition["emailEnabled"] ?? true),
-							EmailFirstFormat = (condition["emailFirstFormat"] ?? "").ToString(),
-							EmailLastFormat = (condition["emailLastFormat"] ?? "").ToString(),
-							TwitterEnabled = (bool)(condition["twitterEnabled"] ?? false),
-							TwitterAccount = (condition["twitterAccount"] ?? "").ToString(),
-							TweetFirstFormat = (condition["tweetFirstFormat"] ?? "").ToString(),
-							TweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
-							TweetMap = (bool)(condition["tweetMap"] ?? true),
-							TweetLink = (TweetLink)Enum.Parse(typeof(TweetLink), (condition["tweetLink"] ?? TweetLink.None.ToString()).ToString())
-						};
-
-						if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString())) {
-							var emailProperty = (VrsProperty)Enum.Parse(typeof(VrsProperty), (condition["emailProperty"] ?? VrsProperty.Registration.ToString()).ToString());
-							newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
-							newCondition.EmailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
-						}
-
-						var emailsArray = new List<string>();
-						foreach (var email in condition["recieverEmails"])
-							emailsArray.Add(email.ToString());
-						newCondition.RecieverEmails = emailsArray;
-
-						foreach (var trigger in condition["triggers"].Values())
-							newCondition.Triggers.Add(newCondition.Triggers.Count, new Trigger((VrsProperty)Enum.Parse(typeof(VrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
-
-						//Add condition to list
-						Conditions.Add(conditionId, newCondition);
-					}
-				}
-			}
+			_conditionManagerService.EditorConditions = new SortedDictionary<int, Condition>(_conditionManagerService.Conditions);
 			UpdateConditionList();
 		}
 
@@ -79,8 +29,8 @@ namespace PlaneAlerter.Forms {
 		private void UpdateConditionList() {
 			conditionEditorTreeView.Nodes.Clear();
 
-			foreach (var conditionId in Conditions.Keys) {
-				var condition = Conditions[conditionId];
+			foreach (var conditionId in _conditionManagerService.EditorConditions.Keys) {
+				var condition = _conditionManagerService.EditorConditions[conditionId];
 
 				var conditionNode = conditionEditorTreeView.Nodes.Add(conditionId + ": " + condition.Name);
 				conditionNode.Tag = conditionId;
@@ -119,9 +69,7 @@ namespace PlaneAlerter.Forms {
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
 		private void ExitButtonClick(object sender, EventArgs e) {
-			//Save conditions to file then close
-			var conditionsJson = JsonConvert.SerializeObject(Conditions, Formatting.Indented);
-			File.WriteAllText("conditions.json", conditionsJson);
+			_conditionManagerService.SaveEditorConditions();
 			Close();
 		}
 		
@@ -135,15 +83,15 @@ namespace PlaneAlerter.Forms {
 			if (conditionEditorTreeView.SelectedNode == null || conditionEditorTreeView.SelectedNode.Tag == null || conditionEditorTreeView.SelectedNode.Tag.ToString() == "")
 				return;
 			//Remove condition from condition list
-			Conditions.Remove(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
+			_conditionManagerService.EditorConditions.Remove(Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag));
 			//Sort conditions
 			var sortedConditions = new SortedDictionary<int, Condition>();
 			var id = 0;
-			foreach (var c in Conditions.Values) {
+			foreach (var c in _conditionManagerService.EditorConditions.Values) {
 				sortedConditions.Add(id,c);
 				id++;
 			}
-			Conditions = sortedConditions;
+			_conditionManagerService.EditorConditions = sortedConditions;
 			//Update condition list
 			UpdateConditionList();
 		}
@@ -160,12 +108,12 @@ namespace PlaneAlerter.Forms {
 			//Swap conditions then update condition list
 			var conditionId = Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag);
 			if (conditionId == 0) return;
-			var c1 = Conditions[conditionId];
-			var c2 = Conditions[conditionId - 1];
-			Conditions.Remove(conditionId - 1);
-			Conditions.Remove(conditionId);
-			Conditions.Add(conditionId - 1, c1);
-			Conditions.Add(conditionId, c2);
+			var c1 = _conditionManagerService.EditorConditions[conditionId];
+			var c2 = _conditionManagerService.EditorConditions[conditionId - 1];
+			_conditionManagerService.EditorConditions.Remove(conditionId - 1);
+			_conditionManagerService.EditorConditions.Remove(conditionId);
+			_conditionManagerService.EditorConditions.Add(conditionId - 1, c1);
+			_conditionManagerService.EditorConditions.Add(conditionId, c2);
 			UpdateConditionList();
 		}
 
@@ -180,13 +128,13 @@ namespace PlaneAlerter.Forms {
 				return;
 			//Swap conditions then update condition list
 			var conditionId = Convert.ToInt32(conditionEditorTreeView.SelectedNode.Tag);
-			if (conditionId == Conditions.Count - 1) return;
-			var c1 = Conditions[conditionId];
-			var c2 = Conditions[conditionId + 1];
-			Conditions.Remove(conditionId + 1);
-			Conditions.Remove(conditionId);
-			Conditions.Add(conditionId + 1, c1);
-			Conditions.Add(conditionId, c2);
+			if (conditionId == _conditionManagerService.EditorConditions.Count - 1) return;
+			var c1 = _conditionManagerService.EditorConditions[conditionId];
+			var c2 = _conditionManagerService.EditorConditions[conditionId + 1];
+			_conditionManagerService.EditorConditions.Remove(conditionId + 1);
+			_conditionManagerService.EditorConditions.Remove(conditionId);
+			_conditionManagerService.EditorConditions.Add(conditionId + 1, c1);
+			_conditionManagerService.EditorConditions.Add(conditionId, c2);
 			UpdateConditionList();
 		}
 

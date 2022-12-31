@@ -13,6 +13,7 @@ namespace PlaneAlerter.Forms {
 	/// Form for editing conditions
 	/// </summary>
 	internal partial class ConditionEditorForm :Form {
+		private readonly IConditionManagerService _conditionManagerService;
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly ITwitterService _twitterService;
 
@@ -29,7 +30,8 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// Initialise form with no existing condition
 		/// </summary>
-		public ConditionEditorForm(ISettingsManagerService settingsManagerService, ITwitterService twitterService) {
+		public ConditionEditorForm(IConditionManagerService conditionManagerService, ISettingsManagerService settingsManagerService, ITwitterService twitterService) {
+			_conditionManagerService = conditionManagerService;
 			_settingsManagerService = settingsManagerService;
 			_twitterService = twitterService;
 			
@@ -77,7 +79,7 @@ namespace PlaneAlerter.Forms {
 			_conditionToUpdate = conditionId;
 
 			//Set form element values from condition info
-			var c = ConditionListForm.Conditions[_conditionToUpdate];
+			var c = _conditionManagerService.EditorConditions[_conditionToUpdate];
 			conditionNameTextBox.Text = c.Name;
 			ignoreFollowingCheckbox.Checked = c.IgnoreFollowing;
 			emailCheckBox.Checked = c.EmailEnabled;
@@ -303,15 +305,15 @@ namespace PlaneAlerter.Forms {
 
 			//If condition is being updated, remove the old one
 			if (_isUpdating)
-				ConditionListForm.Conditions.Remove(_conditionToUpdate);
+				_conditionManagerService.EditorConditions.Remove(_conditionToUpdate);
 
 			//Sort conditions
-			var list = ConditionListForm.Conditions.Keys.ToList();
+			var list = _conditionManagerService.EditorConditions.Keys.ToList();
 			var sortedConditions = new SortedDictionary<int, Condition>();
 			list.Sort();
 			foreach(var key in list)
-				sortedConditions.Add(key, ConditionListForm.Conditions[key]);
-			ConditionListForm.Conditions = sortedConditions;
+				sortedConditions.Add(key, _conditionManagerService.EditorConditions[key]);
+			_conditionManagerService.EditorConditions = sortedConditions;
 
 			//Create new condition
 			var newCondition = new Condition {
@@ -339,7 +341,9 @@ namespace PlaneAlerter.Forms {
 								break;
 							}
 			//Add condition to condition list
-			ConditionListForm.Conditions.Add(_isUpdating ? _conditionToUpdate : ConditionListForm.Conditions.Count, newCondition);
+			_conditionManagerService.EditorConditions.Add(_isUpdating ?
+				_conditionToUpdate :
+				_conditionManagerService.EditorConditions.Count, newCondition);
 
 			//Close form
 			Close();
