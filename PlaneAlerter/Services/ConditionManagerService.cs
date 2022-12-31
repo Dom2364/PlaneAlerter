@@ -113,13 +113,6 @@ namespace PlaneAlerter.Services
 
 				//Log to UI
 				_logger.Log("Conditions Loaded", Color.White);
-
-				//Notify user if no conditions are found
-				if (Conditions.Count == 0)
-				{
-					MessageBox.Show("No Conditions! Click Options then Open Condition Editor to add conditions.",
-						"No Conditions!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-				}
 			}
 			catch (Exception e)
 			{

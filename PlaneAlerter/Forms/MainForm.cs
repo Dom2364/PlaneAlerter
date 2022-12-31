@@ -102,6 +102,13 @@ namespace PlaneAlerter.Forms
 				UpdateStats();
 				UpdateConditionList();
 				conditionTreeView.Nodes[0].Expand();
+
+				//Notify user if no conditions are found
+				if (_conditionManagerService.Conditions.Count == 0)
+				{
+					MessageBox.Show("No Conditions! Click Options then Open Condition Editor to add conditions.",
+						"No Conditions!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+				}
 			};
 		}
 
