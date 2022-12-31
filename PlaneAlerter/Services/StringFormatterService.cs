@@ -56,7 +56,7 @@ namespace PlaneAlerter.Services
 			}
 
 			//Iterate properties
-			foreach (var info in Core.VrsPropertyData.Values)
+			foreach (var info in VrsProperties.VrsPropertyData.Values)
 			{
 				//Check if content contains keyword
 				if (!format.ToLower().Contains(@"[" + info[2].ToLower() + @"]"))

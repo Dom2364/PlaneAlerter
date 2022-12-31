@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using PlaneAlerter.Enums;
-using Match = PlaneAlerter.Models.Match;
 
 namespace PlaneAlerter {
 	/// <summary>
 	/// Important variables and things
 	/// </summary>
-	internal static class Core {
+	internal static class VrsProperties {
 
 		/// <summary>
 		/// VRS property descriptions
@@ -26,7 +25,7 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// Core static constructor
 		/// </summary>
-		static Core() {
+		static VrsProperties() {
 			//LEGEND
 			//A = Equals/Not Equals
 			//B = Higher Than + Lower Than

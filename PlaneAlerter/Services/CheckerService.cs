@@ -136,7 +136,7 @@ namespace PlaneAlerter.Services {
 								//E = Contains
 
 								//Get internal name for property to compare
-								propertyInternalName = Core.VrsPropertyData[trigger.Property][2].ToString();
+								propertyInternalName = VrsProperties.VrsPropertyData[trigger.Property][2].ToString();
 								var propertyValue = aircraft.GetProperty(propertyInternalName);
 
 								//Check property against value

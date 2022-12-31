@@ -201,13 +201,13 @@ namespace PlaneAlerter.Services {
                         continue;
                     //Get parameter information from vrs property info
                     if (parameter == "UNKNOWN_PARAMETER") {
-                        foreach (var property in Core.VrsPropertyData.Keys)
+                        foreach (var property in VrsProperties.VrsPropertyData.Keys)
                         {
-	                        if (Core.VrsPropertyData[property][2] != propertyKey.ToString())
+	                        if (VrsProperties.VrsPropertyData[property][2] != propertyKey.ToString())
 		                        continue;
 	                        
 	                        //If property list type is essentials and this property is not in the list of essentials, leave this property as unknown so it can be skipped
-	                        if (_settingsManagerService.EmailContentConfig.PropertyList == PropertyListType.Essentials && !Core.EssentialProperties.Contains(property))
+	                        if (_settingsManagerService.EmailContentConfig.PropertyList == PropertyListType.Essentials && !VrsProperties.EssentialProperties.Contains(property))
 		                        continue;
 	                        parameter = property.ToString();
                         }

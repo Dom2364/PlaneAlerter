@@ -7,8 +7,8 @@ namespace PlaneAlerter.Forms {
 			InitializeComponent();
 
 			//Add vrs property info to form
-			foreach (var property in Core.VrsPropertyData.Keys) {
-				var propertyData = Core.VrsPropertyData[property];
+			foreach (var property in VrsProperties.VrsPropertyData.Keys) {
+				var propertyData = VrsProperties.VrsPropertyData[property];
                 propertyDataGridView.Rows.Add(property.ToString(), propertyData[0], propertyData[2], propertyData[3]);
 			}
 		}

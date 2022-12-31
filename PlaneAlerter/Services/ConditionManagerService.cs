@@ -116,8 +116,8 @@ namespace PlaneAlerter.Services
 					if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString()))
 					{
 						var emailProperty = (VrsProperty)Enum.Parse(typeof(VrsProperty), (condition["emailProperty"] ?? VrsProperty.Registration.ToString()).ToString());
-						newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
-						newCondition.EmailLastFormat = "Last Contact Alert! [ConditionName]: [" + Core.VrsPropertyData[emailProperty][2] + "]";
+						newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + VrsProperties.VrsPropertyData[emailProperty][2] + "]";
+						newCondition.EmailLastFormat = "Last Contact Alert! [ConditionName]: [" + VrsProperties.VrsPropertyData[emailProperty][2] + "]";
 					}
 
 					var emailsArray = new List<string>();
