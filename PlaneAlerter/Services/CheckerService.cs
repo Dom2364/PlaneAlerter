@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -12,6 +13,7 @@ using Match = PlaneAlerter.Models.Match;
 namespace PlaneAlerter.Services {
 	internal interface ICheckerService
 	{
+		Dictionary<string, Match> ActiveMatches { get; set; }
 		delegate void AlertSentEventHandler(Condition condition, Aircraft aircraft, string receiver, bool isFirst);
 		event AlertSentEventHandler SendingAlert;
 		event EventHandler<string> StatusChanged;
@@ -24,6 +26,12 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class CheckerService : ICheckerService
 	{
+
+		/// <summary>
+		/// List of current matches
+		/// </summary>
+		public Dictionary<string, Match> ActiveMatches { get; set; } = new Dictionary<string, Match>();
+
 		public event ICheckerService.AlertSentEventHandler SendingAlert;
 
 		public event EventHandler<string> StatusChanged;
@@ -105,7 +113,7 @@ namespace PlaneAlerter.Services {
 						StatusChanged?.Invoke(this, $"Checking conditions for aircraft {aircraftCount} of {_vrsService.AircraftList.Count}");
 						aircraftCount++;
 
-						if (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].IgnoreFollowing) continue;
+						if (ActiveMatches.ContainsKey(aircraft.Icao) && ActiveMatches[aircraft.Icao].IgnoreFollowing) continue;
 						if (aircraft.GetProperty("Reg") == null && aircraft.GetProperty("Type") == null && (aircraft.GetProperty("FlightsCount") == null || Convert.ToInt32(aircraft.GetProperty("FlightsCount")) == 0)) 
 							continue;
 
@@ -113,7 +121,7 @@ namespace PlaneAlerter.Services {
 						foreach (var conditionId in _conditionManagerService.Conditions.Keys.ToList()) {
 							condition = _conditionManagerService.Conditions[conditionId];
 							//Skip if condition is disabled or condition is already matched
-							if (condition.AlertType == AlertType.Disabled || (Core.ActiveMatches.ContainsKey(aircraft.Icao) && Core.ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionId == conditionId)))
+							if (condition.AlertType == AlertType.Disabled || (ActiveMatches.ContainsKey(aircraft.Icao) && ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionId == conditionId)))
 								continue;
 
 							triggersMatching = 0;
@@ -169,21 +177,21 @@ namespace PlaneAlerter.Services {
 									receiverName = _vrsService.Receivers[aircraft.GetProperty("Rcvr")];
 
 								//If active matches contains aircraft, add condition to the match
-								if (Core.ActiveMatches.ContainsKey(aircraft.Icao)) {
-									Core.ActiveMatches[aircraft.Icao].AddCondition(conditionId, condition, aircraft);
+								if (ActiveMatches.ContainsKey(aircraft.Icao)) {
+									ActiveMatches[aircraft.Icao].AddCondition(conditionId, condition, aircraft);
 								}
 								//Else add to active matches
 								else {
 									var m = new Match(aircraft.Icao);
 									m.AddCondition(conditionId, condition, aircraft);
-									Core.ActiveMatches.Add(aircraft.Icao, m);
+									ActiveMatches.Add(aircraft.Icao, m);
 								}
 
 								//Cancel checking for conditions for this aircraft
 								ignoreFollowing = condition.IgnoreFollowing;
 
 								//Get trails if they haven't been requested due to no matches
-								if (Core.ActiveMatches.Count == 1 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0) {
+								if (ActiveMatches.Count == 1 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0) {
 									_vrsService.GetAircraft(false, true, true);
 									if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS) _vrsService.GetAircraft(true, false, true);
 									updatedTrailsAvailable = true;
@@ -213,8 +221,8 @@ namespace PlaneAlerter.Services {
 							if (ignoreFollowing) break;
 						}
 						//If active matches contains this aircraft, update aircraft info
-						if (Core.ActiveMatches.ContainsKey(aircraft.Icao))
-							foreach (var c in Core.ActiveMatches[aircraft.Icao].Conditions)
+						if (ActiveMatches.ContainsKey(aircraft.Icao))
+							foreach (var c in ActiveMatches[aircraft.Icao].Conditions)
 								c.AircraftInfo = aircraft;
 
 						//Cancel if thread is supposed to stop
@@ -226,14 +234,14 @@ namespace PlaneAlerter.Services {
 					StatusChanged?.Invoke(this, "Checking aircraft are still on radar...");
 
 					//Iterate active matches
-					foreach (var match in Core.ActiveMatches.Values.ToList()) {
+					foreach (var match in ActiveMatches.Values.ToList()) {
 						//Iterate match conditions
 						foreach (var c in match.Conditions) {
 							//Check if signal has been lost for more than the removal timeout
 							if (match.SignalLost && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((
 								    _settingsManagerService.Settings.RemovalTimeout - (_settingsManagerService.Settings.RemovalTimeout * 2)))) < 0) {
 								//Remove from active matches
-								Core.ActiveMatches.Remove(match.Icao);
+								ActiveMatches.Remove(match.Icao);
 								//Log to console
 								_logger.Log(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
 								//Update aircraft info
@@ -259,12 +267,12 @@ namespace PlaneAlerter.Services {
 								if (aircraft.Icao == match.Icao)
 									stillActive = true;
 							if (!stillActive && match.SignalLost == false) {
-								Core.ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
-								Core.ActiveMatches[match.Icao].SignalLost = true;
+								ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
+								ActiveMatches[match.Icao].SignalLost = true;
 								_logger.Log(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 							}
 							if (stillActive && match.SignalLost) {
-								Core.ActiveMatches[match.Icao].SignalLost = false;
+								ActiveMatches[match.Icao].SignalLost = false;
 								_logger.Log(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 							}
 						}

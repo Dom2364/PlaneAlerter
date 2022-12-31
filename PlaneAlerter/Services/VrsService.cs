@@ -35,6 +35,7 @@ namespace PlaneAlerter.Services
 
 	internal class VrsService : IVrsService
 	{
+		private readonly ICheckerService _checkerService;
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly ILoggerWithQueue _logger;
 
@@ -58,8 +59,9 @@ namespace PlaneAlerter.Services
 		/// </summary>
 		private HttpWebRequest? _request;
 
-		public VrsService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
+		public VrsService(ICheckerService checkerService, ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
 		{
+			_checkerService = checkerService;
 			_settingsManagerService	= settingsManagerService;
 			_logger = logger;
 		}
@@ -77,7 +79,7 @@ namespace PlaneAlerter.Services
 				requestTrails = true;
 			}
 			//No matches so we don't need trails
-			else if (Core.ActiveMatches.Count == 0)
+			else if (_checkerService.ActiveMatches.Count == 0)
 			{
 				requestTrails = false;
 			}

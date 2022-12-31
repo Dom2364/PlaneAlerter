@@ -250,7 +250,7 @@ namespace PlaneAlerter.Forms
 					conditionTreeView.EndUpdate();
 
 					activeMatchesDataGridView.Rows.Clear();
-					foreach (var match in Core.ActiveMatches.Values)
+					foreach (var match in _checkerService.ActiveMatches.Values)
 					{
 						activeMatchesDataGridView.Rows.Add(match.Icao,
 							match.Conditions[0].AircraftInfo.GetProperty("Reg"),
@@ -258,7 +258,7 @@ namespace PlaneAlerter.Forms
 							match.Conditions[0].AircraftInfo.GetProperty("Call"), match.Conditions[0].Condition.Name);
 					}
 
-					activeAlertsLabel.Text = $"Active Alerts ({Core.ActiveMatches.Count}):";
+					activeAlertsLabel.Text = $"Active Alerts ({_checkerService.ActiveMatches.Count}):";
 				}
 				catch (Exception)
 				{

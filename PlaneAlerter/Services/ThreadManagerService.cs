@@ -136,7 +136,7 @@ namespace PlaneAlerter.Services {
 			ThreadStatus = CheckerStatus.Stopped;
 
 			//Clear matches
-			Core.ActiveMatches.Clear();
+			_checkerService.ActiveMatches.Clear();
 			
 			_logger.Log("Checker Stopped", Color.White);
 		}

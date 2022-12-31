@@ -24,11 +24,6 @@ namespace PlaneAlerter {
 		public static List<VrsProperty> EssentialProperties { get; set; } = new List<VrsProperty>();
 
 		/// <summary>
-		/// List of current matches
-		/// </summary>
-		public static Dictionary<string, Match> ActiveMatches { get; set; } = new Dictionary<string, Match>();
-
-		/// <summary>
 		/// Core static constructor
 		/// </summary>
 		static Core() {
