@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using PlaneAlerter.Enums;
 
 namespace PlaneAlerter.Models
@@ -21,6 +22,7 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Alerts sent for this condition
 		/// </summary>
+		[JsonIgnore]
 		public int AlertsThisSession { get; set; } = 0;
 
 		/// <summary>

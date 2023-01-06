@@ -4,8 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
+using Newtonsoft.Json.Serialization;
 using PlaneAlerter.Enums;
+using PlaneAlerter.Extensions;
 using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services
@@ -59,7 +62,10 @@ namespace PlaneAlerter.Services
 		{
 			//Save conditions to file then close
 			var conditionsJson =
-				JsonConvert.SerializeObject(EditorConditions, Formatting.Indented);
+				JsonConvert.SerializeObject(EditorConditions, new JsonSerializerSettings
+				{
+					Formatting = Formatting.Indented
+				});
 			File.WriteAllText("conditions.json", conditionsJson);
 			EditorConditions.Clear();
 		}
@@ -96,36 +102,34 @@ namespace PlaneAlerter.Services
 				{
 					var condition = conditionJson[conditionId.ToString()];
 
-					//Create condition and copy values
-					var newCondition = new Condition
-					{
-						Name = condition["conditionName"].ToString(),
-						AlertType = (AlertType)Enum.Parse(typeof(AlertType), condition["alertType"].ToString()),
-						IgnoreFollowing = (bool)condition["ignoreFollowing"],
-						EmailEnabled = (bool)(condition["emailEnabled"] ?? true),
-						EmailFirstFormat = (condition["emailFirstFormat"] ?? "").ToString(),
-						EmailLastFormat = (condition["emailLastFormat"] ?? "").ToString(),
-						TwitterEnabled = (bool)(condition["twitterEnabled"] ?? false),
-						TwitterAccount = (condition["twitterAccount"] ?? "").ToString(),
-						TweetFirstFormat = (condition["tweetFirstFormat"] ?? "").ToString(),
-						TweetLastFormat = (condition["tweetLastFormat"] ?? "").ToString(),
-						TweetMap = (bool)(condition["tweetMap"] ?? true),
-						TweetLink = (TweetLink)Enum.Parse(typeof(TweetLink), (condition["tweetLink"] ?? TweetLink.None.ToString()).ToString())
-					};
+					if (condition == null)
+						throw new Exception($"Condition with id {conditionId} not found in conditions.json.\nConditions should have sequential ids.");
 
-					if (condition["emailProperty"] != null && !string.IsNullOrEmpty(condition["emailProperty"].ToString()))
+					//Create condition and copy values
+					var newCondition = new Condition();
+					newCondition.Name = condition.RequiredValue<string>("conditionName", "Name");
+					newCondition.AlertType = condition.RequiredValue<AlertType>("alertType", "AlertType");
+					newCondition.IgnoreFollowing = condition.RequiredValue<bool>("ignoreFollowing", "IgnoreFollowing");
+					newCondition.EmailEnabled = condition.OptionalValue<bool?>("emailEnabled", "EmailEnabled") ?? true;
+					newCondition.EmailFirstFormat = condition.OptionalValue<string>("emailFirstFormat", "EmailFirstFormat") ?? string.Empty;
+					newCondition.EmailLastFormat = condition.OptionalValue<string>("emailLastFormat", "EmailLastFormat") ?? string.Empty;
+					newCondition.TwitterEnabled = condition.OptionalValue<bool?>("twitterEnabled", "TwitterEnabled") ?? true;
+					newCondition.TwitterAccount = condition.OptionalValue<string>("twitterAccount", "TwitterAccount") ?? string.Empty;
+					newCondition.TweetFirstFormat = condition.OptionalValue<string>("tweetFirstFormat", "TweetFirstFormat") ?? string.Empty;
+					newCondition.TweetLastFormat = condition.OptionalValue<string>("tweetLastFormat", "TweetLastFormat") ?? string.Empty;
+					newCondition.TweetMap = condition.OptionalValue<bool?>("tweetMap", "TweetMap") ?? true;
+					newCondition.TweetLink = condition.OptionalValue<TweetLink?>("tweetLink", "TweetLink") ?? TweetLink.None;
+					newCondition.RecieverEmails = condition.RequiredValue<List<string>>("recieverEmails", "RecieverEmails");
+					newCondition.Triggers = condition.RequiredValue<Dictionary<int, Trigger>>("triggers", "Triggers");
+
+					//Convert conditions using the email property system to use email formats
+					var oldEmailProperty = condition.OptionalValue<VrsProperty?>();
+					if (oldEmailProperty != null)
 					{
-						var emailProperty = (VrsProperty)Enum.Parse(typeof(VrsProperty), (condition["emailProperty"] ?? VrsProperty.Registration.ToString()).ToString());
-						newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + VrsProperties.VrsPropertyData[emailProperty][2] + "]";
-						newCondition.EmailLastFormat = "Last Contact Alert! [ConditionName]: [" + VrsProperties.VrsPropertyData[emailProperty][2] + "]";
+						newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + VrsProperties.VrsPropertyData[oldEmailProperty.Value][2] + "]";
+						newCondition.EmailLastFormat = "Last Contact Alert! [ConditionName]: [" + VrsProperties.VrsPropertyData[oldEmailProperty.Value][2] + "]";
 					}
 
-					var emailsArray = new List<string>();
-					foreach (var email in condition["recieverEmails"])
-						emailsArray.Add(email.ToString());
-					newCondition.RecieverEmails = emailsArray;
-					foreach (var trigger in condition["triggers"].Values())
-						newCondition.Triggers.Add(newCondition.Triggers.Count, new Trigger((VrsProperty)Enum.Parse(typeof(VrsProperty), trigger["Property"].ToString()), trigger["Value"].ToString(), trigger["ComparisonType"].ToString()));
 					//Add condition to list
 					Conditions.Add(conditionId, newCondition);
 				}
@@ -142,7 +146,7 @@ namespace PlaneAlerter.Services
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.Message + "\n\n" + e.StackTrace);
+				MessageBox.Show("Error loading conditions:\n\n" + e.Message + "\n\n" + e.StackTrace);
 			}
 		}
 	}

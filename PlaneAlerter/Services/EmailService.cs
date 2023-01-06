@@ -3,9 +3,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
 
@@ -20,7 +18,7 @@ namespace PlaneAlerter.Services {
 		/// <param name="aircraft">Aircraft information for matched aircraft</param>
 		/// <param name="receiverName">Name of receiver that got the last aircraft information</param>
 		/// <param name="isDetection">Is this a detection, not a removal?</param>
-		void SendEmail(string emailAddress, Condition condition, Aircraft aircraft, string receiverName, bool isDetection);
+		Task SendEmail(string emailAddress, Condition condition, Aircraft aircraft, string receiverName, bool isDetection);
 	}
 
 	/// <summary>
@@ -34,10 +32,11 @@ namespace PlaneAlerter.Services {
         private readonly IKmlService _kmlService;
         private readonly ILoggerWithQueue _logger;
         private readonly IVrsEnumService _vrsEnumService;
+        private readonly IVrsService _vrsService;
 
 		public EmailService(ISettingsManagerService settingsManagerService, IUrlBuilderService urlBuilderService,
 			IStringFormatterService stringFormatterService, IKmlService kmlService, ILoggerWithQueue logger,
-			IVrsEnumService vrsEnumService)
+			IVrsEnumService vrsEnumService, IVrsService vrsService)
 		{
 			_settingsManagerService = settingsManagerService;
 			_urlBuilderService = urlBuilderService;
@@ -45,6 +44,7 @@ namespace PlaneAlerter.Services {
 			_kmlService = kmlService;
             _logger = logger;
             _vrsEnumService = vrsEnumService;
+            _vrsService = vrsService;
 		}
 
 		/// <summary>
@@ -55,7 +55,7 @@ namespace PlaneAlerter.Services {
 		/// <param name="aircraft">Aircraft information for matched aircraft</param>
 		/// <param name="receiverName">Name of receiver that got the last aircraft information</param>
 		/// <param name="isDetection">Is this a detection, not a removal?</param>
-		public void SendEmail(string emailAddress, Condition condition, Aircraft aircraft, string receiverName, bool isDetection) {
+		public async Task SendEmail(string emailAddress, Condition condition, Aircraft aircraft, string receiverName, bool isDetection) {
             var mailClient = new SmtpClient(_settingsManagerService.Settings.SMTPHost);
             mailClient.Port = _settingsManagerService.Settings.SMTPPort;
             mailClient.Credentials = new NetworkCredential(_settingsManagerService.Settings.SMTPUser,
@@ -64,12 +64,8 @@ namespace PlaneAlerter.Services {
             
 			//Transponder type from aircraft info
 			var transponderName = "Unknown";
-			//Aircraft image urls
-			var imageLinks = new string[2];
 			//Table for displaying aircraft property values
 			var aircraftTable = "<table style='border: 2px solid #444;border-spacing: 0px;border-collapse: collapse;' id='acTable'>";
-			//HTML for aircraft images
-			var imageHtml = "";
 			//Airframes.org url
 			var airframesUrl = "";
 
@@ -122,42 +118,15 @@ namespace PlaneAlerter.Services {
                                _settingsManagerService.Settings.RadarUrl;
                 //[Last Contact] USAF (RCH9701), 79-1951, RCH, DC10, RCH9701 http://aussieadsb.com
             }
-            else {
-                //Create request for aircraft image urls
-                var request = (HttpWebRequest)WebRequest.Create(_settingsManagerService.Settings.AircraftListUrl.Substring(0,
-	                _settingsManagerService.Settings.AircraftListUrl.LastIndexOf("/") + 1) + "AirportDataThumbnails.json?icao=" + aircraft.Icao + "&numThumbs=" + imageLinks.Length);
-                request.Method = "GET";
-                request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-                request.Timeout = 5000;
+            else
+            {
+	            var aircraftImages = await _vrsService.GetAircraftThumbnails(aircraft.Icao);
 
-                //If vrs authentication is used, add credentials to request
-                if (_settingsManagerService.Settings.VRSAuthenticate) {
-                    var encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(
-	                    _settingsManagerService.Settings.VRSUser + ":" + _settingsManagerService.Settings.VRSPassword));
-                    request.Headers.Add("Authorization", "Basic " + encoded);
-                }
+	            var imageHtml = "";
+				foreach (var image in aircraftImages)
+	                imageHtml += $"<img style='margin: 0px 5px 5px 0px;border: 2px solid #444;' src='{image}' />";
+                imageHtml += "<br><br>";
 
-                //Send request and parse response
-                try {
-                    //Get response
-                    var imageResponse = (HttpWebResponse)request.GetResponse();
-                    var imageResponseBytes = new byte[32768];
-                    imageResponse.GetResponseStream().Read(imageResponseBytes, 0, 32768);
-                    var imageResponseText = Encoding.ASCII.GetString(imageResponseBytes);
-
-                    //Parse json
-                    var imageResponseJson = (JObject)JsonConvert.DeserializeObject(imageResponseText);
-
-                    //If status is not 404, add images to image HTML
-                    if (imageResponseJson["status"].ToString() != "404")
-                        foreach (JObject image in imageResponseJson["data"])
-                            imageHtml += "<img style='margin: 0px 5px 5px 0px;border: 2px solid #444;' src='" + image["image"].Value<string>() + "' />";
-                    imageHtml += "<br><br>";
-                }
-                catch (Exception) {
-
-                }
-				
 				//Generate google maps url
 				var googleMapsUrl = "https://www.google.com.au/maps/search/" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long");
 

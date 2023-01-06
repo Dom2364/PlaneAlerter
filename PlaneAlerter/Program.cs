@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -61,6 +64,16 @@ namespace PlaneAlerter {
 					services.AddSingleton<IKmlService, KmlService>();
 					services.AddSingleton<ILoggerWithQueue, LoggerWithQueue>();
 					services.AddSingleton<IVrsEnumService, VrsEnumService>();
+
+					//HttpClients
+					services.AddHttpClient<VrsService>(client =>
+					{
+						client.Timeout = Timeout.InfiniteTimeSpan;
+					}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+					{
+						AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+					});
+					services.AddHttpClient<TwitterService>();
 				});
 		}
 	}

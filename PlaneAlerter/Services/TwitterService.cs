@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,6 +12,7 @@ using PlaneAlerter.Forms;
 using Tweetinvi;
 using Tweetinvi.Exceptions;
 using Tweetinvi.Models;
+using HttpMethod = Tweetinvi.Models.HttpMethod;
 
 namespace PlaneAlerter.Services {
 	internal interface ITwitterService
@@ -42,6 +44,7 @@ namespace PlaneAlerter.Services {
 
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly ILoggerWithQueue _logger;
+		private readonly HttpClient _httpClient;
 
 		//Don't even think about it
 		private const string Key = "U1dYZUhZT0RqOG1hV25xRzczMXZ6Y3k3NA==";
@@ -50,10 +53,11 @@ namespace PlaneAlerter.Services {
 		private static readonly string ConsumerKey = Encoding.UTF8.GetString(Convert.FromBase64String(Key));
 		private static readonly string ConsumerSecretKey = Encoding.UTF8.GetString(Convert.FromBase64String(SecretKey));
 
-		public TwitterService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
+		public TwitterService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger, HttpClient httpClient)
 		{
 			_settingsManagerService = settingsManagerService;
 			_logger = logger;
+			_httpClient = httpClient;
 		}
 
 		/// <summary>
@@ -72,52 +76,20 @@ namespace PlaneAlerter.Services {
 			long? mediaId = null;
 
 			//Upload map image if required
-			if (mediaUrl != "") {
-				var ms = new MemoryStream();
+			if (!string.IsNullOrEmpty(mediaUrl))
+				mediaId = await UploadMedia(twitterClient, mediaUrl);
 
-				try {
-					//Download the map image from google
-					var req = (HttpWebRequest)WebRequest.Create(mediaUrl);
-					using var res = req.GetResponse();
-					await res.GetResponseStream().CopyToAsync(ms);
-				}
-				catch (Exception e) {
-					_logger.Log($"ERROR: {e.GetType()} error downloading map image from Google: {e.Message}", System.Drawing.Color.Red);
-					return false;
-				}
-
-				try {
-					//Upload it to twitter
-					var imageBytes = ms.ToArray();
-					var media = await twitterClient.Upload.UploadTweetImageAsync(imageBytes);
-					await ms.DisposeAsync();
-
-					//Check if it was uploaded properly
-					if (media.HasBeenUploaded) mediaId = media.Id;
-					else _logger.Log("ERROR: Error uploading map", System.Drawing.Color.Red);
-				}
-				catch (TwitterException e) {
-					_logger.Log($"ERROR: Error uploading map image to Twitter: {e}", System.Drawing.Color.Red);
-				}
-				catch (Exception e) { 
-					_logger.Log($"ERROR: {e.GetType()} error uploading map image to Twitter: {e.Message}", System.Drawing.Color.Red);
-				}
-			}
+			var requestBody = mediaId != null
+				? $@"{{""text"": ""{content}"", ""media"": {{""media_ids"": [""{mediaId}""]}}}}"
+				: $@"{{""text"": ""{content}""}}";
 
 			//Publish tweet
 			try {
-				string requestBody;
-				if (mediaId != null) {
-					requestBody = $@"{{""text"": ""{content}"", ""media"": {{""media_ids"": [""{mediaId}""]}}}}";
-				}
-				else {
-					requestBody = $@"{{""text"": ""{content}""}}";
-				}
 				await twitterClient.Execute.RequestAsync(request =>
 				{
 					request.Url = "https://api.twitter.com/2/tweets";
 					request.HttpMethod = HttpMethod.POST;
-					request.HttpContent = new System.Net.Http.StringContent(requestBody, Encoding.ASCII, "application/json");
+					request.HttpContent = new StringContent(requestBody, Encoding.ASCII, "application/json");
 				});
 			}
 			catch (TwitterException e) {
@@ -136,6 +108,46 @@ namespace PlaneAlerter.Services {
 			}
 
 			return true;
+		}
+
+		private async Task<long?> UploadMedia(ITwitterClient client, string mediaUrl)
+		{
+			byte[] imageBytes;
+
+			try
+			{
+				//Download the map image from google
+				imageBytes = await _httpClient.GetByteArrayAsync(mediaUrl);
+			}
+			catch (Exception e)
+			{
+				_logger.Log($"ERROR: {e.GetType()} error downloading map image from Google: {e.Message}",
+					System.Drawing.Color.Red);
+				return null;
+			}
+
+			try
+			{
+				//Upload it to twitter
+				var media = await client.Upload.UploadTweetImageAsync(imageBytes);
+
+				//Check if it was uploaded properly
+				if (!media.HasBeenUploaded)
+					_logger.Log("ERROR: Error uploading map", System.Drawing.Color.Red);
+				
+				return media.Id;
+			}
+			catch (TwitterException e)
+			{
+				_logger.Log($"ERROR: Error uploading map image to Twitter: {e}", System.Drawing.Color.Red);
+			}
+			catch (Exception e)
+			{
+				_logger.Log($"ERROR: {e.GetType()} error uploading map image to Twitter: {e.Message}",
+					System.Drawing.Color.Red);
+			}
+
+			return null;
 		}
 
 		/// <summary>

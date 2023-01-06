@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Media;
 using System.Threading;
+using System.Threading.Tasks;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
 using Match = PlaneAlerter.Models.Match;
@@ -77,7 +78,7 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public void Start() {
+		public async void Start() {
 			//Name of receiver that provided the aircraft information
 			string receiverName;
 			//Number of triggers matching for condition
@@ -95,9 +96,9 @@ namespace PlaneAlerter.Services {
 				StatusChanged?.Invoke(this, "Downloading Aircraft Info...");
 				receiverName = "";
 				//Get latest aircraft information
-				_vrsService.GetAircraft(false, true, ActiveMatches.Count == 0);
+				await _vrsService.GetAircraft(false, true, ActiveMatches.Count == 0);
 				if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS)
-					_vrsService.GetAircraft(true, false, ActiveMatches.Count == 0);
+					await _vrsService.GetAircraft(true, false, ActiveMatches.Count == 0);
 
 				//Check if there are aircraft to check
 				if (_vrsService.AircraftList.Count != 0) {
@@ -193,9 +194,9 @@ namespace PlaneAlerter.Services {
 
 								//Get trails if they haven't been requested due to no matches
 								if (ActiveMatches.Count == 1 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0) {
-									_vrsService.GetAircraft(false, true, false, true);
+									await _vrsService.GetAircraft(false, true, false, true);
 									if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS)
-										_vrsService.GetAircraft(true, false, false, true);
+										await _vrsService.GetAircraft(true, false, false, true);
 									updatedTrailsAvailable = true;
 								}
 
@@ -218,7 +219,7 @@ namespace PlaneAlerter.Services {
 
 								//Send Alert
 								if (condition.AlertType == AlertType.First_and_Last_Contact || condition.AlertType == AlertType.First_Contact)
-									SendAlert(condition, aircraft, receiverName, true);
+									await SendAlert(condition, aircraft, receiverName, true);
 							}
 							if (ignoreFollowing) break;
 						}
@@ -259,7 +260,7 @@ namespace PlaneAlerter.Services {
 										receiverName = _vrsService.Receivers[aircraft.GetProperty("Rcvr")];
 
 									//Send Alert
-									SendAlert(condition, aircraft, receiverName, false);
+									await SendAlert(condition, aircraft, receiverName, false);
 								}
 								break;
 							}
@@ -301,7 +302,7 @@ namespace PlaneAlerter.Services {
 			_stopping = true;
 		}
 
-		private void SendAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
+		private async Task SendAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
 			SendingAlert?.Invoke(condition, aircraft, receiver, isFirst);
 
 			//Make a ding noise
@@ -313,7 +314,7 @@ namespace PlaneAlerter.Services {
 			if (condition.EmailEnabled) {
 				//Send emails
 				foreach (var email in condition.RecieverEmails) {
-					_emailService.SendEmail(email, condition, aircraft, receiver, isFirst);
+					await _emailService.SendEmail(email, condition, aircraft, receiver, isFirst);
 				}
 			}
 			
@@ -364,10 +365,10 @@ namespace PlaneAlerter.Services {
 				var mapUrl = condition.TweetMap ? _urlBuilderService.GenerateMapUrl(aircraft) : "";
 
 				//Send tweet
-				var success = _twitterService.Tweet(credentials[0], credentials[1], content, mapUrl).Result;
-				if (success) {
+				var success = await _twitterService.Tweet(credentials[0], credentials[1], content, mapUrl);
+				
+				if (success)
 					_logger.Log(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.Name, Color.LightBlue);
-				}
 			}
 
 			//Increase sent alerts for condition and update stats

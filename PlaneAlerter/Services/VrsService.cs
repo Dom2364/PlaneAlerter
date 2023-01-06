@@ -8,7 +8,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace PlaneAlerter.Services
 {
@@ -27,15 +31,18 @@ namespace PlaneAlerter.Services
 		/// <summary>
 		/// Get latest aircraftlist.json
 		/// </summary>
-		void GetAircraft(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false);
+		Task GetAircraft(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false);
 
-		Dictionary<string, string>? GetReceivers();
+		Task<Dictionary<string, string>?> GetReceivers();
+
+		Task<string[]> GetAircraftThumbnails(string icao);
 	}
 
 	internal class VrsService : IVrsService
 	{
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly ILoggerWithQueue _logger;
+		private readonly HttpClient _httpClient;
 
 		/// <summary>
 		/// List of current aircraft
@@ -52,21 +59,17 @@ namespace PlaneAlerter.Services
 		/// </summary>
 		private int _trailsAge = 1;
 
-		/// <summary>
-		/// Client for sending aircraftlist.json requests
-		/// </summary>
-		private HttpWebRequest? _request;
-
-		public VrsService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
+		public VrsService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger, HttpClient httpClient)
 		{
 			_settingsManagerService	= settingsManagerService;
 			_logger = logger;
+			_httpClient = httpClient;
 		}
 
 		/// <summary>
 		/// Get latest aircraftlist.json
 		/// </summary>
-		public void GetAircraft(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false)
+		public async Task GetAircraft(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false)
 		{
 			var requestTrails = _settingsManagerService.Settings.TrailsUpdateFrequency == 1;
 
@@ -103,10 +106,10 @@ namespace PlaneAlerter.Services
 
 			try
 			{
-				JObject responseJson;
+				JObject? responseJson;
 				try
 				{
-					responseJson = RequestAircraftList(url);
+					responseJson = await RequestAircraftListAsync(url);
 				}
 				catch (Exception e)
 				{
@@ -194,30 +197,29 @@ namespace PlaneAlerter.Services
 			}
 		}
 
-		private JObject? RequestAircraftList(string url)
+		private async Task<JObject?> RequestAircraftListAsync(string url)
 		{
-			//Create request
-			_request = (HttpWebRequest)WebRequest.Create(url);
-			_request.Method = "GET";
-			_request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-			_request.Timeout = _settingsManagerService.Settings.Timeout * 1000;
-			//Add credentials if they are provided
+			var request = new HttpRequestMessage(HttpMethod.Get, url);
+
 			if (_settingsManagerService.Settings.VRSAuthenticate)
 			{
-				var encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(
-					_settingsManagerService.Settings.VRSUser + ":" + _settingsManagerService.Settings.VRSPassword));
-				_request.Headers.Add("Authorization", "Basic " + encoded);
-			}
-			//Send request and parse json response
-			using var response = (HttpWebResponse)_request.GetResponse();
-			using var responseStream = response.GetResponseStream();
-			using var reader = new StreamReader(responseStream);
-			using var jsonReader = new JsonTextReader(reader);
+				var encoded = Convert.ToBase64String(Encoding.ASCII.GetBytes(
+					$"{_settingsManagerService.Settings.VRSUser}:{_settingsManagerService.Settings.VRSPassword}"));
 
-			return JsonSerializer.Create().Deserialize<JObject>(jsonReader);
+				request.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoded);
+			}
+
+			using var tokenSource = new CancellationTokenSource();
+			tokenSource.CancelAfter(_settingsManagerService.Settings.Timeout * 1000);
+
+			var response = await _httpClient.SendAsync(request, tokenSource.Token);
+
+			var responseContent = await response.Content.ReadAsStringAsync();
+
+			return (JObject?)JsonConvert.DeserializeObject(responseContent);
 		}
 
-		public Dictionary<string, string>? GetReceivers()
+		public async Task<Dictionary<string, string>?> GetReceivers()
 		{
 			//Generate aircraftlist.json url
 			var url = _settingsManagerService.Settings.AircraftListUrl;
@@ -226,10 +228,10 @@ namespace PlaneAlerter.Services
 
 			try
 			{
-				JObject responseJson;
+				JObject? responseJson;
 				try
 				{
-					responseJson = RequestAircraftList(url);
+					responseJson = await RequestAircraftListAsync(url);
 				}
 				catch (Exception e)
 				{
@@ -279,6 +281,55 @@ namespace PlaneAlerter.Services
 			}
 
 			return Receivers;
+		}
+
+		public async Task<string[]> GetAircraftThumbnails(string icao)
+		{
+			//Aircraft image urls
+			var imageLinks = new List<string>();
+
+			var url =
+				$"{_settingsManagerService.Settings.AircraftListUrl.Substring(0, _settingsManagerService.Settings.AircraftListUrl.LastIndexOf("/") + 1)}AirportDataThumbnails.json?icao={icao}&numThumbs=2";
+
+			var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+			if (_settingsManagerService.Settings.VRSAuthenticate)
+			{
+				var encoded = Convert.ToBase64String(Encoding.ASCII.GetBytes(
+					$"{_settingsManagerService.Settings.VRSUser}:{_settingsManagerService.Settings.VRSPassword}"));
+
+				request.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoded);
+			}
+
+			using var tokenSource = new CancellationTokenSource();
+			tokenSource.CancelAfter(TimeSpan.FromSeconds(5));
+
+			//Send request and parse response
+			try
+			{
+				var response = await _httpClient.SendAsync(request, tokenSource.Token);
+
+				var responseContent = await response.Content.ReadAsStringAsync();
+
+				//Parse json
+				var responseJson = (JObject?)JsonConvert.DeserializeObject(responseContent);
+
+				if (responseJson == null)
+					return Array.Empty<string>();
+
+				//If status is not 404, add images to result
+				if (responseJson.Value<string>("status") != "404" && responseJson.TryGetValue("data", out var data))
+					imageLinks.AddRange(data.Select(image => image.Value<string>("image"))
+							.Where(x => x != null)
+							.Select(x => x!));
+
+				return imageLinks.ToArray();
+			}
+			catch (Exception e)
+			{
+				_logger.Log($"ERROR: {e.GetType()} error getting aircraft images from VRS: {e.Message}", Color.Red);
+				return Array.Empty<string>();
+			}
 		}
 	}
 }
