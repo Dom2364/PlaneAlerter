@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Linq;
-using PlaneAlerter.Forms;
 using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services
@@ -15,7 +14,13 @@ namespace PlaneAlerter.Services
 		/// <summary>
 		/// Generate a map
 		/// </summary>
-		string GenerateMapUrl(Aircraft aircraft);
+		string GenerateGoogleStaticMapUrl(Aircraft aircraft);
+
+		/// <summary>
+		/// Generate a link to airframes.org
+		/// </summary>
+		/// <param name="reg">Aircraft registration</param>
+		string GenerateAirframesOrgUrl(string reg);
 	}
 
 	internal class UrlBuilderService : IUrlBuilderService
@@ -59,7 +64,7 @@ namespace PlaneAlerter.Services
 		/// <summary>
 		/// Generate a map
 		/// </summary>
-		public string GenerateMapUrl(Aircraft aircraft)
+		public string GenerateGoogleStaticMapUrl(Aircraft aircraft)
 		{
 			var staticMapUrl = "";
 			//If aircraft has a position, generate a google map url
@@ -103,6 +108,11 @@ namespace PlaneAlerter.Services
 			if (staticMapUrl == "" || staticMapUrl.Length == 0) return "";
 
 			return staticMapUrl.Substring(0, staticMapUrl.Length - 1);
+		}
+
+		public string GenerateAirframesOrgUrl(string reg)
+		{
+			return $"http://www.airframes.org/reg/{reg.Replace("-", "").ToUpper()}";
 		}
 	}
 }

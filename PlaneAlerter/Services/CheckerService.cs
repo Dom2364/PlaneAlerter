@@ -373,7 +373,7 @@ namespace PlaneAlerter.Services {
 				}
 
 				//Get map URL if enabled
-				var mapUrl = condition.TweetMap ? _urlBuilderService.GenerateMapUrl(aircraft) : "";
+				var mapUrl = condition.TweetMap ? _urlBuilderService.GenerateGoogleStaticMapUrl(aircraft) : "";
 
 				//Send tweet
 				var success = await _twitterService.Tweet(credentials[0], credentials[1], content, mapUrl);

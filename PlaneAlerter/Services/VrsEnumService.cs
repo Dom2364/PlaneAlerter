@@ -4,7 +4,7 @@ namespace PlaneAlerter.Services
 {
 	internal interface IVrsEnumService
 	{
-		bool TryToString(string propertyKey, string value, out string? convertedValue);
+		bool TryToString(string propertyKey, string? value, out string? convertedValue);
 	}
 
 	/// <summary>
@@ -12,8 +12,14 @@ namespace PlaneAlerter.Services
     /// </summary>
     internal class VrsEnumService : IVrsEnumService
 	{
-        public bool TryToString(string propertyKey, string value, out string? convertedValue)
+        public bool TryToString(string propertyKey, string? value, out string? convertedValue)
         {
+	        if (value == null)
+	        {
+                convertedValue = null;
+                return false;
+	        }
+
             if (!int.TryParse(value, out var result))
             {
                 convertedValue = null;
