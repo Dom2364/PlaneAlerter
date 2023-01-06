@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Threading;
 using PlaneAlerter.Enums;
-using PlaneAlerter.Forms;
 
 namespace PlaneAlerter.Services {
 	internal interface IThreadManagerService
