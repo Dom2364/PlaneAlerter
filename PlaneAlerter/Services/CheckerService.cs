@@ -81,208 +81,13 @@ namespace PlaneAlerter.Services {
 		/// Constructor
 		/// </summary>
 		public async void Start() {
-			//Name of receiver that provided the aircraft information
-			string receiverName;
-			//Number of triggers matching for condition
-			int triggersMatching;
-			//VRS name of property
-			string propertyInternalName;
 
 			//Set culture to invariant
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-			while (!_stopping) {
-				//Set next check time
-				_nextCheck = DateTime.Now.AddSeconds(_settingsManagerService.Settings.RefreshRate);
-				//Notify user that aircraft info is being downloaded
-				StatusChanged?.Invoke(this, "Downloading Aircraft Info...");
-				receiverName = "";
-				//Get latest aircraft information
-				await _vrsService.GetAircraft(false, true, ActiveMatches.Count == 0);
-				if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS)
-					await _vrsService.GetAircraft(true, false, ActiveMatches.Count == 0);
-
-				//Check if there are aircraft to check
-				if (_vrsService.AircraftList.Count != 0) {
-					//Aircraft number to be shown on UI
-					var aircraftCount = 1;
-					//Current condition being checked
-					Condition condition;
-					//Ignore following conditions for an aircraft
-					var ignoreFollowing = false;
-					//Updated trails are available, this check contains the first match in a while
-					var updatedTrailsAvailable = false;
-					foreach (var aircraft in _vrsService.AircraftList.ToList()) {
-						//Update UI with aircraft being checked
-						StatusChanged?.Invoke(this, $"Checking conditions for aircraft {aircraftCount} of {_vrsService.AircraftList.Count}");
-						aircraftCount++;
-
-						if (ActiveMatches.ContainsKey(aircraft.Icao) && ActiveMatches[aircraft.Icao].IgnoreFollowing) continue;
-						if (aircraft.GetProperty("Reg") == null && aircraft.GetProperty("Type") == null && (aircraft.GetProperty("FlightsCount") == null || Convert.ToInt32(aircraft.GetProperty("FlightsCount")) == 0)) 
-							continue;
-
-						//Iterate conditions
-						foreach (var conditionId in _conditionManagerService.Conditions.Keys.ToList()) {
-							condition = _conditionManagerService.Conditions[conditionId];
-							//Skip if condition is disabled or condition is already matched
-							if (condition.AlertType == AlertType.Disabled || (ActiveMatches.ContainsKey(aircraft.Icao) && ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionId == conditionId)))
-								continue;
-
-							triggersMatching = 0;
-							//Iterate triggers for condition
-							foreach (var trigger in condition.Triggers.Values) {
-								//LEGEND
-								//A = Equals/Not Equals
-								//B = Higher Than + Lower Than
-								//C = True/False Boolean
-								//D = Starts With + Ends With
-								//E = Contains
-
-								//Get internal name for property to compare
-								propertyInternalName = VrsProperties.VrsPropertyData[trigger.Property][2].ToString();
-								var propertyValue = aircraft.GetProperty(propertyInternalName);
-
-								//Check property against value
-								if (trigger.ComparisonType == "Equals") {
-									if (propertyValue == null) {
-										if (trigger.Value == "") triggersMatching++;
-									}
-									else {
-										if (propertyValue == trigger.Value) triggersMatching++;
-									}
-								}	
-								else if (trigger.ComparisonType == "Not Equals") {
-									if (propertyValue == null) {
-										if (trigger.Value != "") triggersMatching++;
-									}
-									else {
-										if (propertyValue != trigger.Value) triggersMatching++;
-									}
-								}
-								//These comparisons must have a non-empty value to compare with
-								else if (!string.IsNullOrEmpty(propertyValue)) {
-									if (trigger.ComparisonType == "Contains" && propertyValue.Contains(trigger.Value))
-										triggersMatching++;
-									else if (trigger.ComparisonType == "Higher Than" && Convert.ToDouble(propertyValue) > Convert.ToDouble(trigger.Value))
-										triggersMatching++;
-									else if (trigger.ComparisonType == "Lower Than" && Convert.ToDouble(propertyValue) < Convert.ToDouble(trigger.Value))
-										triggersMatching++;
-									else if (trigger.ComparisonType == "Starts With" && (propertyValue.Length > trigger.Value.Length && propertyValue.Substring(0, trigger.Value.Length) == trigger.Value))
-										triggersMatching++;
-									else if (trigger.ComparisonType == "Ends With" && (propertyValue.Length > trigger.Value.Length && propertyValue.Substring(propertyValue.Length - trigger.Value.Length) == trigger.Value))
-										triggersMatching++;
-								}
-							}
-
-							//Check if condition still matches
-							if (triggersMatching == condition.Triggers.Count) {
-								//Get receiver name
-								if (_vrsService.Receivers.ContainsKey(aircraft.GetProperty("Rcvr")))
-									receiverName = _vrsService.Receivers[aircraft.GetProperty("Rcvr")];
-
-								//If active matches contains aircraft, add condition to the match
-								if (ActiveMatches.ContainsKey(aircraft.Icao)) {
-									ActiveMatches[aircraft.Icao].AddCondition(conditionId, condition, aircraft);
-								}
-								//Else add to active matches
-								else {
-									var m = new Match(aircraft.Icao);
-									m.AddCondition(conditionId, condition, aircraft);
-									ActiveMatches.Add(aircraft.Icao, m);
-								}
-
-								//Cancel checking for conditions for this aircraft
-								ignoreFollowing = condition.IgnoreFollowing;
-
-								//Get trails if they haven't been requested due to no matches
-								if (ActiveMatches.Count == 1 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0) {
-									await _vrsService.GetAircraft(false, true, false, true);
-									if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS)
-										await _vrsService.GetAircraft(true, false, false, true);
-									updatedTrailsAvailable = true;
-								}
-
-								//If updated trails are available, update trail and position
-								if (updatedTrailsAvailable) {
-									foreach (var updatedAircraft in _vrsService.AircraftList.ToList())
-									{
-										if (updatedAircraft.Icao != aircraft.Icao)
-											continue;
-
-										aircraft.Trail = updatedAircraft.Trail;
-										aircraft.SetProperty("Lat", updatedAircraft.GetProperty("Lat"));
-										aircraft.SetProperty("Long", updatedAircraft.GetProperty("Long"));
-										break;
-									}
-								}
-
-								//Log to console
-								_logger.Log(DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " + condition.Name, Color.LightGreen);
-
-								//Send Alert
-								if (condition.AlertType == AlertType.First_and_Last_Contact || condition.AlertType == AlertType.First_Contact)
-									await SendAlert(condition, aircraft, receiverName, true);
-							}
-							if (ignoreFollowing) break;
-						}
-						//If active matches contains this aircraft, update aircraft info
-						if (ActiveMatches.ContainsKey(aircraft.Icao))
-							foreach (var c in ActiveMatches[aircraft.Icao].Conditions)
-								c.AircraftInfo = aircraft;
-
-						//Cancel if thread is supposed to stop
-						if (_stopping)
-							return;
-					}
-					
-					//Check if aircraft have lost signal and remove aircraft that have timed out
-					StatusChanged?.Invoke(this, "Checking aircraft are still on radar...");
-
-					//Iterate active matches
-					foreach (var match in ActiveMatches.Values.ToList()) {
-						//Iterate match conditions
-						foreach (var c in match.Conditions) {
-							//Check if signal has been lost for more than the removal timeout
-							if (match.SignalLost && DateTime.Compare(match.SignalLostTime, DateTime.Now.AddSeconds((
-								    _settingsManagerService.Settings.RemovalTimeout - (_settingsManagerService.Settings.RemovalTimeout * 2)))) < 0) {
-								//Remove from active matches
-								ActiveMatches.Remove(match.Icao);
-								//Log to console
-								_logger.Log(DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
-								//Update aircraft info
-								var aircraft = c.AircraftInfo;
-
-								//Alert if alert type is both or last
-								if (c.Condition.AlertType == AlertType.First_and_Last_Contact || c.Condition.AlertType ==
-								    AlertType.Last_Contact) {
-									condition = c.Condition;
-
-									//Get receiver name
-									if (_vrsService.Receivers.ContainsKey(aircraft.GetProperty("Rcvr")))
-										receiverName = _vrsService.Receivers[aircraft.GetProperty("Rcvr")];
-
-									//Send Alert
-									await SendAlert(condition, aircraft, receiverName, false);
-								}
-								break;
-							}
-							//Check if signal has been lost/returned
-							var stillActive = false;
-							foreach (var aircraft in _vrsService.AircraftList)
-								if (aircraft.Icao == match.Icao)
-									stillActive = true;
-							if (!stillActive && match.SignalLost == false) {
-								ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
-								ActiveMatches[match.Icao].SignalLost = true;
-								_logger.Log(DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
-							}
-							if (stillActive && match.SignalLost) {
-								ActiveMatches[match.Icao].SignalLost = false;
-								_logger.Log(DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " + match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
-							}
-						}
-					}
-				}
+			while (!_stopping)
+			{
+				await Check();
 
 				//Cancel if thread is supposed to stop
 				if (_stopping) return;
@@ -302,6 +107,268 @@ namespace PlaneAlerter.Services {
 		public void Stop()
 		{
 			_stopping = true;
+		}
+
+		private async Task Check()
+		{
+			//Set next check time
+			_nextCheck = DateTime.Now.AddSeconds(_settingsManagerService.Settings.RefreshRate);
+
+			//Notify user that aircraft info is being downloaded
+			StatusChanged?.Invoke(this, "Downloading Aircraft Info...");
+
+			//Get latest aircraft information
+			await _vrsService.GetAircraft(false, true, ActiveMatches.Count == 0);
+			if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS)
+				await _vrsService.GetAircraft(true, false, ActiveMatches.Count == 0);
+
+			//Check if there are aircraft to check
+			if (_vrsService.AircraftList.Count == 0)
+				return;
+
+			//Check if aircraft match conditions
+			await CheckForFirstContactAlerts();
+			
+			//Check if aircraft have lost signal and remove aircraft that have timed out
+			await CheckForLastContactAlerts();
+		}
+
+		private async Task CheckForFirstContactAlerts()
+		{
+			//Updated trails are available, this check contains the first match in a while
+			var updatedTrailsAvailable = false;
+
+			//Aircraft number to be shown on UI
+			var aircraftCount = 1;
+			foreach (var aircraft in _vrsService.AircraftList.ToList())
+			{
+				//Update UI with aircraft being checked
+				StatusChanged?.Invoke(this,
+					$"Checking conditions for aircraft {aircraftCount} of {_vrsService.AircraftList.Count}");
+				aircraftCount++;
+
+				//Ignore if already matched and ignore following is enabled
+				if (ActiveMatches.TryGetValue(aircraft.Icao, out var value) && value.IgnoreFollowing)
+					continue;
+
+				//Ignore if VRS database info looks missing
+				if (aircraft.GetProperty("Reg") == null && aircraft.GetProperty("Type") == null &&
+					(aircraft.GetProperty("FlightsCount") == null ||
+					 Convert.ToInt32(aircraft.GetProperty("FlightsCount")) == 0))
+					continue;
+
+				var ignoreFollowing = false;
+
+				//Iterate conditions
+				foreach (var conditionId in _conditionManagerService.Conditions.Keys.ToList())
+				{
+					var condition = _conditionManagerService.Conditions[conditionId];
+
+					var matchedAlready = ActiveMatches.ContainsKey(aircraft.Icao) &&
+										 ActiveMatches[aircraft.Icao].Conditions.Exists(x => x.ConditionId == conditionId);
+
+					//Skip if condition is disabled or condition is already matched
+					if (condition.AlertType == AlertType.Disabled || matchedAlready)
+						continue;
+
+					var conditionMatches = ConditionMatches(condition, aircraft);
+
+					if (conditionMatches)
+					{
+						//Cancel checking for conditions for this aircraft
+						ignoreFollowing = condition.IgnoreFollowing;
+
+						//Get trails if they haven't been requested due to no matches
+						if (ActiveMatches.Count == 1 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0)
+						{
+							await _vrsService.GetAircraft(false, true, false, true);
+							if (_settingsManagerService.Settings.FilterDistance &&
+								!_settingsManagerService.Settings.IgnoreModeS)
+								await _vrsService.GetAircraft(true, false, false, true);
+							updatedTrailsAvailable = true;
+						}
+
+						//If updated trails are available, update trail and position
+						if (updatedTrailsAvailable)
+						{
+							foreach (var updatedAircraft in _vrsService.AircraftList
+										 .Where(updatedAircraft => updatedAircraft.Icao == aircraft.Icao)
+										 .ToList())
+							{
+								aircraft.Trail = updatedAircraft.Trail;
+								aircraft.SetProperty("Lat", updatedAircraft.GetProperty("Lat"));
+								aircraft.SetProperty("Long", updatedAircraft.GetProperty("Long"));
+								break;
+							}
+						}
+
+						//If active matches contains aircraft, add condition to the match
+						if (ActiveMatches.ContainsKey(aircraft.Icao))
+						{
+							ActiveMatches[aircraft.Icao].AddCondition(conditionId, condition, aircraft);
+						}
+						//Else add to active matches
+						else
+						{
+							var m = new Match(aircraft.Icao);
+							m.AddCondition(conditionId, condition, aircraft);
+							ActiveMatches.Add(aircraft.Icao, m);
+						}
+
+						//Log to console
+						_logger.Log(
+							DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " +
+							condition.Name, Color.LightGreen);
+						
+						//Send Alert
+						if (condition.AlertType == AlertType.First_and_Last_Contact ||
+							condition.AlertType == AlertType.First_Contact)
+						{
+							//Get receiver name
+							var receiverId = aircraft.GetProperty("Rcvr");
+							var receiverName = !string.IsNullOrEmpty(receiverId) && 
+							                   _vrsService.Receivers.TryGetValue(receiverId, out var receiverNameNullable)
+								? receiverNameNullable
+								: "";
+
+							await SendAlert(condition, aircraft, receiverName, true);
+						}
+					}
+
+					if (ignoreFollowing) break;
+				}
+
+				//If active matches contains this aircraft, update aircraft info
+				if (ActiveMatches.ContainsKey(aircraft.Icao))
+					foreach (var c in ActiveMatches[aircraft.Icao].Conditions)
+						c.AircraftInfo = aircraft;
+
+				//Cancel if thread is supposed to stop
+				if (_stopping)
+					return;
+			}
+		}
+
+		private async Task CheckForLastContactAlerts()
+		{
+			StatusChanged?.Invoke(this, "Checking aircraft are still on radar...");
+
+			//Iterate active matches
+			foreach (var match in ActiveMatches.Values.ToList())
+			{
+				//Iterate match conditions
+				foreach (var c in match.Conditions)
+				{
+					var timeoutDateTime = DateTime.Now.AddSeconds((_settingsManagerService.Settings.RemovalTimeout -
+																   (_settingsManagerService.Settings.RemovalTimeout * 2)));
+
+					//Continue if not timed out
+					if (!match.SignalLost ||
+						DateTime.Compare(match.SignalLostTime, timeoutDateTime) >= 0)
+						continue;
+
+					//Remove from active matches
+					ActiveMatches.Remove(match.Icao);
+
+					//Log to console
+					_logger.Log(
+						DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
+
+					//Update aircraft info
+					var aircraft = c.AircraftInfo;
+
+					//Alert if alert type is both or last
+					if (c.Condition.AlertType is AlertType.First_and_Last_Contact or AlertType.Last_Contact)
+					{
+						//Get receiver name
+						var receiverName = "";
+						if (_vrsService.Receivers.ContainsKey(aircraft.GetProperty("Rcvr")))
+							receiverName = _vrsService.Receivers[aircraft.GetProperty("Rcvr")];
+
+						//Send Alert
+						await SendAlert(c.Condition, aircraft, receiverName, false);
+					}
+
+					break;
+				}
+
+				//Check if signal has been lost/returned
+				var stillActive = _vrsService.AircraftList.Any(aircraft => aircraft.Icao == match.Icao);
+
+				//Active > Not active
+				if (!stillActive && match.SignalLost == false)
+				{
+					ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
+					ActiveMatches[match.Icao].SignalLost = true;
+
+					_logger.Log(
+						DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " +
+						match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+				}
+
+				//Not active > Active
+				if (stillActive && match.SignalLost)
+				{
+					ActiveMatches[match.Icao].SignalLost = false;
+
+					_logger.Log(
+						DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " +
+						match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+				}
+			}
+		}
+
+		private static bool ConditionMatches(Condition condition, Aircraft aircraft)
+		{
+			var triggersMatching = 0;
+
+			//Iterate triggers for condition
+			foreach (var trigger in condition.Triggers.Values)
+			{
+				//Get internal name for property to compare
+				var propertyInternalName = VrsProperties.VrsPropertyData[trigger.Property][2];
+				var propertyValue = aircraft.GetProperty(propertyInternalName);
+
+				//Check property against value
+				if (trigger.ComparisonType == "Equals")
+				{
+					if (propertyValue == null)
+					{
+						if (trigger.Value == "") triggersMatching++;
+					}
+					else
+					{
+						if (propertyValue == trigger.Value) triggersMatching++;
+					}
+				}
+				else if (trigger.ComparisonType == "Not Equals")
+				{
+					if (propertyValue == null)
+					{
+						if (trigger.Value != "") triggersMatching++;
+					}
+					else
+					{
+						if (propertyValue != trigger.Value) triggersMatching++;
+					}
+				}
+				//These comparisons must have a non-empty value to compare with
+				else if (!string.IsNullOrEmpty(propertyValue))
+				{
+					switch (trigger.ComparisonType)
+					{
+						case "Contains" when propertyValue.Contains(trigger.Value):
+						case "Higher Than" when Convert.ToDouble(propertyValue) > Convert.ToDouble(trigger.Value):
+						case "Lower Than" when Convert.ToDouble(propertyValue) < Convert.ToDouble(trigger.Value):
+						case "Starts With" when (propertyValue.Length > trigger.Value.Length && propertyValue.Substring(0, trigger.Value.Length) == trigger.Value):
+						case "Ends With" when (propertyValue.Length > trigger.Value.Length && propertyValue.Substring(propertyValue.Length - trigger.Value.Length) == trigger.Value):
+							triggersMatching++;
+							break;
+					}
+				}
+			}
+
+			return triggersMatching == condition.Triggers.Count;
 		}
 
 		private async Task SendAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
@@ -387,7 +454,7 @@ namespace PlaneAlerter.Services {
 			_statsService.TotalAlertsSent++;
 		}
 
-		public void LogAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst)
+		private void LogAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst)
 		{
 			try
 			{

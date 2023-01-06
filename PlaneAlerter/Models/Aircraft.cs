@@ -11,7 +11,7 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// List of property values retrieved from last aircraftlist.json
 		/// </summary>
-		private readonly Dictionary<string, string> _properties = new Dictionary<string, string>();
+		private readonly Dictionary<string, string?> _properties = new Dictionary<string, string?>();
 
 		/// <summary>
 		/// ICAO hex of aircraft
@@ -38,7 +38,7 @@ namespace PlaneAlerter.Models
 		/// </summary>
 		/// <param name="key">Property name</param>
 		/// <param name="value">Value</param>
-		public void SetProperty(string key, string value)
+		public void SetProperty(string key, string? value)
 		{
 			if (_properties.ContainsKey(key))
 				_properties[key] = value;
