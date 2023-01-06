@@ -41,6 +41,7 @@ namespace PlaneAlerter.Services {
 		private readonly IConditionManagerService _conditionManagerService;
 		private readonly IVrsService _vrsService;
 		private readonly IEmailService _emailService;
+		private readonly IEmailBuilderService _emailBuilderService;
 		private readonly ITwitterService _twitterService;
 		private readonly IUrlBuilderService _urlBuilderService;
 		private readonly IStatsService _statsService;
@@ -60,14 +61,15 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public CheckerService(ISettingsManagerService settingsManagerService, IConditionManagerService conditionManagerService, IVrsService vrsService,
-			IEmailService emailService, ITwitterService twitterService, IUrlBuilderService urlBuilderService, IStatsService statsService,
-			IStringFormatterService stringFormatterService, ILoggerWithQueue logger)
+		public CheckerService(ISettingsManagerService settingsManagerService, IConditionManagerService conditionManagerService,
+			IVrsService vrsService, IEmailService emailService, IEmailBuilderService emailBuilderService, ITwitterService twitterService,
+			IUrlBuilderService urlBuilderService, IStatsService statsService, IStringFormatterService stringFormatterService, ILoggerWithQueue logger)
 		{
 			_settingsManagerService = settingsManagerService;
 			_conditionManagerService = conditionManagerService;
 			_vrsService = vrsService;
 			_emailService = emailService;
+			_emailBuilderService = emailBuilderService;
 			_twitterService = twitterService;
 			_urlBuilderService = urlBuilderService;
 			_statsService = statsService;
@@ -313,8 +315,17 @@ namespace PlaneAlerter.Services {
 
 			if (condition.EmailEnabled) {
 				//Send emails
-				foreach (var email in condition.RecieverEmails) {
-					await _emailService.SendEmail(email, condition, aircraft, receiver, isFirst);
+				foreach (var emailAddress in condition.RecieverEmails)
+				{
+					var email = await _emailBuilderService.Build(condition, aircraft, receiver, isFirst);
+					
+					_logger.Log(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.Icao + " | " + email.Subject,
+						Color.LightBlue);
+
+					_emailService.SendEmail(email, emailAddress);
+
+					_logger.Log(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.Icao + " | " + email.Subject,
+						Color.LightBlue);
 				}
 			}
 			

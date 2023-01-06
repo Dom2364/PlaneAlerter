@@ -57,6 +57,7 @@ namespace PlaneAlerter {
 					services.AddSingleton<ICheckerService, CheckerService>();
 					services.AddSingleton<ITwitterService, TwitterService>();
 					services.AddSingleton<IEmailService, EmailService>();
+					services.AddSingleton<IEmailBuilderService, EmailBuilderService>();
 					services.AddSingleton<IUrlBuilderService, UrlBuilderService>();
 					services.AddSingleton<IStatsService, StatsService>();
 					services.AddSingleton<IThreadManagerService, ThreadManagerService>();
