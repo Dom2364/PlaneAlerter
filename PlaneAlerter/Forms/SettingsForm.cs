@@ -71,14 +71,14 @@ namespace PlaneAlerter.Forms {
 			smtpSSLCheckBox.Checked = _settingsManagerService.Settings.SMTPSSL;
 			timeoutTextBox.Value = _settingsManagerService.Settings.Timeout;
 			filterDstCheckBox.Checked = _settingsManagerService.Settings.FilterDistance;
-			filterDstCheckBox_CheckedChanged(this, new EventArgs());
+			filterDstCheckBox_CheckedChanged(this, EventArgs.Empty);
 			filterAltCheckBox.Checked = _settingsManagerService.Settings.FilterAltitude;
-			filterAltCheckBox_CheckedChanged(this, new EventArgs());
+			filterAltCheckBox_CheckedChanged(this, EventArgs.Empty);
 			ignoreModeSCheckBox.Checked = _settingsManagerService.Settings.IgnoreModeS;
 			ignoreDistTextBox.Value = Convert.ToDecimal(_settingsManagerService.Settings.IgnoreDistance);
 			ignoreAltTextBox.Value = _settingsManagerService.Settings.IgnoreAltitude;
 			if (filterReceiverCheckBox.Checked) filterReceiverCheckBox.Checked = _settingsManagerService.Settings.FilterReceiver; //Will be unchecked if there was an error getting receivers
-			filterReceiverCheckBox_CheckedChanged(this, new EventArgs());
+			filterReceiverCheckBox_CheckedChanged(this, EventArgs.Empty);
 			trailsAgeNumericUpDown.Value = _settingsManagerService.Settings.TrailsUpdateFrequency;
 		}
 

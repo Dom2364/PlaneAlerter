@@ -61,7 +61,7 @@ namespace PlaneAlerter.Models
 		/// Get list of keys from property list
 		/// </summary>
 		/// <returns>List of property keys</returns>
-		public Dictionary<string, string>.KeyCollection GetPropertyKeys()
+		public Dictionary<string, string?>.KeyCollection GetPropertyKeys()
 		{
 			return _properties.Keys;
 		}

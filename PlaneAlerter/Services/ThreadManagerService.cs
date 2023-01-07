@@ -123,7 +123,7 @@ namespace PlaneAlerter.Services {
 		/// </summary>
 		public void Stop()
 		{
-			if (ThreadStatus != CheckerStatus.Running)
+			if (ThreadStatus != CheckerStatus.Running || CheckerThread == null)
 				return;
 
 			_checkerService.Stop();

@@ -31,13 +31,15 @@ namespace PlaneAlerter.Services
 		/// <returns>Parsed string</returns>
 		public string Format(string format, Aircraft aircraft, Condition condition)
 		{
+			var receiverId = aircraft.GetProperty("Rcvr");
+
 			var variables = new Dictionary<string, string>
 			{
 				{ "ConditionName", condition.Name },
 				{
 					"RcvrName",
-					_vrsService.Receivers.ContainsKey(aircraft.GetProperty("Rcvr"))
-						? _vrsService.Receivers[aircraft.GetProperty("Rcvr")]
+					!string.IsNullOrEmpty(receiverId) && _vrsService.Receivers.TryGetValue(receiverId, out var receiverName)
+						? receiverName
 						: ""
 				},
 				{ "Date", DateTime.Now.ToString("d") },
