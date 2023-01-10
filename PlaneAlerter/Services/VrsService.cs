@@ -4,7 +4,6 @@ using PlaneAlerter.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using PlaneAlerter.Extensions;
 
 namespace PlaneAlerter.Services
 {
@@ -117,40 +117,41 @@ namespace PlaneAlerter.Services
 					return;
 				}
 
-				//Check if we actually got aircraft data
-				if (responseJson["acList"] == null)
+				if (responseJson == null)
+				{
+					_logger.Log("ERROR: Unable to deserialise AircraftList.json", Color.Red);
+					return;
+				}
+
+				//Check if we actually got data
+				if (responseJson.OptionalValue<JToken>("acList") == null ||
+				    responseJson.OptionalValue<JToken>("stm") == null)
 				{
 					_logger.Log("ERROR: Invalid response received from server", Color.Red);
 					return;
 				}
 
-				//Throw error if server time was not parsed
-				if (responseJson["stm"] == null)
-					throw new JsonReaderException();
-
 				//Save old trails if not requesting new ones
-				Dictionary<string, double[]>? oldTrails = null;
-				if (!requestTrails) oldTrails = AircraftList.ToDictionary(x => x.Icao, x => x.Trail);
+				Dictionary<string, double?[]>? oldTrails = null;
+				if (!requestTrails)
+					oldTrails = AircraftList.ToDictionary(x => x.Icao, x => x.Trail);
+
+				if (clearExisting) AircraftList.Clear();
 
 				//Parse aircraft data
-				if (clearExisting) AircraftList.Clear();
-				foreach (JObject a in responseJson["acList"].ToList())
+				foreach (var a in responseJson.RequiredValue<List<JObject?>>("acList"))
 				{
-					//Ignore if no icao is provided
-					if (a["Icao"] == null) continue;
+					//Ignore if null
+					if (a == null)
+						continue;
+
 					//Create new aircraft
-					var aircraft = new Aircraft(a["Icao"].ToString());
+					var aircraft = new Aircraft(a.RequiredValue<string>("Icao"));
 
 					//Parse aircraft trail
 					if (requestTrails)
 					{
-						if (a["Cot"] != null)
-							aircraft.Trail = new double[a["Cot"].Count()];
-						for (var i = 0; i < aircraft.Trail.Length - 1; i++)
-							if (a["Cot"][i].Value<string>() != null)
-								aircraft.Trail[i] = double.Parse(a["Cot"][i].Value<string>(), CultureInfo.InvariantCulture);
-							else
-								aircraft.Trail[i] = 0;
+						aircraft.Trail = a.OptionalValue<double?[]>("Cot") ?? Array.Empty<double?>();
 					}
 					else
 					{
@@ -159,8 +160,8 @@ namespace PlaneAlerter.Services
 
 					//Parse aircraft properties
 					var properties = a.Properties().ToList();
-					for (var i = 0; i < properties.Count; i++)
-						aircraft.AddProperty(properties[i].Name, properties[i].Value.ToString());
+					foreach (var property in properties)
+						aircraft.AddProperty(property.Name, property.Value.ToString());
 
 					//Add aircraft to list
 					AircraftList.Add(aircraft);
@@ -168,8 +169,8 @@ namespace PlaneAlerter.Services
 
 				//Get list of receivers
 				Receivers.Clear();
-				foreach (JObject f in responseJson["feeds"])
-					Receivers.Add(f["id"].ToString(), f["name"].ToString());
+				foreach (var f in responseJson.RequiredValue<JToken>("feeds"))
+					Receivers.Add(f.RequiredValue<string>("id"), f.RequiredValue<string>("name"));
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();
@@ -239,20 +240,24 @@ namespace PlaneAlerter.Services
 					return null;
 				}
 
-				//Check if we actually got aircraft data
-				if (responseJson["acList"] == null)
+				if (responseJson == null)
 				{
-					_logger.Log("ERROR: Invalid response recieved from server", Color.Red);
+					_logger.Log("ERROR: Unable to deserialise AircraftList.json", Color.Red);
 					return null;
 				}
-				//Throw error if server time was not parsed
-				if (responseJson["stm"] == null)
-					throw new JsonReaderException();
+
+				//Check if we actually got data
+				if (responseJson.OptionalValue<JToken>("feeds") == null ||
+				    responseJson.OptionalValue<JToken>("stm") == null)
+				{
+					_logger.Log("ERROR: Invalid response received from server", Color.Red);
+					return null;
+				}
 
 				//Get list of receivers
 				Receivers.Clear();
-				foreach (JObject f in responseJson["feeds"])
-					Receivers.Add(f["id"].ToString(), f["name"].ToString());
+				foreach (var f in responseJson.RequiredValue<JToken>("feeds"))
+					Receivers.Add(f.RequiredValue<string>("id"), f.RequiredValue<string>("name"));
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();

@@ -43,14 +43,13 @@ namespace PlaneAlerter.Services
 				//Get coordinate
 				var coordinate = new[]
 				{
-					aircraft.Trail[i * 4].ToString("#.####"),
-					aircraft.Trail[i * 4 + 1].ToString("#.####"),
-					aircraft.Trail[i * 4 + 2].ToString("#.####"),
-					(aircraft.Trail[i * 4 + 3] * 0.3048).ToString("#.####") // Convert feet to metres for KML
+					aircraft.Trail[i * 4]?.ToString("#.####"),
+					aircraft.Trail[i * 4 + 1]?.ToString("#.####"),
+					((aircraft.Trail[i * 4 + 3] ?? 0) * 0.3048).ToString("#.####") // Convert feet to metres for KML
 				};
 
 				//Add coordinate to KML
-				kmlData += coordinate[1] + "," + coordinate[0] + "," + coordinate[3] + " ";
+				kmlData += coordinate[1] + "," + coordinate[0] + "," + coordinate[2] + " ";
 			}
 
 			//Add rest of KML

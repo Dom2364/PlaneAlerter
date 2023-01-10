@@ -21,7 +21,7 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Position track from last aircraftlist.json
 		/// </summary>
-		public double[] Trail { get; set; } = Array.Empty<double>();
+		public double?[] Trail { get; set; } = Array.Empty<double?>();
 
 		/// <summary>
 		/// Get property value from property list

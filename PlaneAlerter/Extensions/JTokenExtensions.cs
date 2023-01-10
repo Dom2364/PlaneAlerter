@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace PlaneAlerter.Extensions
@@ -8,12 +9,12 @@ namespace PlaneAlerter.Extensions
 		public static T RequiredValue<T>(this JToken? token, params string[] keys)
 		{
 			if (token == null)
-				throw new Exception($"Token null, unable to get key {string.Join('/', keys)}");
+				throw new JsonReaderException($"Token null, unable to get key {string.Join('/', keys)}");
 
 			var value = token.OptionalValue<T>(keys);
 
 			if (value == null)
-				throw new Exception($"None of the keys ({string.Join(", ", keys)}) exist as a child of {token.Path}");
+				throw new JsonReaderException($"None of the keys ({string.Join(", ", keys)}) exist as a child of {token.Path}");
 
 			return value;
 		}
@@ -21,7 +22,7 @@ namespace PlaneAlerter.Extensions
 		public static T? OptionalValue<T>(this JToken? token, params string[] keys)
 		{
 			if (token == null)
-				throw new Exception($"Token null, unable to get key {string.Join('/', keys)}");
+				throw new JsonReaderException($"Token null, unable to get key {string.Join('/', keys)}");
 
 			var value = default(T);
 			foreach (var key in keys)

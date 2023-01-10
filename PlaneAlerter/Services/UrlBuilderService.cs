@@ -90,11 +90,10 @@ namespace PlaneAlerter.Services
 			{
 				//Get coordinate
 				var coordinate = new[] {
-						aircraft.Trail[i * 4].ToString("#.####"),
-						aircraft.Trail[i * 4 + 1].ToString("#.####"),
-						aircraft.Trail[i * 4 + 2].ToString("#.####"),
-						aircraft.Trail[i * 4 + 3].ToString("#.####")
+						aircraft.Trail[i * 4]?.ToString("#.####") ?? "0",
+						aircraft.Trail[i * 4 + 1]?.ToString("#.####") ?? "0"
 					};
+
 				var coordinateString = coordinate[0] + "," + coordinate[1] + "|";
 
 				//Check if adding another coordinate will make the url too long

@@ -334,9 +334,6 @@ namespace PlaneAlerter.Forms
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
 		private void PlaneAlerterFormClosing(object sender, FormClosingEventArgs e) {
-			//Abort threads if running
-			_threadManagerService.CheckerThread?.Abort();
-
 			_settingsManagerService.Save();
 		}
 		
