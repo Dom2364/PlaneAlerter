@@ -35,6 +35,7 @@ namespace PlaneAlerter.Services {
 
 		public Settings Settings { get; set; } = new Settings();
 		public EmailContentConfig EmailContentConfig { get; set; } = new EmailContentConfig();
+		public bool LoadedSuccessfully { get; set; } = false;
 
 		//Constructor
 		public SettingsManagerService(ILoggerWithQueue logger)
@@ -125,19 +126,21 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// Save Settings
 		/// </summary>
-		public void Save() {
+		public void Save()
+		{
+			if (!LoadedSuccessfully)
+				return;
+
 			//Serialise and save settings and email config
 			var serialisedSettings = JsonConvert.SerializeObject(GetSettingsDictionary(), Formatting.Indented);
 			File.WriteAllText("settings.json", serialisedSettings);
+
 			var serialisedEcc = JsonConvert.SerializeObject(GetECCDictionary(), Formatting.Indented);
 			File.WriteAllText("emailconfig.json", serialisedEcc);
 		}
 
 		public void Load()
 		{
-			//Initialise aircraftlist.json url as empty
-			Settings.AircraftListUrl = "";
-
 			//Create settings file if one does not exist
 			if (!File.Exists("settings.json"))
 			{
@@ -146,70 +149,72 @@ namespace PlaneAlerter.Services {
 			}
 
 			//Deserialise settings file
-			JObject? settingsJson;
-			using (var fileStream = new FileStream("settings.json", FileMode.Open))
-			using (var reader = new StreamReader(fileStream))
-			using (var jsonReader = new JsonTextReader(reader))
+			JObject? settingsJson = null;
+			try
+			{
+				using var fileStream = new FileStream("settings.json", FileMode.Open);
+				using var reader = new StreamReader(fileStream);
+				using var jsonReader = new JsonTextReader(reader);
 				settingsJson = JsonSerializer.Create().Deserialize<JObject>(jsonReader);
-
-			//If file could not be parsed, create a new one, else parse settings
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show($"Unable to deserialise settings.json, exiting program\n\n{e.Message}\n\n{e.StackTrace}", "settings.json parse error",
+					MessageBoxButtons.OK, MessageBoxIcon.Error);
+				Environment.Exit(0);
+			}
+			
 			if (settingsJson == null)
 			{
-				MessageBox.Show("Unable to parse settings.json, exiting program", "Settings.json parse error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				Application.Exit();
+				MessageBox.Show("Error loading settings.json, exiting program", "settings.json error",
+					MessageBoxButtons.OK, MessageBoxIcon.Error);
+				Environment.Exit(0);
 			}
-			else
+
+			//Copy settings from parsed json
+			try {
+				Settings.SenderEmail = settingsJson.RequiredValue<string>("senderEmail");
+				Settings.AircraftListUrl = settingsJson.RequiredValue<string>("acListUrl") ?? string.Empty;
+				Settings.VRSUser = settingsJson.RequiredValue<string>("VRSUsr");
+				Settings.VRSPassword = settingsJson.RequiredValue<string>("VRSPwd");
+				Settings.Lat = settingsJson.RequiredValueStruct<decimal>("Lat");
+				Settings.Long = settingsJson.RequiredValueStruct<decimal>("Long");
+				Settings.FilterDistance = settingsJson.OptionalValueStruct<bool>("filterDistance") ?? false;
+				Settings.FilterAltitude = settingsJson.OptionalValueStruct<bool>("filterAltitude") ?? false;
+				Settings.IgnoreModeS = settingsJson.OptionalValueStruct<bool>("ignoreModeS") ?? true;
+				Settings.IgnoreDistance = settingsJson.OptionalValueStruct<double>("ignoreDistance") ?? 30000;
+				Settings.IgnoreAltitude = settingsJson.OptionalValueStruct<int>("ignoreAltitude") ?? 100000;
+				Settings.FilterReceiver = settingsJson.OptionalValueStruct<bool>("filterReceiver") ?? false;
+				Settings.FilterReceiverId = settingsJson.OptionalValueStruct<int>("filterReceiverId") ?? 1;
+				Settings.TrailsUpdateFrequency = settingsJson.OptionalValueStruct<int>("trailsUpdateFrequency") ?? 1;
+				Settings.RemovalTimeout = settingsJson.OptionalValueStruct<int>("timeoutLength") ?? 60;
+				Settings.RefreshRate = settingsJson.OptionalValueStruct<int>("refreshRate") ?? 60;
+				Settings.StartOnStart = settingsJson.OptionalValueStruct<bool>("startOnStart") ?? true;
+				Settings.Timeout = settingsJson.OptionalValueStruct<int>("timeout") ?? 5;
+				Settings.ShowNotifications = settingsJson.OptionalValueStruct<bool>("showNotifications") ?? true;
+				Settings.SoundAlerts = settingsJson.OptionalValueStruct<bool>("soundAlerts") ?? true;
+				Settings.CentreMapOnAircraft = settingsJson.OptionalValueStruct<bool>("centreMapOnAircraft") ?? true;
+				Settings.RadarUrl = settingsJson.RequiredValue<string>("radarURL");
+				Settings.SMTPHost = settingsJson.RequiredValue<string>("SMTPHost");
+				Settings.SMTPPort = settingsJson.OptionalValueStruct<int>("SMTPPort") ?? 21;
+				Settings.SMTPUser = settingsJson.RequiredValue<string>("SMTPUsr");
+				Settings.SMTPPassword = settingsJson.RequiredValue<string>("SMTPPwd");
+				Settings.SMTPSSL = settingsJson.RequiredValueStruct<bool>("SMTPSSL");
+				Settings.TwitterUsers = settingsJson.OptionalValue<Dictionary<string, string[]>>("TwitterUsers") ?? new Dictionary<string, string[]>();
+			}
+			catch (Exception e)
 			{
-				//Copy settings from parsed json
-				if (settingsJson["senderEmail"] != null) Settings.SenderEmail = settingsJson["senderEmail"].ToString();
-				if (settingsJson["acListUrl"] != null) Settings.AircraftListUrl = settingsJson["acListUrl"].ToString();
-				if (Settings.AircraftListUrl.ToString() != "" && Settings.AircraftListUrl.ToString().Length > 3 && Settings.AircraftListUrl.Substring(0, 4) != "http")
-					Settings.AircraftListUrl = "http://" + Settings.AircraftListUrl;
-				if (settingsJson["VRSUsr"] != null) Settings.VRSUser = settingsJson["VRSUsr"].ToString();
-				if (settingsJson["VRSPwd"] != null) Settings.VRSPassword = settingsJson["VRSPwd"].ToString();
-				Settings.VRSAuthenticate = (Settings.VRSUser != "");
-				if (settingsJson["Lat"] != null) Settings.Lat = Convert.ToDecimal(settingsJson["Lat"]);
-				if (settingsJson["Long"] != null) Settings.Long = Convert.ToDecimal(settingsJson["Long"]);
-				if (settingsJson["filterDistance"] != null) Settings.FilterDistance = (settingsJson["filterDistance"].ToString().ToLower() == "true"); else Settings.FilterDistance = false;
-				if (settingsJson["filterAltitude"] != null) Settings.FilterAltitude = (settingsJson["filterAltitude"].ToString().ToLower() == "true"); else Settings.FilterAltitude = false;
-				if (settingsJson["ignoreModeS"] != null) Settings.IgnoreModeS = (settingsJson["ignoreModeS"].ToString().ToLower() == "true"); else Settings.IgnoreModeS = true;
-				if (settingsJson["ignoreDistance"] != null) Settings.IgnoreDistance = Convert.ToDouble(settingsJson["ignoreDistance"]); else Settings.IgnoreDistance = 30000;
-				if (settingsJson["ignoreAltitude"] != null) Settings.IgnoreAltitude = Convert.ToInt32(settingsJson["ignoreAltitude"]); else Settings.IgnoreAltitude = 100000;
-				if (settingsJson["filterReceiver"] != null) Settings.FilterReceiver = (settingsJson["filterReceiver"].ToString().ToLower() == "true"); else Settings.FilterReceiver = false;
-				if (settingsJson["filterReceiverId"] != null) Settings.FilterReceiverId = Convert.ToInt32(settingsJson["filterReceiverId"]); else Settings.FilterReceiverId = 1;
-				if (settingsJson["trailsUpdateFrequency"] != null) Settings.TrailsUpdateFrequency = Convert.ToInt32(settingsJson["trailsUpdateFrequency"]); else Settings.TrailsUpdateFrequency = 1;
-				if (settingsJson["timeoutLength"] != null) Settings.RemovalTimeout = Convert.ToInt32(settingsJson["timeoutLength"]); else Settings.RemovalTimeout = 60;
-				if (settingsJson["refreshRate"] != null) Settings.RefreshRate = Convert.ToInt32(settingsJson["refreshRate"]); else Settings.RefreshRate = 60;
-				if (Settings.RefreshRate < 1) Settings.RefreshRate = 1;
-				if (settingsJson["startOnStart"] != null) Settings.StartOnStart = (settingsJson["startOnStart"].ToString().ToLower() == "true"); else Settings.StartOnStart = true;
-				if (settingsJson["timeout"] != null && Convert.ToInt32(settingsJson["timeout"]) >= 5) Settings.Timeout = Convert.ToInt32(settingsJson["timeout"]); else Settings.Timeout = 5;
-				if (settingsJson["showNotifications"] != null) Settings.ShowNotifications = (settingsJson["showNotifications"].ToString().ToLower() == "true"); else Settings.ShowNotifications = true;
-				if (settingsJson["soundAlerts"] != null) Settings.SoundAlerts = (settingsJson["soundAlerts"].ToString().ToLower() == "true"); else Settings.SoundAlerts = true;
-				if (settingsJson["centreMapOnAircraft"] != null) Settings.CentreMapOnAircraft = (settingsJson["centreMapOnAircraft"].ToString().ToLower() == "true"); else Settings.CentreMapOnAircraft = true;
-				if (settingsJson["radarURL"] != null) Settings.RadarUrl = settingsJson["radarURL"].ToString();
-				if (settingsJson["SMTPHost"] != null) Settings.SMTPHost = settingsJson["SMTPHost"].ToString();
-
-				if (settingsJson["SMTPPort"] != null)
-				{
-					try
-					{
-						Settings.SMTPPort = Convert.ToInt32(settingsJson["SMTPPort"]);
-						if (Settings.SMTPPort == 0) Settings.SMTPPort = 21;
-					}
-					catch
-					{
-						Settings.SMTPPort = 21;
-					}
-				}
-				else Settings.SMTPPort = 21;
-				if (settingsJson["SMTPUsr"] != null) Settings.SMTPUser = settingsJson["SMTPUsr"].ToString();
-				if (settingsJson["SMTPPwd"] != null) Settings.SMTPPassword = settingsJson["SMTPPwd"].ToString();
-				if (settingsJson["SMTPSSL"] != null) Settings.SMTPSSL = (settingsJson["SMTPSSL"].ToString().ToLower() == "true");
-				if (settingsJson["TwitterUsers"] != null) Settings.TwitterUsers = settingsJson["TwitterUsers"].ToObject<Dictionary<string, string[]>>();
-
-				//Clear settings json to hopefully save some memory
-				settingsJson.RemoveAll();
+				MessageBox.Show($"Unable to parse settings.json, exiting program\n\n{e.Message}\n\n{e.StackTrace}");
+				Environment.Exit(0);
 			}
+
+			//Fix invalid settings
+			if (Settings.RefreshRate < 1) Settings.RefreshRate = 1;
+			if (Settings.Timeout < 5) Settings.Timeout = 5;
+			if (Settings.SMTPPort == default) Settings.SMTPPort = 21;
+			if (!string.IsNullOrEmpty(Settings.AircraftListUrl) && Settings.AircraftListUrl.Length > 3 &&
+			    Settings.AircraftListUrl.Substring(0, 4) != "http")
+				Settings.AircraftListUrl = "http://" + Settings.AircraftListUrl;
 
 			//Log to UI
 			_logger.Log("Settings Loaded", Color.White);
@@ -222,11 +227,29 @@ namespace PlaneAlerter.Services {
 			}
 
 			//Decode ecc json
-			JObject? eccJson;
-			using (var fileStream = new FileStream("emailconfig.json", FileMode.Open))
-			using (var reader = new StreamReader(fileStream))
-			using (var jsonReader = new JsonTextReader(reader))
+			JObject? eccJson = null;
+			try
+			{
+				using var fileStream = new FileStream("emailconfig.json", FileMode.Open);
+				using var reader = new StreamReader(fileStream);
+				using var jsonReader = new JsonTextReader(reader);
 				eccJson = JsonSerializer.Create().Deserialize<JObject>(jsonReader);
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(
+					$"Unable to deserialise emailconfig.json, exiting program\n\n{e.Message}\n\n{e.StackTrace}",
+					"emailconfig.json parse error",
+					MessageBoxButtons.OK, MessageBoxIcon.Error);
+				Environment.Exit(0);
+			}
+
+			if (eccJson == null)
+			{
+				MessageBox.Show("Error loading emailconfig.json, exiting program", "emailconfig.json error",
+					MessageBoxButtons.OK, MessageBoxIcon.Error);
+				Environment.Exit(0);
+			}
 
 			try
 			{
@@ -244,12 +267,14 @@ namespace PlaneAlerter.Services {
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show($"Error loading email content config.\nResetting back to default config.\n\n{e.Message}\n\n{e.StackTrace}");
-				LoadECCDefaults();
+				MessageBox.Show($"Unable to parse emailconfig.json, exiting program\n\n{e.Message}\n\n{e.StackTrace}");
+				Environment.Exit(0);
 			}
 
 			//Log to UI
 			_logger.Log("Email Content Config Loaded", Color.White);
+
+			LoadedSuccessfully = true;
 		}
 	}
 }

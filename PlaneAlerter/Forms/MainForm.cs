@@ -190,8 +190,6 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		private void UpdateSettings()
 		{
-			_settingsManagerService.Settings.VRSAuthenticate = (_settingsManagerService.Settings.VRSUser != "");
-			
 			foreach (TreeNode settingsGroupNode in conditionTreeView.Nodes[1].Nodes)
 				settingsGroupNode.Nodes.Clear();
 

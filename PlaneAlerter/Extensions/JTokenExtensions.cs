@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -11,9 +12,9 @@ namespace PlaneAlerter.Extensions
 			if (token == null)
 				throw new JsonReaderException($"Token null, unable to get key {string.Join('/', keys)}");
 
-			var value = token.OptionalValue<T>(keys);
+			var foundKey = token.TryOptionalValue<T>(out var value, keys);
 
-			if (value == null)
+			if (!foundKey)
 			{
 				if (keys.Length > 1)
 				{
@@ -27,7 +28,7 @@ namespace PlaneAlerter.Extensions
 				}
 			}
 
-			return value;
+			return value!;
 		}
 
 		public static T RequiredValueStruct<T>(this JToken? token, params string[] keys) where T : struct
@@ -56,9 +57,12 @@ namespace PlaneAlerter.Extensions
 
 		public static T? OptionalValueStruct<T>(this JToken? token, params string[] keys) where T : struct
 		{
+			if (keys.Length == 0)
+				throw new ArgumentException("No keys provided");
+
 			if (token == null)
 				throw new JsonReaderException($"Token null, unable to get key {string.Join('/', keys)}");
-			
+
 			foreach (var key in keys)
 			{
 				var keyToken = token.SelectToken(key);
@@ -74,6 +78,14 @@ namespace PlaneAlerter.Extensions
 		
 		public static T? OptionalValue<T>(this JToken? token, params string[] keys) where T : class
 		{
+			return TryOptionalValue(token, out T? value, keys) ? value : null;
+		}
+
+		public static bool TryOptionalValue<T>(this JToken? token, out T? value, params string[] keys) where T : class
+		{
+			if (keys.Length == 0)
+				throw new ArgumentException("No keys provided");
+
 			if (token == null)
 				throw new JsonReaderException($"Token null, unable to get key {string.Join('/', keys)}");
 
@@ -84,10 +96,12 @@ namespace PlaneAlerter.Extensions
 				if (keyToken == null)
 					continue;
 
-				return keyToken.ToObject<T>();
+				value = keyToken.ToObject<T>();
+				return true;
 			}
 
-			return null;
+			value = null;
+			return false;
 		}
 	}
 }

@@ -17,7 +17,7 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Do we need authentication for VRS?
 		/// </summary>
-		public bool VRSAuthenticate { get; set; }
+		public bool VRSAuthenticate => !string.IsNullOrEmpty(VRSUser);
 
 		/// <summary>
 		/// VRS username

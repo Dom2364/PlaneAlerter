@@ -121,7 +121,7 @@ namespace PlaneAlerter.Services
 					newCondition.Triggers = condition.RequiredValue<Dictionary<int, Trigger>>("triggers", "Triggers");
 
 					//Convert conditions using the email property system to use email formats
-					var oldEmailProperty = condition.OptionalValueStruct<VrsProperty>();
+					var oldEmailProperty = condition.OptionalValueStruct<VrsProperty>("emailProperty");
 					if (oldEmailProperty != null)
 					{
 						newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + VrsProperties.VrsPropertyData[oldEmailProperty.Value][2] + "]";
@@ -131,9 +131,6 @@ namespace PlaneAlerter.Services
 					//Add condition to list
 					Conditions.Add(conditionId, newCondition);
 				}
-
-				//Try to clean up json parsing
-				conditionJson.RemoveAll();
 
 				//Save to file again in case some defaults were set
 				var conditionsJson = JsonConvert.SerializeObject(Conditions, Formatting.Indented);
