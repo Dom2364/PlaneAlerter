@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -6,7 +6,7 @@ namespace PlaneAlerter.Extensions
 {
 	internal static class JTokenExtensions
 	{
-		public static T RequiredValue<T>(this JToken? token, params string[] keys)
+		public static T RequiredValue<T>(this JToken? token, params string[] keys) where T : class
 		{
 			if (token == null)
 				throw new JsonReaderException($"Token null, unable to get key {string.Join('/', keys)}");
@@ -14,17 +14,69 @@ namespace PlaneAlerter.Extensions
 			var value = token.OptionalValue<T>(keys);
 
 			if (value == null)
-				throw new JsonReaderException($"None of the keys ({string.Join(", ", keys)}) exist as a child of {token.Path}");
+			{
+				if (keys.Length > 1)
+				{
+					throw new JsonReaderException(
+						$"None of the keys ({string.Join(", ", keys)}) exist{(!string.IsNullOrEmpty(token.Path) ? $" as a child of {token.Path}" : "")}");
+				}
+				else
+				{
+					throw new JsonReaderException(
+						$"The key {keys.First()} does not exist{(!string.IsNullOrEmpty(token.Path) ? $" as a child of {token.Path}" : "")}");
+				}
+			}
 
 			return value;
 		}
 
-		public static T? OptionalValue<T>(this JToken? token, params string[] keys)
+		public static T RequiredValueStruct<T>(this JToken? token, params string[] keys) where T : struct
 		{
 			if (token == null)
 				throw new JsonReaderException($"Token null, unable to get key {string.Join('/', keys)}");
 
-			var value = default(T);
+			var value = token.OptionalValueStruct<T>(keys);
+
+			if (!value.HasValue)
+			{
+				if (keys.Length > 1)
+				{
+					throw new JsonReaderException(
+						$"None of the keys ({string.Join(", ", keys)}) exist{(!string.IsNullOrEmpty(token.Path) ? $" as a child of {token.Path}" : "")}");
+				}
+				else
+				{
+					throw new JsonReaderException(
+						$"The key {keys.First()} does not exist{(!string.IsNullOrEmpty(token.Path) ? $" as a child of {token.Path}" : "")}");
+				}
+			}
+
+			return value.Value;
+		}
+
+		public static T? OptionalValueStruct<T>(this JToken? token, params string[] keys) where T : struct
+		{
+			if (token == null)
+				throw new JsonReaderException($"Token null, unable to get key {string.Join('/', keys)}");
+			
+			foreach (var key in keys)
+			{
+				var keyToken = token.SelectToken(key);
+
+				if (keyToken == null)
+					continue;
+				
+				return keyToken.ToObject<T>();
+			}
+			
+			return null;
+		}
+		
+		public static T? OptionalValue<T>(this JToken? token, params string[] keys) where T : class
+		{
+			if (token == null)
+				throw new JsonReaderException($"Token null, unable to get key {string.Join('/', keys)}");
+
 			foreach (var key in keys)
 			{
 				var keyToken = token.SelectToken(key);
@@ -32,13 +84,10 @@ namespace PlaneAlerter.Extensions
 				if (keyToken == null)
 					continue;
 
-				//value = token.Value<T>(key);
-				value = keyToken.ToObject<T>();
-
-				return value;
+				return keyToken.ToObject<T>();
 			}
 
-			return value;
+			return null;
 		}
 	}
 }

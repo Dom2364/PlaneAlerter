@@ -106,22 +106,22 @@ namespace PlaneAlerter.Services
 					//Create condition and copy values
 					var newCondition = new Condition();
 					newCondition.Name = condition.RequiredValue<string>("conditionName", "Name");
-					newCondition.AlertType = condition.RequiredValue<AlertType>("alertType", "AlertType");
-					newCondition.IgnoreFollowing = condition.RequiredValue<bool>("ignoreFollowing", "IgnoreFollowing");
-					newCondition.EmailEnabled = condition.OptionalValue<bool?>("emailEnabled", "EmailEnabled") ?? true;
+					newCondition.AlertType = condition.RequiredValueStruct<AlertType>("alertType", "AlertType");
+					newCondition.IgnoreFollowing = condition.RequiredValueStruct<bool>("ignoreFollowing", "IgnoreFollowing");
+					newCondition.EmailEnabled = condition.OptionalValueStruct<bool>("emailEnabled", "EmailEnabled") ?? true;
 					newCondition.EmailFirstFormat = condition.OptionalValue<string>("emailFirstFormat", "EmailFirstFormat") ?? string.Empty;
 					newCondition.EmailLastFormat = condition.OptionalValue<string>("emailLastFormat", "EmailLastFormat") ?? string.Empty;
-					newCondition.TwitterEnabled = condition.OptionalValue<bool?>("twitterEnabled", "TwitterEnabled") ?? true;
+					newCondition.TwitterEnabled = condition.OptionalValueStruct<bool>("twitterEnabled", "TwitterEnabled") ?? true;
 					newCondition.TwitterAccount = condition.OptionalValue<string>("twitterAccount", "TwitterAccount") ?? string.Empty;
 					newCondition.TweetFirstFormat = condition.OptionalValue<string>("tweetFirstFormat", "TweetFirstFormat") ?? string.Empty;
 					newCondition.TweetLastFormat = condition.OptionalValue<string>("tweetLastFormat", "TweetLastFormat") ?? string.Empty;
-					newCondition.TweetMap = condition.OptionalValue<bool?>("tweetMap", "TweetMap") ?? true;
-					newCondition.TweetLink = condition.OptionalValue<TweetLink?>("tweetLink", "TweetLink") ?? TweetLink.None;
+					newCondition.TweetMap = condition.OptionalValueStruct<bool>("tweetMap", "TweetMap") ?? true;
+					newCondition.TweetLink = condition.OptionalValueStruct<TweetLink>("tweetLink", "TweetLink") ?? TweetLink.None;
 					newCondition.RecieverEmails = condition.RequiredValue<List<string>>("recieverEmails", "RecieverEmails");
 					newCondition.Triggers = condition.RequiredValue<Dictionary<int, Trigger>>("triggers", "Triggers");
 
 					//Convert conditions using the email property system to use email formats
-					var oldEmailProperty = condition.OptionalValue<VrsProperty?>();
+					var oldEmailProperty = condition.OptionalValueStruct<VrsProperty>();
 					if (oldEmailProperty != null)
 					{
 						newCondition.EmailFirstFormat = "First Contact Alert! [ConditionName]: [" + VrsProperties.VrsPropertyData[oldEmailProperty.Value][2] + "]";

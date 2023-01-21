@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlaneAlerter.Enums;
+using PlaneAlerter.Extensions;
 using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services {
@@ -230,25 +231,22 @@ namespace PlaneAlerter.Services {
 			try
 			{
 				//Copy ecc from parsed json
-				EmailContentConfig.ReceiverName = (bool)eccJson["ReceiverName"];
-				EmailContentConfig.TransponderType = (bool)eccJson["TransponderType"];
-				EmailContentConfig.RadarLink = (bool)eccJson["RadarLink"];
-				EmailContentConfig.ReportLink = (bool)eccJson["ReportLink"];
-				EmailContentConfig.AfLookup = (bool)eccJson["AfLookup"];
-				EmailContentConfig.AircraftPhotos = (bool)eccJson["AircraftPhotos"];
-				EmailContentConfig.Map = (bool)eccJson["Map"];
-				EmailContentConfig.TwitterOptimised = (bool)eccJson["TwitterOptimised"];
-				EmailContentConfig.PropertyList = (PropertyListType)Enum.Parse(typeof(PropertyListType), eccJson["PropertyList"].ToString());
-				EmailContentConfig.KMLfile = (bool)eccJson["KMLfile"];
+				EmailContentConfig.ReceiverName = eccJson.RequiredValueStruct<bool>("ReceiverName");
+				EmailContentConfig.TransponderType = eccJson.RequiredValueStruct<bool>("TransponderType");
+				EmailContentConfig.RadarLink = eccJson.RequiredValueStruct<bool>("RadarLink");
+				EmailContentConfig.ReportLink = eccJson.RequiredValueStruct<bool>("ReportLink");
+				EmailContentConfig.AfLookup = eccJson.RequiredValueStruct<bool>("AfLookup");
+				EmailContentConfig.AircraftPhotos = eccJson.RequiredValueStruct<bool>("AircraftPhotos");
+				EmailContentConfig.Map = eccJson.RequiredValueStruct<bool>("Map");
+				EmailContentConfig.TwitterOptimised = eccJson.RequiredValueStruct<bool>("TwitterOptimised");
+				EmailContentConfig.PropertyList = eccJson.RequiredValueStruct<PropertyListType>("PropertyList");
+				EmailContentConfig.KMLfile = eccJson.OptionalValueStruct<bool>("KMLfile") ?? false;
 			}
-			catch
+			catch (Exception e)
 			{
-				File.Delete("emailconfig.json");
+				MessageBox.Show($"Error loading email content config.\nResetting back to default config.\n\n{e.Message}\n\n{e.StackTrace}");
 				LoadECCDefaults();
 			}
-
-			//Clear ecc json to hopefully save some memory
-			eccJson.RemoveAll();
 
 			//Log to UI
 			_logger.Log("Email Content Config Loaded", Color.White);
