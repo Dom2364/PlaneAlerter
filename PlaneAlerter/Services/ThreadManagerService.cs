@@ -12,11 +12,6 @@ namespace PlaneAlerter.Services {
 		/// </summary>
 		CheckerStatus ThreadStatus { get; set; }
 
-		/// <summary>
-		/// Thread for the checker loop
-		/// </summary>
-		Thread? CheckerThread { get; set; }
-
 		event EventHandler StatusChanged;
 
 		/// <summary>
@@ -73,13 +68,13 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// Thread for checking operations
 		/// </summary>
-		public Thread? CheckerThread { get; set; }
+		private Thread? _checkerThread;
 
 		/// <summary>
 		/// Start threads
 		/// </summary>
 		public void Start() {
-			if (CheckerThread != null || ThreadStatus == CheckerStatus.Running) {
+			if (_checkerThread != null || ThreadStatus == CheckerStatus.Running) {
 				Restart();
 				return;
 			}
@@ -108,10 +103,10 @@ namespace PlaneAlerter.Services {
 			}
 			
 			//Start thread
-			CheckerThread = new Thread(_checkerService.Start);
-			CheckerThread.IsBackground = true;
-			CheckerThread.Name = "Checker Thread";
-			CheckerThread.Start();
+			_checkerThread = new Thread(_checkerService.Start);
+			_checkerThread.IsBackground = true;
+			_checkerThread.Name = "Checker Thread";
+			_checkerThread.Start();
 			
 			_logger.Log("Checker Started", Color.White);
 
@@ -123,15 +118,15 @@ namespace PlaneAlerter.Services {
 		/// </summary>
 		public void Stop()
 		{
-			if (ThreadStatus != CheckerStatus.Running || CheckerThread == null)
+			if (ThreadStatus != CheckerStatus.Running || _checkerThread == null)
 				return;
 
 			_checkerService.Stop();
 			ThreadStatus = CheckerStatus.Stopping;
 			
-			while (CheckerThread.ThreadState != ThreadState.Stopped) Thread.Sleep(200);
+			while (_checkerThread.ThreadState != ThreadState.Stopped) Thread.Sleep(200);
 
-			CheckerThread = null;
+			_checkerThread = null;
 			ThreadStatus = CheckerStatus.Stopped;
 
 			//Clear matches

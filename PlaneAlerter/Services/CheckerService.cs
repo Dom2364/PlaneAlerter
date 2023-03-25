@@ -33,9 +33,9 @@ namespace PlaneAlerter.Services {
 		/// </summary>
 		public Dictionary<string, Match> ActiveMatches { get; set; } = new Dictionary<string, Match>();
 
-		public event ICheckerService.AlertSentEventHandler SendingAlert;
+		public event ICheckerService.AlertSentEventHandler? SendingAlert;
 
-		public event EventHandler<string> StatusChanged;
+		public event EventHandler<string>? StatusChanged;
 
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly IConditionManagerService _conditionManagerService;
@@ -85,12 +85,15 @@ namespace PlaneAlerter.Services {
 			//Set culture to invariant
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
+			_stopping = false;
+
 			while (!_stopping)
 			{
 				await Check();
 
 				//Cancel if thread is supposed to stop
-				if (_stopping) return;
+				if (_stopping)
+					return;
 
 				//Set thread status to waiting
 				StatusChanged?.Invoke(this, "Waiting for next check...");
@@ -98,10 +101,14 @@ namespace PlaneAlerter.Services {
 				//Wait until the next check time
 				while (DateTime.Compare(DateTime.Now, _nextCheck) < 0) {
 					//Cancel if thread is supposed to stop
-					if (_stopping) return;
+					if (_stopping)
+						return;
+
 					Thread.Sleep(1000);
 				}
 			}
+
+			_stopping = false;
 		}
 
 		public void Stop()
