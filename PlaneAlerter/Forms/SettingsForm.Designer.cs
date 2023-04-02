@@ -61,6 +61,7 @@
 			this.ignoreModeSCheckBox = new System.Windows.Forms.CheckBox();
 			this.filterReceiverCheckBox = new System.Windows.Forms.CheckBox();
 			this.label12 = new System.Windows.Forms.Label();
+			this.flashWindowCheckBox = new System.Windows.Forms.CheckBox();
 			this.saveSettingsButton = new System.Windows.Forms.Button();
 			this.emailGroupBox = new System.Windows.Forms.GroupBox();
 			this.radarGroupBox = new System.Windows.Forms.GroupBox();
@@ -78,7 +79,6 @@
 			this.centreAircraftRadioButton = new System.Windows.Forms.RadioButton();
 			this.refreshTextBox = new System.Windows.Forms.NumericUpDown();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.flashWindowCheckBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.removalTimeoutTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.smtpHostPortTextBox)).BeginInit();
 			this.emailGroupBox.SuspendLayout();
@@ -509,6 +509,19 @@
 			this.label12.Text = "Trail Update Frequency (no. of checks)";
 			this.toolTip.SetToolTip(this.label12, resources.GetString("label12.ToolTip"));
 			// 
+			// flashWindowCheckBox
+			// 
+			this.flashWindowCheckBox.AutoSize = true;
+			this.flashWindowCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.flashWindowCheckBox.Location = new System.Drawing.Point(273, 20);
+			this.flashWindowCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.flashWindowCheckBox.Name = "flashWindowCheckBox";
+			this.flashWindowCheckBox.Size = new System.Drawing.Size(100, 19);
+			this.flashWindowCheckBox.TabIndex = 28;
+			this.flashWindowCheckBox.Text = "Flash Window";
+			this.toolTip.SetToolTip(this.flashWindowCheckBox, "Flash the window on alert");
+			this.flashWindowCheckBox.UseVisualStyleBackColor = true;
+			// 
 			// saveSettingsButton
 			// 
 			this.saveSettingsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -804,19 +817,6 @@
 			this.groupBox1.TabIndex = 25;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Alert Actions";
-			// 
-			// flashWindowCheckBox
-			// 
-			this.flashWindowCheckBox.AutoSize = true;
-			this.flashWindowCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.flashWindowCheckBox.Location = new System.Drawing.Point(273, 20);
-			this.flashWindowCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-			this.flashWindowCheckBox.Name = "flashWindowCheckBox";
-			this.flashWindowCheckBox.Size = new System.Drawing.Size(100, 19);
-			this.flashWindowCheckBox.TabIndex = 28;
-			this.flashWindowCheckBox.Text = "Flash Window";
-			this.toolTip.SetToolTip(this.flashWindowCheckBox, "Show a notification on alert");
-			this.flashWindowCheckBox.UseVisualStyleBackColor = true;
 			// 
 			// SettingsForm
 			// 
