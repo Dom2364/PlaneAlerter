@@ -10,17 +10,17 @@ namespace PlaneAlerter {
 		/// <summary>
 		/// VRS property descriptions
 		/// </summary>
-		public static Dictionary<VrsProperty, string[]> VrsPropertyData { get; set; } = new Dictionary<VrsProperty, string[]>();
+		public static Dictionary<VrsProperty, string[]> VrsPropertyData { get; set; } = new();
 
 		/// <summary>
 		/// Types of comparisons usable with triggers
 		/// </summary>
-		public static Dictionary<string, string[]> ComparisonTypes { get; set; } = new Dictionary<string, string[]>();
+		public static Dictionary<string, string[]> ComparisonTypes { get; set; } = new();
 
 		/// <summary>
 		/// Properties shown when essential properties selected
 		/// </summary>
-		public static List<VrsProperty> EssentialProperties { get; set; } = new List<VrsProperty>();
+		public static List<VrsProperty> EssentialProperties { get; set; } = new();
 
 		/// <summary>
 		/// Core static constructor

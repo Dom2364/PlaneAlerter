@@ -25,7 +25,7 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// Is this updating the condition?
 		/// </summary>
-		private bool _isUpdating = false;
+		private bool _isUpdating;
 		
 		/// <summary>
 		/// Initialise form with no existing condition
@@ -332,7 +332,7 @@ namespace PlaneAlerter.Forms {
 				EmailEnabled = emailCheckBox.Checked,
 				EmailFirstFormat = emailFirstFormatTextBox.Text,
 				EmailLastFormat = emailLastFormatTextBox.Text,
-				RecieverEmails = receiverEmailTextBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
+				RecieverEmails = receiverEmailTextBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
 				TwitterEnabled = twitterCheckBox.Checked,
 				TwitterAccount = twitterAccountComboBox.Text,
 				TweetFirstFormat = tweetFirstFormatTextBox.Text,
@@ -342,13 +342,30 @@ namespace PlaneAlerter.Forms {
 			};
 
 			if (triggerDataGridView.Rows.Count != 0)
+			{
 				foreach (DataGridViewRow row in triggerDataGridView.Rows)
-					if (row.Index != triggerDataGridView.Rows.Count - 1)
-						foreach (VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
-							if (property.ToString() == row.Cells[0].Value.ToString().Replace(' ', '_')) {
-								newCondition.Triggers.Add(newCondition.Triggers.Count, new Trigger(property, row.Cells[2].Value.ToString(), row.Cells[1].Value.ToString()));
-								break;
-							}
+				{
+					if (row.Index == triggerDataGridView.Rows.Count - 1)
+						continue;
+
+					var selectedPropertyKey = row.Cells[0].Value?.ToString();
+					var selectedProperty = !string.IsNullOrEmpty(selectedPropertyKey)
+						? (VrsProperty?)Enum.Parse(typeof(VrsProperty?), selectedPropertyKey.Replace(' ', '_'))
+						: null;
+
+					var comparisonType = row.Cells[1].Value.ToString();
+
+					if (selectedProperty == null || string.IsNullOrEmpty(comparisonType))
+						continue;
+					
+					newCondition.Triggers.Add(newCondition.Triggers.Count,
+						new Trigger(
+							selectedProperty.Value,
+							row.Cells[2].Value.ToString() ?? "",
+							comparisonType));
+				}
+			}
+
 			//Add condition to condition list
 			_conditionManagerService.EditorConditions.Add(_isUpdating ?
 				_conditionToUpdate :
@@ -371,14 +388,14 @@ namespace PlaneAlerter.Forms {
 		/// Update controls when email checkbox is toggled
 		/// </summary>
 		private void emailCheckBox_CheckedChanged(object sender, EventArgs e) {
-			UpdateUIState();
+			UpdateUiState();
 		}
 
 		/// <summary>
 		/// Update controls when twitter checkbox is toggled
 		/// </summary>
 		private void twitterCheckBox_CheckedChanged(object sender, EventArgs e) {
-			UpdateUIState();
+			UpdateUiState();
 		}
 		
 		//Show add account dialog if add account is selected
@@ -420,7 +437,7 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// Update enabled state and styling of UI based on settings
 		/// </summary>
-		private void UpdateUIState() {
+		private void UpdateUiState() {
 			var alertType = AlertType.First_and_Last_Contact;
 
 			if (!string.IsNullOrEmpty(alertTypeComboBox.Text)) {
@@ -437,7 +454,7 @@ namespace PlaneAlerter.Forms {
 		}
 
 		private void alertTypeComboBox_SelectedIndexChanged(object sender, EventArgs e) {
-			UpdateUIState();
+			UpdateUiState();
 		}
 	}
 }

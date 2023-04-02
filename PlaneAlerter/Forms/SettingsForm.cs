@@ -17,7 +17,7 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// Smtp host info
 		/// </summary>
-		private static Dictionary<string, object[]> HostInfo { get; } = new Dictionary<string, object[]>();
+		private static Dictionary<string, object[]> HostInfo { get; } = new();
 
 		/// <summary>
 		/// Constructor

@@ -21,12 +21,12 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class StatsService : IStatsService
 	{
-		public event EventHandler StatsChanged;
+		public event EventHandler? StatsChanged;
 
 		/// <summary>
 		/// Counter for total alerts sent
 		/// </summary>
-		private int _totalAlertsSent = 0;
+		private int _totalAlertsSent;
 		public int TotalAlertsSent {
 			get => _totalAlertsSent;
 			set

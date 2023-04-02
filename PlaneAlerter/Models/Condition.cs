@@ -33,7 +33,7 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Emails to send alert to
 		/// </summary>
-		public List<string> RecieverEmails { get; set; } = new List<string>();
+		public List<string> RecieverEmails { get; set; } = new();
 
 		/// <summary>
 		/// Email first contact alert format
@@ -83,7 +83,7 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// List of triggers
 		/// </summary>
-		public Dictionary<int, Trigger> Triggers = new Dictionary<int, Trigger>();
+		public Dictionary<int, Trigger> Triggers = new();
 
 		/// <summary>
 		/// Creates a new condition

@@ -79,7 +79,6 @@ namespace PlaneAlerter.Services {
 				}
 
 				_logger.Log("SMTP ERROR: " + e.Message, Color.Red);
-				return;
 			}
 			catch (InvalidOperationException e) {
 				if (e.InnerException != null) {
@@ -88,7 +87,6 @@ namespace PlaneAlerter.Services {
 				}
 
 				_logger.Log("SMTP ERROR: " + e.Message, Color.Red);
-				return;
 			}
 		}
 	}

@@ -70,7 +70,7 @@ namespace PlaneAlerter.Services
 				//If enum, replace with string value
 				if (_vrsEnumService.TryToString(info[2], value, out var convertedValue))
 				{
-					value = convertedValue;
+					value = convertedValue!;
 				}
 
 				format = Regex.Replace(format, @"\[" + info[2] + @"\]", value, RegexOptions.IgnoreCase);

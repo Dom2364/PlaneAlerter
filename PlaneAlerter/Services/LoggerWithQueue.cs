@@ -22,7 +22,7 @@ namespace PlaneAlerter.Services
 			_queuedLogs = new Queue<LogMessage>();
 		}
 
-		public event EventHandler NewLogMessage;
+		public event EventHandler? NewLogMessage;
 
 		public IEnumerable<LogMessage> DequeueLogsForUi(int maxCount = 10)
 		{

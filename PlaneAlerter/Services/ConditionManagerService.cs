@@ -46,12 +46,12 @@ namespace PlaneAlerter.Services
 		/// <summary>
 		/// List of current conditions
 		/// </summary>
-		public Dictionary<int, Condition> Conditions { get; set; } = new Dictionary<int, Condition>();
+		public Dictionary<int, Condition> Conditions { get; set; } = new();
 
 		/// <summary>
 		/// List of conditions being edited
 		/// </summary>
-		public SortedDictionary<int, Condition> EditorConditions { get; set; } = new SortedDictionary<int, Condition>();
+		public SortedDictionary<int, Condition> EditorConditions { get; set; } = new();
 
 		/// <summary>
 		/// Save the conditions in the editor
@@ -78,7 +78,7 @@ namespace PlaneAlerter.Services
 				//Clear conditions and active matches
 				Conditions.Clear();
 
-				//Create conditions file if one doesnt exist
+				//Create conditions file if one doesn't exist
 				if (!File.Exists("conditions.json"))
 				{
 					_logger.Log("No conditions file! Creating one...", Color.White);
@@ -104,21 +104,23 @@ namespace PlaneAlerter.Services
 						throw new Exception($"Condition with id {conditionId} not found in conditions.json.\nConditions should have sequential ids.");
 
 					//Create condition and copy values
-					var newCondition = new Condition();
-					newCondition.Name = condition.RequiredValue<string>("conditionName", "Name");
-					newCondition.AlertType = condition.RequiredValueStruct<AlertType>("alertType", "AlertType");
-					newCondition.IgnoreFollowing = condition.RequiredValueStruct<bool>("ignoreFollowing", "IgnoreFollowing");
-					newCondition.EmailEnabled = condition.OptionalValueStruct<bool>("emailEnabled", "EmailEnabled") ?? true;
-					newCondition.EmailFirstFormat = condition.OptionalValue<string>("emailFirstFormat", "EmailFirstFormat") ?? string.Empty;
-					newCondition.EmailLastFormat = condition.OptionalValue<string>("emailLastFormat", "EmailLastFormat") ?? string.Empty;
-					newCondition.TwitterEnabled = condition.OptionalValueStruct<bool>("twitterEnabled", "TwitterEnabled") ?? true;
-					newCondition.TwitterAccount = condition.OptionalValue<string>("twitterAccount", "TwitterAccount") ?? string.Empty;
-					newCondition.TweetFirstFormat = condition.OptionalValue<string>("tweetFirstFormat", "TweetFirstFormat") ?? string.Empty;
-					newCondition.TweetLastFormat = condition.OptionalValue<string>("tweetLastFormat", "TweetLastFormat") ?? string.Empty;
-					newCondition.TweetMap = condition.OptionalValueStruct<bool>("tweetMap", "TweetMap") ?? true;
-					newCondition.TweetLink = condition.OptionalValueStruct<TweetLink>("tweetLink", "TweetLink") ?? TweetLink.None;
-					newCondition.RecieverEmails = condition.RequiredValue<List<string>>("recieverEmails", "RecieverEmails");
-					newCondition.Triggers = condition.RequiredValue<Dictionary<int, Trigger>>("triggers", "Triggers");
+					var newCondition = new Condition
+					{
+						Name = condition.RequiredValue<string>("conditionName", "Name"),
+						AlertType = condition.RequiredValueStruct<AlertType>("alertType", "AlertType"),
+						IgnoreFollowing = condition.RequiredValueStruct<bool>("ignoreFollowing", "IgnoreFollowing"),
+						EmailEnabled = condition.OptionalValueStruct<bool>("emailEnabled", "EmailEnabled") ?? true,
+						EmailFirstFormat = condition.OptionalValue<string>("emailFirstFormat", "EmailFirstFormat") ?? string.Empty,
+						EmailLastFormat = condition.OptionalValue<string>("emailLastFormat", "EmailLastFormat") ?? string.Empty,
+						TwitterEnabled = condition.OptionalValueStruct<bool>("twitterEnabled", "TwitterEnabled") ?? true,
+						TwitterAccount = condition.OptionalValue<string>("twitterAccount", "TwitterAccount") ?? string.Empty,
+						TweetFirstFormat = condition.OptionalValue<string>("tweetFirstFormat", "TweetFirstFormat") ?? string.Empty,
+						TweetLastFormat = condition.OptionalValue<string>("tweetLastFormat", "TweetLastFormat") ?? string.Empty,
+						TweetMap = condition.OptionalValueStruct<bool>("tweetMap", "TweetMap") ?? true,
+						TweetLink = condition.OptionalValueStruct<TweetLink>("tweetLink", "TweetLink") ?? TweetLink.None,
+						RecieverEmails = condition.RequiredValue<List<string>>("recieverEmails", "RecieverEmails"),
+						Triggers = condition.RequiredValue<Dictionary<int, Trigger>>("triggers", "Triggers")
+					};
 
 					//Convert conditions using the email property system to use email formats
 					var oldEmailProperty = condition.OptionalValueStruct<VrsProperty>("emailProperty");

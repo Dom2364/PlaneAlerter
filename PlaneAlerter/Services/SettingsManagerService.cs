@@ -33,9 +33,9 @@ namespace PlaneAlerter.Services {
 	{
 		private readonly ILoggerWithQueue _logger;
 
-		public Settings Settings { get; set; } = new Settings();
-		public EmailContentConfig EmailContentConfig { get; set; } = new EmailContentConfig();
-		public bool LoadedSuccessfully { get; set; } = false;
+		public Settings Settings { get; set; } = new();
+		public EmailContentConfig EmailContentConfig { get; set; } = new();
+		public bool LoadedSuccessfully { get; set; }
 
 		//Constructor
 		public SettingsManagerService(ILoggerWithQueue logger)
@@ -105,7 +105,7 @@ namespace PlaneAlerter.Services {
         /// <summary>
         /// Load default ecc settings
         /// </summary>
-        private void LoadECCDefaults()
+        private void LoadEccDefaults()
         {
 	        EmailContentConfig = new EmailContentConfig
 	        {
@@ -175,7 +175,7 @@ namespace PlaneAlerter.Services {
 			//Copy settings from parsed json
 			try {
 				Settings.SenderEmail = settingsJson.RequiredValue<string>("senderEmail");
-				Settings.AircraftListUrl = settingsJson.RequiredValue<string>("acListUrl") ?? string.Empty;
+				Settings.AircraftListUrl = settingsJson.RequiredValue<string>("acListUrl");
 				Settings.VRSUser = settingsJson.RequiredValue<string>("VRSUsr");
 				Settings.VRSPassword = settingsJson.RequiredValue<string>("VRSPwd");
 				Settings.Lat = settingsJson.RequiredValueStruct<decimal>("Lat");
@@ -225,7 +225,7 @@ namespace PlaneAlerter.Services {
 			if (!File.Exists("emailconfig.json"))
 			{
 				_logger.Log("No email content config file! Creating one...", Color.White);
-				LoadECCDefaults();
+				LoadEccDefaults();
 			}
 
 			//Decode ecc json

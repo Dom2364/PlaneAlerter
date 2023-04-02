@@ -11,7 +11,7 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// List of property values retrieved from last aircraftlist.json
 		/// </summary>
-		private readonly Dictionary<string, string?> _properties = new Dictionary<string, string?>();
+		private readonly Dictionary<string, string?> _properties = new();
 
 		/// <summary>
 		/// ICAO hex of aircraft
@@ -52,7 +52,7 @@ namespace PlaneAlerter.Models
 		public void AddProperty(string key, string value)
 		{
 			//Add if property is not position trail or stops list
-			//Arrays can't be used for conditions or displaying so theyre just ignored
+			//Arrays can't be used for conditions or displaying so they're just ignored
 			if (key != "Cot" && key != "Stops")
 				_properties.Add(key, value);
 		}

@@ -152,6 +152,6 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// List of Twitter user credentials
 		/// </summary>
-		public Dictionary<string, string[]> TwitterUsers { get; set; } = new Dictionary<string, string[]>();
+		public Dictionary<string, string[]> TwitterUsers { get; set; } = new();
 	}
 }

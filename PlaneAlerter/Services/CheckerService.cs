@@ -4,11 +4,8 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Media;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
 using Match = PlaneAlerter.Models.Match;
@@ -33,7 +30,7 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// List of current matches
 		/// </summary>
-		public Dictionary<string, Match> ActiveMatches { get; set; } = new Dictionary<string, Match>();
+		public Dictionary<string, Match> ActiveMatches { get; set; } = new();
 
 		public event ICheckerService.AlertSentEventHandler? SendingAlert;
 
@@ -58,7 +55,7 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// Stop the loop when it's suitable to do so
 		/// </summary>
-		private bool _stopping = false;
+		private bool _stopping;
 
 		/// <summary>
 		/// Constructor
@@ -288,8 +285,11 @@ namespace PlaneAlerter.Services {
 					{
 						//Get receiver name
 						var receiverName = "";
-						if (_vrsService.Receivers.ContainsKey(aircraft.GetProperty("Rcvr")))
-							receiverName = _vrsService.Receivers[aircraft.GetProperty("Rcvr")];
+
+						var receiverId = aircraft.GetProperty("Rcvr");
+
+						if (receiverId != null && _vrsService.Receivers.ContainsKey(receiverId))
+							receiverName = _vrsService.Receivers[receiverId];
 
 						//Send Alert
 						await SendAlert(c.Condition, aircraft, receiverName, false);

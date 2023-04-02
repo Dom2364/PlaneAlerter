@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.Linq;
 using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services
@@ -78,7 +77,7 @@ namespace PlaneAlerter.Services
 				}
 				else
 				{
-					if (aircraft.Trail.Count() != 4)
+					if (aircraft.Trail.Length != 4)
 						staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" +
 						               _settingsManagerService.Settings.Lat + "," + _settingsManagerService.Settings.Long + "&size=800x800&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
 					else
@@ -86,7 +85,7 @@ namespace PlaneAlerter.Services
 						               _settingsManagerService.Settings.Lat + "," + _settingsManagerService.Settings.Long + "&size=800x800&zoom=8&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
 				}
 			//Process aircraft trail
-			for (var i = (aircraft.Trail.Count() / 4) - 1; i >= 0; i--)
+			for (var i = (aircraft.Trail.Length / 4) - 1; i >= 0; i--)
 			{
 				//Get coordinate
 				var coordinate = new[] {

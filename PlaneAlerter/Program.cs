@@ -39,7 +39,7 @@ namespace PlaneAlerter {
 					options.ValidateOnBuild = context.HostingEnvironment.IsDevelopment();
 					options.ValidateScopes = context.HostingEnvironment.IsDevelopment();
 				})
-				.ConfigureServices((context, services) =>
+				.ConfigureServices((_, services) =>
 				{
 					//Forms
 					services.AddTransient<MainForm>();

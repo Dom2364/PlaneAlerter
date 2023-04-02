@@ -1,4 +1,5 @@
-﻿namespace PlaneAlerter.Enums
+﻿// ReSharper disable InconsistentNaming
+namespace PlaneAlerter.Enums
 {
 	/// <summary>
 	/// Tweet Link Types

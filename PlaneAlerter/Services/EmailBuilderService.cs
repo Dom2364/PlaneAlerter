@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using PlaneAlerter.Enums;
@@ -213,23 +212,6 @@ namespace PlaneAlerter.Services
 			table += "</table>";
 
 			return table;
-		}
-
-		private bool TryGetProperty(string propertyKey, out VrsProperty property)
-		{
-			
-
-			foreach (var propertyDataKey in VrsProperties.VrsPropertyData.Keys)
-			{
-				if (VrsProperties.VrsPropertyData[propertyDataKey][2] != propertyKey)
-					continue;
-
-				property = propertyDataKey;
-				return true;
-			}
-
-			property = default;
-			return false;
 		}
 
 		private string BuildTwitterOptimisedBody(Condition condition, Aircraft aircraft, bool isDetection)

@@ -35,7 +35,7 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class ThreadManagerService : IThreadManagerService
 	{
-		public event EventHandler StatusChanged;
+		public event EventHandler? StatusChanged;
 
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly IConditionManagerService _conditionManagerService;
@@ -103,9 +103,12 @@ namespace PlaneAlerter.Services {
 			}
 			
 			//Start thread
-			_checkerThread = new Thread(_checkerService.Start);
-			_checkerThread.IsBackground = true;
-			_checkerThread.Name = "Checker Thread";
+			_checkerThread = new Thread(_checkerService.Start)
+			{
+				IsBackground = true,
+				Name = "Checker Thread"
+			};
+
 			_checkerThread.Start();
 			
 			_logger.Log("Checker Started", Color.White);

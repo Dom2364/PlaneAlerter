@@ -47,12 +47,12 @@ namespace PlaneAlerter.Services
 		/// <summary>
 		/// List of current aircraft
 		/// </summary>
-		public List<Aircraft> AircraftList { get; set; } = new List<Aircraft>();
+		public List<Aircraft> AircraftList { get; set; } = new();
 
 		/// <summary>
 		/// List of receivers from the last aircraftlist.json response
 		/// </summary>
-		public Dictionary<string, string> Receivers { get; set; } = new Dictionary<string, string>();
+		public Dictionary<string, string> Receivers { get; set; } = new();
 
 		/// <summary>
 		/// How many checks ago were the trails requested
@@ -182,22 +182,18 @@ namespace PlaneAlerter.Services
 			catch (UriFormatException)
 			{
 				_logger.Log("ERROR: AircraftList.json url invalid (" + _settingsManagerService.Settings.AircraftListUrl + ")", Color.Red);
-				return;
 			}
 			catch (InvalidDataException)
 			{
 				_logger.Log("ERROR: Data returned from " + _settingsManagerService.Settings.AircraftListUrl + " was not gzip compressed", Color.Red);
-				return;
 			}
 			catch (WebException e)
 			{
 				_logger.Log("ERROR: Error while connecting to AircraftList.json (" + e.Message + ")", Color.Red);
-				return;
 			}
 			catch (JsonReaderException e)
 			{
 				_logger.Log("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
-				return;
 			}
 		}
 

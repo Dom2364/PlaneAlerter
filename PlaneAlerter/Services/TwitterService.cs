@@ -39,7 +39,7 @@ namespace PlaneAlerter.Services {
 	/// </summary>
 	internal class TwitterService : ITwitterService
 	{
-		public event EventHandler AccountsUpdated;
+		public event EventHandler? AccountsUpdated;
 
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly ILoggerWithQueue _logger;
@@ -99,7 +99,7 @@ namespace PlaneAlerter.Services {
 					detailedContent = contentJson?["detail"]?.ToString();
 				}
 
-				_logger.Log($"ERROR: Error publishing tweet: {(detailedContent != null ? detailedContent + Environment.NewLine : "")}{e.ToString()}", System.Drawing.Color.Red);
+				_logger.Log($"ERROR: Error publishing tweet: {(detailedContent != null ? detailedContent + Environment.NewLine : "")}{e}", System.Drawing.Color.Red);
 				return false;
 			}
 			catch (Exception e) {
@@ -162,15 +162,15 @@ namespace PlaneAlerter.Services {
 				authenticationRequest = await appClient.Auth.RequestAuthenticationUrlAsync();
 			}
 			catch (TwitterAuthException e) {
-				MessageBox.Show("Auth error authenticating PlaneAlerter with Twitter, please contact developer with details of this message: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+				MessageBox.Show("Auth error authenticating PlaneAlerter with Twitter, please contact developer with details of this message: " + Environment.NewLine + Environment.NewLine + e, "Authentication Error");
 				return;
 			}
 			catch (TwitterException e) {
-				MessageBox.Show("Error authenticating PlaneAlerter with Twitter, please contact developer with details of this message: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+				MessageBox.Show("Error authenticating PlaneAlerter with Twitter, please contact developer with details of this message: " + Environment.NewLine + Environment.NewLine + e, "Authentication Error");
 				return;
 			}
 			catch (Exception e) {
-				MessageBox.Show($"{e.GetType()} error authenticating PlaneAlerter with Twitter: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+				MessageBox.Show($"{e.GetType()} error authenticating PlaneAlerter with Twitter: " + Environment.NewLine + Environment.NewLine + e, "Authentication Error");
 				return;
 			}
 
@@ -188,15 +188,15 @@ namespace PlaneAlerter.Services {
 				userCredentials = await appClient.Auth.RequestCredentialsFromVerifierCodeAsync(dialog.Pin, authenticationRequest);
 			}
 			catch (TwitterAuthException e) {
-				MessageBox.Show("Auth error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+				MessageBox.Show("Auth error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e, "Authentication Error");
 				return;
 			}
 			catch (TwitterException e) {
-				MessageBox.Show("Error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+				MessageBox.Show("Error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e, "Authentication Error");
 				return;
 			}
 			catch (Exception e) {
-				MessageBox.Show($"{e.GetType()} error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Authentication Error");
+				MessageBox.Show($"{e.GetType()} error while retrieving user credentials: " + Environment.NewLine + Environment.NewLine + e, "Authentication Error");
 				return;
 			}
 

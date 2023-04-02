@@ -48,7 +48,7 @@ namespace PlaneAlerter.Forms {
 			if (conditionEditorTreeView.Nodes.Count != 0)
 				conditionEditorTreeView.SelectedNode = conditionEditorTreeView.Nodes[0];
 			
-			updateUIState();
+			UpdateUiState();
 		}
 
 		/// <summary>
@@ -158,10 +158,10 @@ namespace PlaneAlerter.Forms {
 		/// <summary>
 		/// Update buttons enabled state
 		/// </summary>
-		private void updateUIState() {
+		private void UpdateUiState() {
 			//If node is valid, enable buttons
 			var node = conditionEditorTreeView.SelectedNode;
-			var conditionSelected = node != null && node.Tag != null && node.Tag.ToString() != "";
+			var conditionSelected = !string.IsNullOrEmpty(node?.Tag?.ToString());
 			removeConditionButton.Enabled = conditionSelected;
 			editButton.Enabled = conditionSelected;
 			moveUpButton.Enabled = conditionSelected;
@@ -169,7 +169,7 @@ namespace PlaneAlerter.Forms {
 		}
 
 		private void conditionEditorTreeView_AfterSelect(object sender, TreeViewEventArgs e) {
-			updateUIState();
+			UpdateUiState();
 		}
 	}
 }

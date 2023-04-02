@@ -121,11 +121,11 @@ namespace PlaneAlerter.Forms
 			InitializeComponent();
 
 			_logger.NewLogMessage += NewLogMessageHandler;
-			_twitterService.AccountsUpdated += (sender, e) => UpdateTwitterAccounts();
-			_checkerService.StatusChanged += (sender, status) => UpdateStatusLabel(status);
+			_twitterService.AccountsUpdated += (_, _) => UpdateTwitterAccounts();
+			_checkerService.StatusChanged += (_, status) => UpdateStatusLabel(status);
 			_threadManagerService.StatusChanged += ThreadManagerServiceOnStatusChanged;
 			_checkerService.SendingAlert += CheckerServiceOnSendingAlert;
-			_statsService.StatsChanged += (sender, args) => UpdateStats();
+			_statsService.StatsChanged += (_, _) => UpdateStats();
 
 			//When shown, wait until everything has loaded then start threads
 			Shown += delegate
@@ -323,7 +323,7 @@ namespace PlaneAlerter.Forms
 
 			foreach (var screenName in _settingsManagerService.Settings.TwitterUsers.Keys) {
 				var item = removeAccountToolStripMenuItem.DropDownItems.Add(screenName);
-				item.Click += (sender, args) =>
+				item.Click += (sender, _) =>
 				{
 					if (sender == null)
 						return;
@@ -389,7 +389,11 @@ namespace PlaneAlerter.Forms
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		private void ConsoleLinkClicked(object sender, LinkClickedEventArgs e) {
+		private void ConsoleLinkClicked(object sender, LinkClickedEventArgs e)
+		{
+			if (string.IsNullOrEmpty(e.LinkText))
+				return;
+
 			//Open link
 			Process.Start(new ProcessStartInfo(e.LinkText)
 			{
