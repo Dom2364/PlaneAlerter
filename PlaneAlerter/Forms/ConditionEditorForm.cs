@@ -119,44 +119,49 @@ namespace PlaneAlerter.Forms {
 			if (triggerDataGridView.Rows.Count == 1)
 				return;
 
-			//Check if cell changed is in the value column and value isnt empty
-			if (e.ColumnIndex == 2 && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString() != "") {
+			var selectedPropertyKey = triggerDataGridView.Rows[e.RowIndex].Cells[0].Value?.ToString();
+			var selectedProperty = !string.IsNullOrEmpty(selectedPropertyKey)
+				? (VrsProperty?)Enum.Parse(typeof(VrsProperty?), selectedPropertyKey.Replace(' ', '_'))
+				: null;
+
+			//Check if cell changed is in the value column and value isn't empty
+			if (e.ColumnIndex == 2 &&
+			    selectedProperty != null)
+			{
 				//Clear value if property is number and value is not a number
-				if (triggerDataGridView.Rows[e.RowIndex].Cells[2].Value != null && triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString() != "" && VrsProperties.VrsPropertyData[(VrsProperty)Enum.Parse(typeof(VrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][0] == "Number") {
-					try {
-						Convert.ToDouble(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value);
-					}
-					catch (Exception) {
-						triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
-					}
+				if (VrsProperties.VrsPropertyData[selectedProperty.Value][0] == "Number" &&
+				    !string.IsNullOrEmpty(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value?.ToString()) &&
+				    !double.TryParse(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString(), out _))
+				{
+					triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
 				}
 			}
 
 			//Change comparison type combo box based on property selected
-			if (e.ColumnIndex == 0) {
+			if (e.ColumnIndex == 0 && selectedProperty != null) {
 				//Clear combobox
 				var comparisonTypeComboBox = (DataGridViewComboBoxCell)(triggerDataGridView.Rows[e.RowIndex].Cells[1]);
 				comparisonTypeComboBox.Items.Clear();
 				comparisonTypeComboBox.Value = "";
 
 				//Get comparison types supported by property
-				string supportedComparisonTypes;
-				try {
-					supportedComparisonTypes = VrsProperties.VrsPropertyData[(VrsProperty)Enum.Parse(typeof(VrsProperty), triggerDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString().Replace(' ', '_'))][1];
-				}
-				catch (Exception) {
-					return;
-				}
+				var supportedComparisonTypes = VrsProperties.VrsPropertyData[selectedProperty.Value][1];
 
 				//Add comparison types to combobox from supported comparison types
 				if (supportedComparisonTypes.Contains("A")) {
-					foreach (var comparisonType in VrsProperties.ComparisonTypes["A"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in VrsProperties.ComparisonTypes["A"])
+						comparisonTypeComboBox.Items.Add(comparisonType);
 				}
+
 				if (supportedComparisonTypes.Contains("B")) {
-					foreach (var comparisonType in VrsProperties.ComparisonTypes["B"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in VrsProperties.ComparisonTypes["B"])
+						comparisonTypeComboBox.Items.Add(comparisonType);
 				}
+
 				if (supportedComparisonTypes.Contains("C")) {
-					foreach (var comparisonType in VrsProperties.ComparisonTypes["C"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in VrsProperties.ComparisonTypes["C"])
+						comparisonTypeComboBox.Items.Add(comparisonType);
+
 					triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "True";
 					triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = true;
 				}
@@ -164,11 +169,15 @@ namespace PlaneAlerter.Forms {
 					triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
 					triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = false;
 				}
+
 				if (supportedComparisonTypes.Contains("D")) {
-					foreach (var comparisonType in VrsProperties.ComparisonTypes["D"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in VrsProperties.ComparisonTypes["D"])
+						comparisonTypeComboBox.Items.Add(comparisonType);
 				}
+
 				if (supportedComparisonTypes.Contains("E")) {
-					foreach (var comparisonType in VrsProperties.ComparisonTypes["E"]) comparisonTypeComboBox.Items.Add(comparisonType);
+					foreach (var comparisonType in VrsProperties.ComparisonTypes["E"])
+						comparisonTypeComboBox.Items.Add(comparisonType);
 				}
 
 				comparisonTypeComboBox.Value = comparisonTypeComboBox.Items[0].ToString();

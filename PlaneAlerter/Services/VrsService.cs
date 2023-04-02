@@ -163,6 +163,9 @@ namespace PlaneAlerter.Services
 					foreach (var property in properties)
 						aircraft.AddProperty(property.Name, property.Value.ToString());
 
+					//Remove the existing aircraft if it exists
+					AircraftList.RemoveAll(x => x.Icao == aircraft.Icao);
+
 					//Add aircraft to list
 					AircraftList.Add(aircraft);
 				}
@@ -215,7 +218,7 @@ namespace PlaneAlerter.Services
 
 			var response = await _httpClient.SendAsync(request, tokenSource.Token);
 
-			var responseContent = await response.Content.ReadAsStringAsync();
+			var responseContent = await response.Content.ReadAsStringAsync(tokenSource.Token);
 
 			return (JObject?)JsonConvert.DeserializeObject(responseContent);
 		}
@@ -294,7 +297,7 @@ namespace PlaneAlerter.Services
 			var imageLinks = new List<string>();
 
 			var url =
-				$"{_settingsManagerService.Settings.AircraftListUrl.Substring(0, _settingsManagerService.Settings.AircraftListUrl.LastIndexOf("/") + 1)}AirportDataThumbnails.json?icao={icao}&numThumbs=2";
+				$"{_settingsManagerService.Settings.AircraftListUrl.Substring(0, _settingsManagerService.Settings.AircraftListUrl.LastIndexOf("/", StringComparison.Ordinal) + 1)}AirportDataThumbnails.json?icao={icao}&numThumbs=2";
 
 			var request = new HttpRequestMessage(HttpMethod.Get, url);
 
@@ -314,7 +317,7 @@ namespace PlaneAlerter.Services
 			{
 				var response = await _httpClient.SendAsync(request, tokenSource.Token);
 
-				var responseContent = await response.Content.ReadAsStringAsync();
+				var responseContent = await response.Content.ReadAsStringAsync(tokenSource.Token);
 
 				//Parse json
 				var responseJson = (JObject?)JsonConvert.DeserializeObject(responseContent);

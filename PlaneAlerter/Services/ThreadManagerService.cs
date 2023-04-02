@@ -126,12 +126,12 @@ namespace PlaneAlerter.Services {
 			
 			while (_checkerThread.ThreadState != ThreadState.Stopped) Thread.Sleep(200);
 
+			//Clear matches
+			_checkerService.ActiveMatches.Clear();
+
 			_checkerThread = null;
 			ThreadStatus = CheckerStatus.Stopped;
 
-			//Clear matches
-			_checkerService.ActiveMatches.Clear();
-			
 			_logger.Log("Checker Stopped", Color.White);
 		}
 

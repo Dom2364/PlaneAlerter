@@ -95,7 +95,8 @@ namespace PlaneAlerter.Services {
 				string? detailedContent = null;
 				if (e.Content != null) {
 					var contentJson = JsonSerializer.Create().Deserialize<Newtonsoft.Json.Linq.JObject>(new JsonTextReader(new StringReader(e.Content)));
-					detailedContent = contentJson["detail"]?.ToString();
+					
+					detailedContent = contentJson?["detail"]?.ToString();
 				}
 
 				_logger.Log($"ERROR: Error publishing tweet: {(detailedContent != null ? detailedContent + Environment.NewLine : "")}{e.ToString()}", System.Drawing.Color.Red);

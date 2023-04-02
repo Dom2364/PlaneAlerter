@@ -160,6 +160,7 @@ namespace PlaneAlerter.Forms
 					startToolStripMenuItem.Enabled = true;
 					restartToolStripMenuItem.Enabled = false;
 					UpdateStatusLabel("Idle");
+					UpdateStats();
 					break;
 				case CheckerStatus.Running:
 					startToolStripMenuItem.Text = "Stop";

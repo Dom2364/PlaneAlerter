@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using PlaneAlerter.Enums;
@@ -141,54 +142,59 @@ namespace PlaneAlerter.Services
 			var aircraftPropertyKeys = aircraft.GetPropertyKeys();
 			foreach (var propertyKey in aircraftPropertyKeys)
 			{
-				//TODO ADD TO VRSPROPERTIES
-				var parameter = "UNKNOWN_PARAMETER";
-				//Set parameter to a readable name if it's not included in vrs property info
-				switch (propertyKey)
-				{
-					case "FSeen":
-						parameter = "First_Seen";
-						break;
-					case "HasPic":
-						parameter = "Has_Picture";
-						break;
-					case "Id":
-						parameter = "Id";
-						break;
-					case "PosTime":
-						parameter = "Position_Time";
-						break;
-					case "TT":
-					case "ResetTrail":
-						continue;
-				}
-				//If parameter is set (not in vrs property info list) and property list type is set to essentials, skip this property
-				if (parameter != "UNKNOWN_PARAMETER" && _settingsManagerService.EmailContentConfig.PropertyList == PropertyListType.Essentials)
-					continue;
-				//Get parameter information from vrs property info
-				if (parameter == "UNKNOWN_PARAMETER")
-				{
-					foreach (var property in VrsProperties.VrsPropertyData.Keys)
-					{
-						if (VrsProperties.VrsPropertyData[property][2] != propertyKey.ToString())
-							continue;
+				var property = VrsProperties.VrsPropertyData.Where(x => x.Value[2] == propertyKey)
+					.Select(x => (VrsProperty?)x.Key).FirstOrDefault();
 
-						//If property list type is essentials and this property is not in the list of essentials, leave this property as unknown so it can be skipped
-						if (_settingsManagerService.EmailContentConfig.PropertyList == PropertyListType.Essentials && !VrsProperties.EssentialProperties.Contains(property))
+				string propertyName;
+
+				if (property != null)
+				{
+					//If property list type is essentials and this property is not in the list of essentials then skip
+					if (_settingsManagerService.EmailContentConfig.PropertyList == PropertyListType.Essentials &&
+					    !VrsProperties.EssentialProperties.Contains(property.Value))
+						continue;
+
+					propertyName = property.Value.ToString();
+				}
+				else
+				{
+					//If property list type is essentials then skip
+					if (_settingsManagerService.EmailContentConfig.PropertyList == PropertyListType.Essentials)
+						continue;
+
+					//Set parameter to a readable name if it's not included in vrs property info
+					switch (propertyKey)
+					{
+						case "FSeen":
+							propertyName = "First_Seen";
+							break;
+						case "HasPic":
+							propertyName = "Has_Picture";
+							break;
+						case "Id":
+							propertyName = "Id";
+							break;
+						case "PosTime":
+							propertyName = "Position_Time";
+							break;
+						case "TT":
+						case "ResetTrail":
 							continue;
-						parameter = property.ToString();
+						default:
+							propertyName = propertyKey;
+							break;
 					}
-					if (parameter == "UNKNOWN_PARAMETER")
-						parameter = propertyKey.ToString();
 				}
 
 				//Get value
 				var value = aircraft.GetProperty(propertyKey);
+
 				//Add string conversions of enum values
 				if (_vrsEnumService.TryToString(propertyKey, value, out var convertedValue))
 				{
 					value += " (" + convertedValue + ")";
 				}
+
 				//If rcvr, add receiver name
 				if (propertyKey == "Rcvr")
 				{
@@ -200,13 +206,30 @@ namespace PlaneAlerter.Services
 					table += "<tr style='border-bottom: 1px dashed #999;'>";
 				else
 					table += "<tr>";
-				table += "<td style='padding: 3px 6px;font-weight:bold;'>" + parameter.Replace('_', ' ') + "</td>";
+				table += "<td style='padding: 3px 6px;font-weight:bold;'>" + propertyName.Replace('_', ' ') + "</td>";
 				table += "<td style='padding: 3px 6px;'>" + value + "</td>";
 				table += "</tr>";
 			}
 			table += "</table>";
 
 			return table;
+		}
+
+		private bool TryGetProperty(string propertyKey, out VrsProperty property)
+		{
+			
+
+			foreach (var propertyDataKey in VrsProperties.VrsPropertyData.Keys)
+			{
+				if (VrsProperties.VrsPropertyData[propertyDataKey][2] != propertyKey)
+					continue;
+
+				property = propertyDataKey;
+				return true;
+			}
+
+			property = default;
+			return false;
 		}
 
 		private string BuildTwitterOptimisedBody(Condition condition, Aircraft aircraft, bool isDetection)
