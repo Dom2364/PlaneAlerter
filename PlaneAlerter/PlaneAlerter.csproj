@@ -14,6 +14,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFramework>net7.0-windows</TargetFramework>
@@ -58,6 +59,9 @@
     <FileAlignment>4096</FileAlignment>
     <DebugType>None</DebugType>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Security" />
