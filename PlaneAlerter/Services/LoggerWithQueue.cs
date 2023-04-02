@@ -9,7 +9,8 @@ namespace PlaneAlerter.Services
 	{
 		event EventHandler NewLogMessage;
 		IEnumerable<LogMessage> DequeueLogsForUi(int maxCount = 10);
-		void Log(string message, Color? color);
+		void Log(string message, Color? color = null);
+		void LogWithTimeAndAircraft(Aircraft aircraft, string action, string message, Color? color = null);
 	}
 
 	internal class LoggerWithQueue : ILoggerWithQueue
@@ -31,10 +32,15 @@ namespace PlaneAlerter.Services
 			}
 		}
 
-		public void Log(string message, Color? color)
+		public void Log(string message, Color? color = null)
 		{
 			_queuedLogs.Enqueue(new LogMessage(message, color));
 			NewLogMessage?.Invoke(this, EventArgs.Empty);
+		}
+
+		public void LogWithTimeAndAircraft(Aircraft aircraft, string action, string message, Color? color = null)
+		{
+			Log(DateTime.Now.ToLongTimeString() + $" | {action.PadRight(10)} | {aircraft.Icao} - {aircraft.GetProperty("Reg")} - {aircraft.GetProperty("Call")} | " + message, color);
 		}
 	}
 }

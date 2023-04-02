@@ -80,6 +80,11 @@ namespace PlaneAlerter.Models
 		public bool SoundAlerts { get; set; }
 
 		/// <summary>
+		/// Flash the window on an alert
+		/// </summary>
+		public bool FlashWindow { get; set; }
+
+		/// <summary>
 		/// Ignore aircraft beyond a specific distance?
 		/// </summary>
 		public bool FilterDistance { get; set; }

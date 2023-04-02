@@ -60,9 +60,11 @@
 			this.filterAltCheckBox = new System.Windows.Forms.CheckBox();
 			this.ignoreModeSCheckBox = new System.Windows.Forms.CheckBox();
 			this.filterReceiverCheckBox = new System.Windows.Forms.CheckBox();
+			this.label12 = new System.Windows.Forms.Label();
 			this.saveSettingsButton = new System.Windows.Forms.Button();
 			this.emailGroupBox = new System.Windows.Forms.GroupBox();
 			this.radarGroupBox = new System.Windows.Forms.GroupBox();
+			this.trailsAgeNumericUpDown = new System.Windows.Forms.NumericUpDown();
 			this.refreshReceiversButton = new System.Windows.Forms.Button();
 			this.receiverComboBox = new System.Windows.Forms.ComboBox();
 			this.ignoreDistTextBox = new System.Windows.Forms.NumericUpDown();
@@ -75,12 +77,13 @@
 			this.centreLatLngRadioButton = new System.Windows.Forms.RadioButton();
 			this.centreAircraftRadioButton = new System.Windows.Forms.RadioButton();
 			this.refreshTextBox = new System.Windows.Forms.NumericUpDown();
-			this.trailsAgeNumericUpDown = new System.Windows.Forms.NumericUpDown();
-			this.label12 = new System.Windows.Forms.Label();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.flashWindowCheckBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.removalTimeoutTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.smtpHostPortTextBox)).BeginInit();
 			this.emailGroupBox.SuspendLayout();
 			this.radarGroupBox.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.trailsAgeNumericUpDown)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ignoreDistTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.longTextBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ignoreAltTextBox)).BeginInit();
@@ -88,93 +91,103 @@
 			((System.ComponentModel.ISupportInitialize)(this.timeoutTextBox)).BeginInit();
 			this.programGroupBox.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.refreshTextBox)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.trailsAgeNumericUpDown)).BeginInit();
+			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// senderEmailTextBox
 			// 
-			this.senderEmailTextBox.Location = new System.Drawing.Point(142, 22);
+			this.senderEmailTextBox.Location = new System.Drawing.Point(166, 25);
+			this.senderEmailTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.senderEmailTextBox.Name = "senderEmailTextBox";
-			this.senderEmailTextBox.Size = new System.Drawing.Size(178, 20);
+			this.senderEmailTextBox.Size = new System.Drawing.Size(207, 23);
 			this.senderEmailTextBox.TabIndex = 0;
 			// 
 			// aircraftListTextBox
 			// 
-			this.aircraftListTextBox.Location = new System.Drawing.Point(142, 22);
+			this.aircraftListTextBox.Location = new System.Drawing.Point(166, 25);
+			this.aircraftListTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.aircraftListTextBox.Name = "aircraftListTextBox";
-			this.aircraftListTextBox.Size = new System.Drawing.Size(178, 20);
+			this.aircraftListTextBox.Size = new System.Drawing.Size(207, 23);
 			this.aircraftListTextBox.TabIndex = 1;
 			// 
 			// VRSUsrTextBox
 			// 
-			this.VRSUsrTextBox.Location = new System.Drawing.Point(142, 100);
+			this.VRSUsrTextBox.Location = new System.Drawing.Point(166, 115);
+			this.VRSUsrTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.VRSUsrTextBox.Name = "VRSUsrTextBox";
-			this.VRSUsrTextBox.Size = new System.Drawing.Size(178, 20);
+			this.VRSUsrTextBox.Size = new System.Drawing.Size(207, 23);
 			this.VRSUsrTextBox.TabIndex = 3;
 			// 
 			// removalTimeoutTextBox
 			// 
-			this.removalTimeoutTextBox.Location = new System.Drawing.Point(245, 45);
+			this.removalTimeoutTextBox.Location = new System.Drawing.Point(286, 52);
+			this.removalTimeoutTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.removalTimeoutTextBox.Maximum = new decimal(new int[] {
             3600,
             0,
             0,
             0});
 			this.removalTimeoutTextBox.Name = "removalTimeoutTextBox";
-			this.removalTimeoutTextBox.Size = new System.Drawing.Size(78, 20);
+			this.removalTimeoutTextBox.Size = new System.Drawing.Size(91, 23);
 			this.removalTimeoutTextBox.TabIndex = 4;
 			// 
 			// smtpHostComboBox
 			// 
 			this.smtpHostComboBox.FormattingEnabled = true;
-			this.smtpHostComboBox.Location = new System.Drawing.Point(142, 48);
+			this.smtpHostComboBox.Location = new System.Drawing.Point(166, 55);
+			this.smtpHostComboBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.smtpHostComboBox.Name = "smtpHostComboBox";
-			this.smtpHostComboBox.Size = new System.Drawing.Size(178, 21);
+			this.smtpHostComboBox.Size = new System.Drawing.Size(207, 23);
 			this.smtpHostComboBox.TabIndex = 5;
 			this.smtpHostComboBox.SelectedValueChanged += new System.EventHandler(this.smtpHostComboBox_SelectedValueChanged);
 			// 
 			// smtpHostPortTextBox
 			// 
-			this.smtpHostPortTextBox.Location = new System.Drawing.Point(245, 75);
+			this.smtpHostPortTextBox.Location = new System.Drawing.Point(286, 87);
+			this.smtpHostPortTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.smtpHostPortTextBox.Maximum = new decimal(new int[] {
             65535,
             0,
             0,
             0});
 			this.smtpHostPortTextBox.Name = "smtpHostPortTextBox";
-			this.smtpHostPortTextBox.Size = new System.Drawing.Size(75, 20);
+			this.smtpHostPortTextBox.Size = new System.Drawing.Size(88, 23);
 			this.smtpHostPortTextBox.TabIndex = 6;
 			// 
 			// smtpUsrTextBox
 			// 
-			this.smtpUsrTextBox.Location = new System.Drawing.Point(142, 101);
+			this.smtpUsrTextBox.Location = new System.Drawing.Point(166, 117);
+			this.smtpUsrTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.smtpUsrTextBox.Name = "smtpUsrTextBox";
-			this.smtpUsrTextBox.Size = new System.Drawing.Size(178, 20);
+			this.smtpUsrTextBox.Size = new System.Drawing.Size(207, 23);
 			this.smtpUsrTextBox.TabIndex = 7;
 			// 
 			// VRSPwdTextBox
 			// 
-			this.VRSPwdTextBox.Location = new System.Drawing.Point(142, 126);
+			this.VRSPwdTextBox.Location = new System.Drawing.Point(166, 145);
+			this.VRSPwdTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.VRSPwdTextBox.Name = "VRSPwdTextBox";
 			this.VRSPwdTextBox.PasswordChar = '*';
-			this.VRSPwdTextBox.Size = new System.Drawing.Size(178, 20);
+			this.VRSPwdTextBox.Size = new System.Drawing.Size(207, 23);
 			this.VRSPwdTextBox.TabIndex = 8;
 			// 
 			// smtpPwdTextBox
 			// 
-			this.smtpPwdTextBox.Location = new System.Drawing.Point(142, 127);
+			this.smtpPwdTextBox.Location = new System.Drawing.Point(166, 147);
+			this.smtpPwdTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.smtpPwdTextBox.Name = "smtpPwdTextBox";
 			this.smtpPwdTextBox.PasswordChar = '*';
-			this.smtpPwdTextBox.Size = new System.Drawing.Size(178, 20);
+			this.smtpPwdTextBox.Size = new System.Drawing.Size(207, 23);
 			this.smtpPwdTextBox.TabIndex = 9;
 			// 
 			// smtpSSLCheckBox
 			// 
 			this.smtpSSLCheckBox.AutoSize = true;
 			this.smtpSSLCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.smtpSSLCheckBox.Location = new System.Drawing.Point(6, 153);
+			this.smtpSSLCheckBox.Location = new System.Drawing.Point(7, 177);
+			this.smtpSSLCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.smtpSSLCheckBox.Name = "smtpSSLCheckBox";
-			this.smtpSSLCheckBox.Size = new System.Drawing.Size(79, 17);
+			this.smtpSSLCheckBox.Size = new System.Drawing.Size(77, 19);
 			this.smtpSSLCheckBox.TabIndex = 10;
 			this.smtpSSLCheckBox.Text = "SMTP SSL";
 			this.toolTip.SetToolTip(this.smtpSSLCheckBox, "Use SSL for the SMTP server. This is usually enabled for gmail and popular server" +
@@ -184,9 +197,10 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(6, 25);
+			this.label1.Location = new System.Drawing.Point(7, 29);
+			this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(93, 13);
+			this.label1.Size = new System.Drawing.Size(107, 15);
 			this.label1.TabIndex = 11;
 			this.label1.Text = "Email to send from";
 			this.toolTip.SetToolTip(this.label1, "This should be a valid email on the smtp server specified");
@@ -194,9 +208,10 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(6, 25);
+			this.label2.Location = new System.Drawing.Point(7, 29);
+			this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(94, 13);
+			this.label2.Size = new System.Drawing.Size(107, 15);
 			this.label2.TabIndex = 12;
 			this.label2.Text = "AircraftList.json Url";
 			this.toolTip.SetToolTip(this.label2, "This should be http://*domain/ip*/VirtualRadar/AircraftList.json");
@@ -213,9 +228,10 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(6, 103);
+			this.label3.Location = new System.Drawing.Point(7, 119);
+			this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(124, 13);
+			this.label3.Size = new System.Drawing.Size(134, 15);
 			this.label3.TabIndex = 13;
 			this.label3.Text = "Username for VRS Login";
 			this.toolTip.SetToolTip(this.label3, "Leave blank for unpassworded servers");
@@ -223,9 +239,10 @@
 			// label4
 			// 
 			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(8, 129);
+			this.label4.Location = new System.Drawing.Point(9, 149);
+			this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(122, 13);
+			this.label4.Size = new System.Drawing.Size(131, 15);
 			this.label4.TabIndex = 14;
 			this.label4.Text = "Password for VRS Login";
 			this.toolTip.SetToolTip(this.label4, "Leave blank for unpassworded servers");
@@ -233,9 +250,10 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(6, 47);
+			this.label5.Location = new System.Drawing.Point(8, 54);
+			this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(157, 13);
+			this.label5.Size = new System.Drawing.Size(175, 15);
 			this.label5.TabIndex = 15;
 			this.label5.Text = "Aircraft Removal Timeout (secs)";
 			this.toolTip.SetToolTip(this.label5, "This is how long it takes for it to remove a plane after signal is lost.");
@@ -243,9 +261,10 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(6, 51);
+			this.label6.Location = new System.Drawing.Point(7, 59);
+			this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(62, 13);
+			this.label6.Size = new System.Drawing.Size(65, 15);
 			this.label6.TabIndex = 16;
 			this.label6.Text = "SMTP Host";
 			this.toolTip.SetToolTip(this.label6, "This is the server that the email is hosted on");
@@ -253,9 +272,10 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(6, 77);
+			this.label7.Location = new System.Drawing.Point(7, 89);
+			this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label7.Name = "label7";
-			this.label7.Size = new System.Drawing.Size(84, 13);
+			this.label7.Size = new System.Drawing.Size(90, 15);
 			this.label7.TabIndex = 17;
 			this.label7.Text = "SMTP Host Port";
 			this.toolTip.SetToolTip(this.label7, "This is the port that the SMTP server uses");
@@ -263,9 +283,10 @@
 			// label8
 			// 
 			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(6, 104);
+			this.label8.Location = new System.Drawing.Point(7, 120);
+			this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label8.Name = "label8";
-			this.label8.Size = new System.Drawing.Size(88, 13);
+			this.label8.Size = new System.Drawing.Size(93, 15);
 			this.label8.TabIndex = 18;
 			this.label8.Text = "SMTP Username";
 			this.toolTip.SetToolTip(this.label8, "The username to login. This is usually the sending email address.");
@@ -273,9 +294,10 @@
 			// label9
 			// 
 			this.label9.AutoSize = true;
-			this.label9.Location = new System.Drawing.Point(6, 130);
+			this.label9.Location = new System.Drawing.Point(7, 150);
+			this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label9.Name = "label9";
-			this.label9.Size = new System.Drawing.Size(86, 13);
+			this.label9.Size = new System.Drawing.Size(90, 15);
 			this.label9.TabIndex = 19;
 			this.label9.Text = "SMTP Password";
 			this.toolTip.SetToolTip(this.label9, "The password to login.");
@@ -284,9 +306,10 @@
 			// 
 			this.runOnStartupCheckBox.AutoSize = true;
 			this.runOnStartupCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.runOnStartupCheckBox.Location = new System.Drawing.Point(6, 71);
+			this.runOnStartupCheckBox.Location = new System.Drawing.Point(7, 82);
+			this.runOnStartupCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.runOnStartupCheckBox.Name = "runOnStartupCheckBox";
-			this.runOnStartupCheckBox.Size = new System.Drawing.Size(100, 17);
+			this.runOnStartupCheckBox.Size = new System.Drawing.Size(107, 19);
 			this.runOnStartupCheckBox.TabIndex = 21;
 			this.runOnStartupCheckBox.Text = "Run On Startup";
 			this.toolTip.SetToolTip(this.runOnStartupCheckBox, "Run PlaneAlerter when this user logs in");
@@ -295,9 +318,10 @@
 			// refreshLabel
 			// 
 			this.refreshLabel.AutoSize = true;
-			this.refreshLabel.Location = new System.Drawing.Point(8, 21);
+			this.refreshLabel.Location = new System.Drawing.Point(8, 24);
+			this.refreshLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.refreshLabel.Name = "refreshLabel";
-			this.refreshLabel.Size = new System.Drawing.Size(107, 13);
+			this.refreshLabel.Size = new System.Drawing.Size(115, 15);
 			this.refreshLabel.TabIndex = 23;
 			this.refreshLabel.Text = "Check Interval (secs)";
 			this.toolTip.SetToolTip(this.refreshLabel, "The time in seconds between each check");
@@ -305,9 +329,10 @@
 			// label10
 			// 
 			this.label10.AutoSize = true;
-			this.label10.Location = new System.Drawing.Point(6, 77);
+			this.label10.Location = new System.Drawing.Point(7, 89);
+			this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label10.Name = "label10";
-			this.label10.Size = new System.Drawing.Size(61, 13);
+			this.label10.Size = new System.Drawing.Size(61, 15);
 			this.label10.TabIndex = 16;
 			this.label10.Text = "Radar URL";
 			this.toolTip.SetToolTip(this.label10, "This should be http://*domain/ip*/VirtualRadar/\r\nThis URL is used for the radar l" +
@@ -316,9 +341,10 @@
 			// latLabel
 			// 
 			this.latLabel.AutoSize = true;
-			this.latLabel.Location = new System.Drawing.Point(8, 153);
+			this.latLabel.Location = new System.Drawing.Point(9, 177);
+			this.latLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.latLabel.Name = "latLabel";
-			this.latLabel.Size = new System.Drawing.Size(45, 13);
+			this.latLabel.Size = new System.Drawing.Size(50, 15);
 			this.latLabel.TabIndex = 17;
 			this.latLabel.Text = "Latitude";
 			this.toolTip.SetToolTip(this.latLabel, "Latitude used for distance measurement");
@@ -326,9 +352,10 @@
 			// longLabel
 			// 
 			this.longLabel.AutoSize = true;
-			this.longLabel.Location = new System.Drawing.Point(185, 153);
+			this.longLabel.Location = new System.Drawing.Point(216, 177);
+			this.longLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.longLabel.Name = "longLabel";
-			this.longLabel.Size = new System.Drawing.Size(54, 13);
+			this.longLabel.Size = new System.Drawing.Size(61, 15);
 			this.longLabel.TabIndex = 22;
 			this.longLabel.Text = "Longitude";
 			this.toolTip.SetToolTip(this.longLabel, "Longitude used for distance measurement");
@@ -336,9 +363,10 @@
 			// label11
 			// 
 			this.label11.AutoSize = true;
-			this.label11.Location = new System.Drawing.Point(6, 50);
+			this.label11.Location = new System.Drawing.Point(7, 58);
+			this.label11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label11.Name = "label11";
-			this.label11.Size = new System.Drawing.Size(193, 13);
+			this.label11.Size = new System.Drawing.Size(214, 15);
 			this.label11.TabIndex = 25;
 			this.label11.Text = "AircraftList.json Request Timeout (secs)";
 			this.toolTip.SetToolTip(this.label11, "Request timeout for aircraftlist.json. Increasing this allows longer aircraft lis" +
@@ -348,11 +376,12 @@
 			// 
 			this.soundAlertsCheckBox.AutoSize = true;
 			this.soundAlertsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.soundAlertsCheckBox.Location = new System.Drawing.Point(6, 94);
+			this.soundAlertsCheckBox.Location = new System.Drawing.Point(8, 20);
+			this.soundAlertsCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.soundAlertsCheckBox.Name = "soundAlertsCheckBox";
-			this.soundAlertsCheckBox.Size = new System.Drawing.Size(119, 17);
+			this.soundAlertsCheckBox.Size = new System.Drawing.Size(85, 19);
 			this.soundAlertsCheckBox.TabIndex = 26;
-			this.soundAlertsCheckBox.Text = "Play Sound on Alert";
+			this.soundAlertsCheckBox.Text = "Play Sound";
 			this.toolTip.SetToolTip(this.soundAlertsCheckBox, "Play a sound on alert");
 			this.soundAlertsCheckBox.UseVisualStyleBackColor = true;
 			// 
@@ -360,11 +389,12 @@
 			// 
 			this.notificationsCheckBox.AutoSize = true;
 			this.notificationsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.notificationsCheckBox.Location = new System.Drawing.Point(172, 94);
+			this.notificationsCheckBox.Location = new System.Drawing.Point(125, 20);
+			this.notificationsCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.notificationsCheckBox.Name = "notificationsCheckBox";
-			this.notificationsCheckBox.Size = new System.Drawing.Size(148, 17);
+			this.notificationsCheckBox.Size = new System.Drawing.Size(121, 19);
 			this.notificationsCheckBox.TabIndex = 27;
-			this.notificationsCheckBox.Text = "Show Notification on Alert";
+			this.notificationsCheckBox.Text = "Show Notification";
 			this.toolTip.SetToolTip(this.notificationsCheckBox, "Show a notification on alert");
 			this.notificationsCheckBox.UseVisualStyleBackColor = true;
 			// 
@@ -372,9 +402,10 @@
 			// 
 			this.startOnStartCheckBox.AutoSize = true;
 			this.startOnStartCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.startOnStartCheckBox.Location = new System.Drawing.Point(147, 71);
+			this.startOnStartCheckBox.Location = new System.Drawing.Point(184, 82);
+			this.startOnStartCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.startOnStartCheckBox.Name = "startOnStartCheckBox";
-			this.startOnStartCheckBox.Size = new System.Drawing.Size(173, 17);
+			this.startOnStartCheckBox.Size = new System.Drawing.Size(189, 19);
 			this.startOnStartCheckBox.TabIndex = 28;
 			this.startOnStartCheckBox.Text = "Start Checker on Program Start";
 			this.toolTip.SetToolTip(this.startOnStartCheckBox, "Start checking for condition matches as soon as PlaneAlerter starts");
@@ -383,9 +414,10 @@
 			// gmailLink
 			// 
 			this.gmailLink.AutoSize = true;
-			this.gmailLink.Location = new System.Drawing.Point(136, 154);
+			this.gmailLink.Location = new System.Drawing.Point(159, 178);
+			this.gmailLink.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.gmailLink.Name = "gmailLink";
-			this.gmailLink.Size = new System.Drawing.Size(184, 13);
+			this.gmailLink.Size = new System.Drawing.Size(210, 15);
 			this.gmailLink.TabIndex = 20;
 			this.gmailLink.TabStop = true;
 			this.gmailLink.Text = "Enable this thing if sending with Gmail";
@@ -395,9 +427,10 @@
 			// label14
 			// 
 			this.label14.AutoSize = true;
-			this.label14.Location = new System.Drawing.Point(8, 119);
+			this.label14.Location = new System.Drawing.Point(7, 112);
+			this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label14.Name = "label14";
-			this.label14.Size = new System.Drawing.Size(81, 13);
+			this.label14.Size = new System.Drawing.Size(91, 15);
 			this.label14.TabIndex = 29;
 			this.label14.Text = "Centre maps on";
 			this.toolTip.SetToolTip(this.label14, "Centre maps on aircraft or provided lat/lng");
@@ -406,9 +439,10 @@
 			// 
 			this.filterDstCheckBox.AutoSize = true;
 			this.filterDstCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.filterDstCheckBox.Location = new System.Drawing.Point(6, 204);
+			this.filterDstCheckBox.Location = new System.Drawing.Point(7, 235);
+			this.filterDstCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.filterDstCheckBox.Name = "filterDstCheckBox";
-			this.filterDstCheckBox.Size = new System.Drawing.Size(171, 17);
+			this.filterDstCheckBox.Size = new System.Drawing.Size(194, 19);
 			this.filterDstCheckBox.TabIndex = 30;
 			this.filterDstCheckBox.Text = "Ignore aircraft further than (km)";
 			this.toolTip.SetToolTip(this.filterDstCheckBox, "Aircraft further than this distance will not be returned by VRS, this can be usef" +
@@ -421,9 +455,10 @@
 			// 
 			this.filterAltCheckBox.AutoSize = true;
 			this.filterAltCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.filterAltCheckBox.Location = new System.Drawing.Point(6, 177);
+			this.filterAltCheckBox.Location = new System.Drawing.Point(7, 204);
+			this.filterAltCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.filterAltCheckBox.Name = "filterAltCheckBox";
-			this.filterAltCheckBox.Size = new System.Drawing.Size(162, 17);
+			this.filterAltCheckBox.Size = new System.Drawing.Size(183, 19);
 			this.filterAltCheckBox.TabIndex = 31;
 			this.filterAltCheckBox.Text = "Ignore aircraft higher than (ft)";
 			this.toolTip.SetToolTip(this.filterAltCheckBox, "Aircraft higher than this altitude will not be returned by VRS, this can be usefu" +
@@ -436,9 +471,10 @@
 			// 
 			this.ignoreModeSCheckBox.AutoSize = true;
 			this.ignoreModeSCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.ignoreModeSCheckBox.Location = new System.Drawing.Point(6, 230);
+			this.ignoreModeSCheckBox.Location = new System.Drawing.Point(7, 265);
+			this.ignoreModeSCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.ignoreModeSCheckBox.Name = "ignoreModeSCheckBox";
-			this.ignoreModeSCheckBox.Size = new System.Drawing.Size(167, 17);
+			this.ignoreModeSCheckBox.Size = new System.Drawing.Size(190, 19);
 			this.ignoreModeSCheckBox.TabIndex = 32;
 			this.ignoreModeSCheckBox.Text = "Ignore aircraft without position";
 			this.toolTip.SetToolTip(this.ignoreModeSCheckBox, "VRS ignores aircraft without positions when filtering by distance. Disabling this" +
@@ -451,9 +487,10 @@
 			this.filterReceiverCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.filterReceiverCheckBox.Checked = true;
 			this.filterReceiverCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.filterReceiverCheckBox.Location = new System.Drawing.Point(6, 255);
+			this.filterReceiverCheckBox.Location = new System.Drawing.Point(7, 294);
+			this.filterReceiverCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.filterReceiverCheckBox.Name = "filterReceiverCheckBox";
-			this.filterReceiverCheckBox.Size = new System.Drawing.Size(103, 17);
+			this.filterReceiverCheckBox.Size = new System.Drawing.Size(112, 19);
 			this.filterReceiverCheckBox.TabIndex = 34;
 			this.filterReceiverCheckBox.Text = "Filter by receiver";
 			this.toolTip.SetToolTip(this.filterReceiverCheckBox, "Filter to only check aircraft from a specific receiver, this can be useful for re" +
@@ -461,12 +498,24 @@
 			this.filterReceiverCheckBox.UseVisualStyleBackColor = true;
 			this.filterReceiverCheckBox.CheckedChanged += new System.EventHandler(this.filterReceiverCheckBox_CheckedChanged);
 			// 
+			// label12
+			// 
+			this.label12.AutoSize = true;
+			this.label12.Location = new System.Drawing.Point(7, 324);
+			this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.label12.Name = "label12";
+			this.label12.Size = new System.Drawing.Size(208, 15);
+			this.label12.TabIndex = 37;
+			this.label12.Text = "Trail Update Frequency (no. of checks)";
+			this.toolTip.SetToolTip(this.label12, resources.GetString("label12.ToolTip"));
+			// 
 			// saveSettingsButton
 			// 
 			this.saveSettingsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.saveSettingsButton.Location = new System.Drawing.Point(573, 351);
+			this.saveSettingsButton.Location = new System.Drawing.Point(668, 401);
+			this.saveSettingsButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.saveSettingsButton.Name = "saveSettingsButton";
-			this.saveSettingsButton.Size = new System.Drawing.Size(103, 23);
+			this.saveSettingsButton.Size = new System.Drawing.Size(120, 27);
 			this.saveSettingsButton.TabIndex = 20;
 			this.saveSettingsButton.Text = "Save Settings";
 			this.saveSettingsButton.UseVisualStyleBackColor = true;
@@ -486,9 +535,11 @@
 			this.emailGroupBox.Controls.Add(this.smtpPwdTextBox);
 			this.emailGroupBox.Controls.Add(this.label6);
 			this.emailGroupBox.Controls.Add(this.smtpSSLCheckBox);
-			this.emailGroupBox.Location = new System.Drawing.Point(12, 165);
+			this.emailGroupBox.Location = new System.Drawing.Point(14, 218);
+			this.emailGroupBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.emailGroupBox.Name = "emailGroupBox";
-			this.emailGroupBox.Size = new System.Drawing.Size(329, 179);
+			this.emailGroupBox.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.emailGroupBox.Size = new System.Drawing.Size(384, 207);
 			this.emailGroupBox.TabIndex = 22;
 			this.emailGroupBox.TabStop = false;
 			this.emailGroupBox.Text = "Email";
@@ -519,18 +570,39 @@
 			this.radarGroupBox.Controls.Add(this.label3);
 			this.radarGroupBox.Controls.Add(this.label4);
 			this.radarGroupBox.Controls.Add(this.label11);
-			this.radarGroupBox.Location = new System.Drawing.Point(347, 12);
+			this.radarGroupBox.Location = new System.Drawing.Point(405, 14);
+			this.radarGroupBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.radarGroupBox.Name = "radarGroupBox";
-			this.radarGroupBox.Size = new System.Drawing.Size(329, 332);
+			this.radarGroupBox.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.radarGroupBox.Size = new System.Drawing.Size(384, 360);
 			this.radarGroupBox.TabIndex = 23;
 			this.radarGroupBox.TabStop = false;
 			this.radarGroupBox.Text = "Radar";
 			// 
+			// trailsAgeNumericUpDown
+			// 
+			this.trailsAgeNumericUpDown.Location = new System.Drawing.Point(286, 322);
+			this.trailsAgeNumericUpDown.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.trailsAgeNumericUpDown.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+			this.trailsAgeNumericUpDown.Name = "trailsAgeNumericUpDown";
+			this.trailsAgeNumericUpDown.Size = new System.Drawing.Size(88, 23);
+			this.trailsAgeNumericUpDown.TabIndex = 36;
+			this.trailsAgeNumericUpDown.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			// 
 			// refreshReceiversButton
 			// 
-			this.refreshReceiversButton.Location = new System.Drawing.Point(126, 251);
+			this.refreshReceiversButton.Location = new System.Drawing.Point(147, 290);
+			this.refreshReceiversButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.refreshReceiversButton.Name = "refreshReceiversButton";
-			this.refreshReceiversButton.Size = new System.Drawing.Size(56, 23);
+			this.refreshReceiversButton.Size = new System.Drawing.Size(65, 27);
 			this.refreshReceiversButton.TabIndex = 35;
 			this.refreshReceiversButton.Text = "Refresh";
 			this.refreshReceiversButton.UseVisualStyleBackColor = true;
@@ -540,28 +612,31 @@
 			// 
 			this.receiverComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.receiverComboBox.FormattingEnabled = true;
-			this.receiverComboBox.Location = new System.Drawing.Point(188, 252);
+			this.receiverComboBox.Location = new System.Drawing.Point(219, 291);
+			this.receiverComboBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.receiverComboBox.Name = "receiverComboBox";
-			this.receiverComboBox.Size = new System.Drawing.Size(132, 21);
+			this.receiverComboBox.Size = new System.Drawing.Size(153, 23);
 			this.receiverComboBox.TabIndex = 33;
 			// 
 			// ignoreDistTextBox
 			// 
 			this.ignoreDistTextBox.DecimalPlaces = 2;
-			this.ignoreDistTextBox.Location = new System.Drawing.Point(245, 203);
+			this.ignoreDistTextBox.Location = new System.Drawing.Point(286, 234);
+			this.ignoreDistTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.ignoreDistTextBox.Maximum = new decimal(new int[] {
             30000,
             0,
             0,
             0});
 			this.ignoreDistTextBox.Name = "ignoreDistTextBox";
-			this.ignoreDistTextBox.Size = new System.Drawing.Size(75, 20);
+			this.ignoreDistTextBox.Size = new System.Drawing.Size(88, 23);
 			this.ignoreDistTextBox.TabIndex = 28;
 			// 
 			// longTextBox
 			// 
 			this.longTextBox.DecimalPlaces = 4;
-			this.longTextBox.Location = new System.Drawing.Point(245, 151);
+			this.longTextBox.Location = new System.Drawing.Point(286, 174);
+			this.longTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.longTextBox.Maximum = new decimal(new int[] {
             180,
             0,
@@ -573,7 +648,7 @@
             0,
             -2147483648});
 			this.longTextBox.Name = "longTextBox";
-			this.longTextBox.Size = new System.Drawing.Size(75, 20);
+			this.longTextBox.Size = new System.Drawing.Size(88, 23);
 			this.longTextBox.TabIndex = 23;
 			// 
 			// ignoreAltTextBox
@@ -583,14 +658,15 @@
             0,
             0,
             0});
-			this.ignoreAltTextBox.Location = new System.Drawing.Point(245, 177);
+			this.ignoreAltTextBox.Location = new System.Drawing.Point(286, 204);
+			this.ignoreAltTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.ignoreAltTextBox.Maximum = new decimal(new int[] {
             100000,
             0,
             0,
             0});
 			this.ignoreAltTextBox.Name = "ignoreAltTextBox";
-			this.ignoreAltTextBox.Size = new System.Drawing.Size(75, 20);
+			this.ignoreAltTextBox.Size = new System.Drawing.Size(88, 23);
 			this.ignoreAltTextBox.TabIndex = 29;
 			this.ignoreAltTextBox.Value = new decimal(new int[] {
             100000,
@@ -601,7 +677,8 @@
 			// latTextBox
 			// 
 			this.latTextBox.DecimalPlaces = 4;
-			this.latTextBox.Location = new System.Drawing.Point(59, 151);
+			this.latTextBox.Location = new System.Drawing.Point(69, 174);
+			this.latTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.latTextBox.Maximum = new decimal(new int[] {
             90,
             0,
@@ -613,12 +690,13 @@
             0,
             -2147483648});
 			this.latTextBox.Name = "latTextBox";
-			this.latTextBox.Size = new System.Drawing.Size(75, 20);
+			this.latTextBox.Size = new System.Drawing.Size(88, 23);
 			this.latTextBox.TabIndex = 21;
 			// 
 			// timeoutTextBox
 			// 
-			this.timeoutTextBox.Location = new System.Drawing.Point(245, 48);
+			this.timeoutTextBox.Location = new System.Drawing.Point(286, 55);
+			this.timeoutTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.timeoutTextBox.Maximum = new decimal(new int[] {
             600,
             0,
@@ -630,7 +708,7 @@
             0,
             0});
 			this.timeoutTextBox.Name = "timeoutTextBox";
-			this.timeoutTextBox.Size = new System.Drawing.Size(75, 20);
+			this.timeoutTextBox.Size = new System.Drawing.Size(88, 23);
 			this.timeoutTextBox.TabIndex = 24;
 			this.timeoutTextBox.Value = new decimal(new int[] {
             5,
@@ -640,9 +718,10 @@
 			// 
 			// radarURLTextBox
 			// 
-			this.radarURLTextBox.Location = new System.Drawing.Point(142, 74);
+			this.radarURLTextBox.Location = new System.Drawing.Point(166, 85);
+			this.radarURLTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.radarURLTextBox.Name = "radarURLTextBox";
-			this.radarURLTextBox.Size = new System.Drawing.Size(178, 20);
+			this.radarURLTextBox.Size = new System.Drawing.Size(207, 23);
 			this.radarURLTextBox.TabIndex = 15;
 			// 
 			// programGroupBox
@@ -651,16 +730,16 @@
 			this.programGroupBox.Controls.Add(this.centreAircraftRadioButton);
 			this.programGroupBox.Controls.Add(this.label14);
 			this.programGroupBox.Controls.Add(this.startOnStartCheckBox);
-			this.programGroupBox.Controls.Add(this.notificationsCheckBox);
-			this.programGroupBox.Controls.Add(this.soundAlertsCheckBox);
 			this.programGroupBox.Controls.Add(this.refreshLabel);
 			this.programGroupBox.Controls.Add(this.refreshTextBox);
 			this.programGroupBox.Controls.Add(this.label5);
 			this.programGroupBox.Controls.Add(this.removalTimeoutTextBox);
 			this.programGroupBox.Controls.Add(this.runOnStartupCheckBox);
-			this.programGroupBox.Location = new System.Drawing.Point(12, 12);
+			this.programGroupBox.Location = new System.Drawing.Point(14, 14);
+			this.programGroupBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.programGroupBox.Name = "programGroupBox";
-			this.programGroupBox.Size = new System.Drawing.Size(329, 147);
+			this.programGroupBox.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.programGroupBox.Size = new System.Drawing.Size(384, 141);
 			this.programGroupBox.TabIndex = 24;
 			this.programGroupBox.TabStop = false;
 			this.programGroupBox.Text = "General";
@@ -668,9 +747,10 @@
 			// centreLatLngRadioButton
 			// 
 			this.centreLatLngRadioButton.AutoSize = true;
-			this.centreLatLngRadioButton.Location = new System.Drawing.Point(212, 117);
+			this.centreLatLngRadioButton.Location = new System.Drawing.Point(259, 110);
+			this.centreLatLngRadioButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.centreLatLngRadioButton.Name = "centreLatLngRadioButton";
-			this.centreLatLngRadioButton.Size = new System.Drawing.Size(108, 17);
+			this.centreLatLngRadioButton.Size = new System.Drawing.Size(116, 19);
 			this.centreLatLngRadioButton.TabIndex = 31;
 			this.centreLatLngRadioButton.Text = "Provided Lat/Lng";
 			this.centreLatLngRadioButton.UseVisualStyleBackColor = true;
@@ -679,9 +759,10 @@
 			// 
 			this.centreAircraftRadioButton.AutoSize = true;
 			this.centreAircraftRadioButton.Checked = true;
-			this.centreAircraftRadioButton.Location = new System.Drawing.Point(150, 117);
+			this.centreAircraftRadioButton.Location = new System.Drawing.Point(187, 110);
+			this.centreAircraftRadioButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.centreAircraftRadioButton.Name = "centreAircraftRadioButton";
-			this.centreAircraftRadioButton.Size = new System.Drawing.Size(58, 17);
+			this.centreAircraftRadioButton.Size = new System.Drawing.Size(64, 19);
 			this.centreAircraftRadioButton.TabIndex = 30;
 			this.centreAircraftRadioButton.TabStop = true;
 			this.centreAircraftRadioButton.Text = "Aircraft";
@@ -689,7 +770,8 @@
 			// 
 			// refreshTextBox
 			// 
-			this.refreshTextBox.Location = new System.Drawing.Point(245, 19);
+			this.refreshTextBox.Location = new System.Drawing.Point(286, 22);
+			this.refreshTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.refreshTextBox.Maximum = new decimal(new int[] {
             600,
             0,
@@ -701,7 +783,7 @@
             0,
             0});
 			this.refreshTextBox.Name = "refreshTextBox";
-			this.refreshTextBox.Size = new System.Drawing.Size(78, 20);
+			this.refreshTextBox.Size = new System.Drawing.Size(91, 23);
 			this.refreshTextBox.TabIndex = 22;
 			this.refreshTextBox.Value = new decimal(new int[] {
             1,
@@ -709,44 +791,46 @@
             0,
             0});
 			// 
-			// trailsAgeNumericUpDown
+			// groupBox1
 			// 
-			this.trailsAgeNumericUpDown.Location = new System.Drawing.Point(245, 279);
-			this.trailsAgeNumericUpDown.Maximum = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-			this.trailsAgeNumericUpDown.Name = "trailsAgeNumericUpDown";
-			this.trailsAgeNumericUpDown.Size = new System.Drawing.Size(75, 20);
-			this.trailsAgeNumericUpDown.TabIndex = 36;
-			this.trailsAgeNumericUpDown.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+			this.groupBox1.Controls.Add(this.flashWindowCheckBox);
+			this.groupBox1.Controls.Add(this.soundAlertsCheckBox);
+			this.groupBox1.Controls.Add(this.notificationsCheckBox);
+			this.groupBox1.Location = new System.Drawing.Point(14, 161);
+			this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.groupBox1.Size = new System.Drawing.Size(384, 51);
+			this.groupBox1.TabIndex = 25;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Alert Actions";
 			// 
-			// label12
+			// flashWindowCheckBox
 			// 
-			this.label12.AutoSize = true;
-			this.label12.Location = new System.Drawing.Point(6, 281);
-			this.label12.Name = "label12";
-			this.label12.Size = new System.Drawing.Size(192, 13);
-			this.label12.TabIndex = 37;
-			this.label12.Text = "Trail Update Frequency (no. of checks)";
-			this.toolTip.SetToolTip(this.label12, resources.GetString("label12.ToolTip"));
+			this.flashWindowCheckBox.AutoSize = true;
+			this.flashWindowCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.flashWindowCheckBox.Location = new System.Drawing.Point(273, 20);
+			this.flashWindowCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.flashWindowCheckBox.Name = "flashWindowCheckBox";
+			this.flashWindowCheckBox.Size = new System.Drawing.Size(100, 19);
+			this.flashWindowCheckBox.TabIndex = 28;
+			this.flashWindowCheckBox.Text = "Flash Window";
+			this.toolTip.SetToolTip(this.flashWindowCheckBox, "Show a notification on alert");
+			this.flashWindowCheckBox.UseVisualStyleBackColor = true;
 			// 
 			// SettingsForm
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(688, 386);
+			this.ClientSize = new System.Drawing.Size(803, 441);
+			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.programGroupBox);
 			this.Controls.Add(this.radarGroupBox);
 			this.Controls.Add(this.emailGroupBox);
 			this.Controls.Add(this.saveSettingsButton);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.MaximizeBox = false;
 			this.Name = "SettingsForm";
 			this.Text = "Configure Settings";
@@ -757,6 +841,7 @@
 			this.emailGroupBox.PerformLayout();
 			this.radarGroupBox.ResumeLayout(false);
 			this.radarGroupBox.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.trailsAgeNumericUpDown)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.ignoreDistTextBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.longTextBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.ignoreAltTextBox)).EndInit();
@@ -765,7 +850,8 @@
 			this.programGroupBox.ResumeLayout(false);
 			this.programGroupBox.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.refreshTextBox)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.trailsAgeNumericUpDown)).EndInit();
+			this.groupBox1.ResumeLayout(false);
+			this.groupBox1.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -824,5 +910,7 @@
 		private System.Windows.Forms.Button refreshReceiversButton;
 		private System.Windows.Forms.Label label12;
 		private System.Windows.Forms.NumericUpDown trailsAgeNumericUpDown;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.CheckBox flashWindowCheckBox;
 	}
 }

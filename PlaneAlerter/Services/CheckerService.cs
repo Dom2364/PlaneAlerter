@@ -5,8 +5,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using PlaneAlerter.Enums;
 using PlaneAlerter.Models;
 using Match = PlaneAlerter.Models.Match;
@@ -223,9 +225,7 @@ namespace PlaneAlerter.Services {
 						}
 
 						//Log to console
-						_logger.Log(
-							DateTime.Now.ToLongTimeString() + " | ADDED      | " + aircraft.Icao + " | " +
-							condition.Name, Color.LightGreen);
+						_logger.LogWithTimeAndAircraft(aircraft, "ADDED", condition.Name, Color.LightGreen);
 						
 						//Send Alert
 						if (condition.AlertType == AlertType.First_and_Last_Contact ||
@@ -277,12 +277,11 @@ namespace PlaneAlerter.Services {
 					//Remove from active matches
 					ActiveMatches.Remove(match.Icao);
 
-					//Log to console
-					_logger.Log(
-						DateTime.Now.ToLongTimeString() + " | REMOVING   | " + match.Icao + " | " + c.Condition.Name, Color.Orange);
-
 					//Update aircraft info
 					var aircraft = c.AircraftInfo;
+
+					//Log to console
+					_logger.LogWithTimeAndAircraft(aircraft, "REMOVING", c.Condition.Name, Color.Orange);
 
 					//Alert if alert type is both or last
 					if (c.Condition.AlertType is AlertType.First_and_Last_Contact or AlertType.Last_Contact)
@@ -308,19 +307,15 @@ namespace PlaneAlerter.Services {
 					ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
 					ActiveMatches[match.Icao].SignalLost = true;
 
-					_logger.Log(
-						DateTime.Now.ToLongTimeString() + " | LOST SGNL  | " + match.Icao + " | " +
-						match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+					_logger.LogWithTimeAndAircraft(match.Conditions[0].AircraftInfo, "LOST SGNL", match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 				}
 
 				//Not active > Active
 				if (stillActive && match.SignalLost)
 				{
 					ActiveMatches[match.Icao].SignalLost = false;
-
-					_logger.Log(
-						DateTime.Now.ToLongTimeString() + " | RETND SGNL | " + match.Icao + " | " +
-						match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+					
+					_logger.LogWithTimeAndAircraft(match.Conditions[0].AircraftInfo, "RETND SGNL", match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 				}
 			}
 		}
@@ -381,9 +376,6 @@ namespace PlaneAlerter.Services {
 		private async Task SendAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst) {
 			SendingAlert?.Invoke(condition, aircraft, receiver, isFirst);
 
-			//Make a ding noise
-			if (_settingsManagerService.Settings.SoundAlerts) SystemSounds.Exclamation.Play();
-
 			//Log
 			LogAlert(condition, aircraft, receiver, isFirst);
 
@@ -393,13 +385,11 @@ namespace PlaneAlerter.Services {
 				{
 					var email = await _emailBuilderService.Build(condition, aircraft, receiver, isFirst);
 					
-					_logger.Log(DateTime.Now.ToLongTimeString() + " | SENDING    | " + aircraft.Icao + " | " + email.Subject,
-						Color.LightBlue);
+					_logger.LogWithTimeAndAircraft(aircraft, "SENDING", email.Subject, Color.LightBlue);
 
 					_emailService.SendEmail(email, emailAddress);
-
-					_logger.Log(DateTime.Now.ToLongTimeString() + " | SENT       | " + aircraft.Icao + " | " + email.Subject,
-						Color.LightBlue);
+					
+					_logger.LogWithTimeAndAircraft(aircraft, "SENT", email.Subject, Color.LightBlue);
 				}
 			}
 			
@@ -453,7 +443,7 @@ namespace PlaneAlerter.Services {
 				var success = await _twitterService.Tweet(credentials[0], credentials[1], content, mapUrl);
 				
 				if (success)
-					_logger.Log(DateTime.Now.ToLongTimeString() + " | TWEET      | " + aircraft.Icao + " | " + condition.Name, Color.LightBlue);
+					_logger.LogWithTimeAndAircraft(aircraft, "TWEET", condition.Name, Color.LightBlue);
 			}
 
 			//Increase sent alerts for condition and update stats

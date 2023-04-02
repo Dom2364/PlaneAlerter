@@ -63,6 +63,7 @@ namespace PlaneAlerter.Services {
 				{ "timeout", Settings.Timeout },
 				{ "showNotifications", Settings.ShowNotifications },
 				{ "soundAlerts", Settings.SoundAlerts },
+				{ "flashWindow", Settings.FlashWindow },
 				{ "ignoreDistance", Settings.IgnoreDistance },
 				{ "ignoreAltitude", Settings.IgnoreAltitude },
 				{ "filterDistance", Settings.FilterDistance },
@@ -192,6 +193,7 @@ namespace PlaneAlerter.Services {
 				Settings.StartOnStart = settingsJson.OptionalValueStruct<bool>("startOnStart") ?? true;
 				Settings.Timeout = settingsJson.OptionalValueStruct<int>("timeout") ?? 5;
 				Settings.ShowNotifications = settingsJson.OptionalValueStruct<bool>("showNotifications") ?? true;
+				Settings.FlashWindow = settingsJson.OptionalValueStruct<bool>("flashWindow") ?? false;
 				Settings.SoundAlerts = settingsJson.OptionalValueStruct<bool>("soundAlerts") ?? true;
 				Settings.CentreMapOnAircraft = settingsJson.OptionalValueStruct<bool>("centreMapOnAircraft") ?? true;
 				Settings.RadarUrl = settingsJson.RequiredValue<string>("radarURL");

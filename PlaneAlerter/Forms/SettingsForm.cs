@@ -61,6 +61,7 @@ namespace PlaneAlerter.Forms {
 			refreshTextBox.Value = _settingsManagerService.Settings.RefreshRate;
 			startOnStartCheckBox.Checked = _settingsManagerService.Settings.StartOnStart;
 			soundAlertsCheckBox.Checked = _settingsManagerService.Settings.SoundAlerts;
+			flashWindowCheckBox.Checked = _settingsManagerService.Settings.FlashWindow;
 			notificationsCheckBox.Checked = _settingsManagerService.Settings.ShowNotifications;
 			centreAircraftRadioButton.Checked = _settingsManagerService.Settings.CentreMapOnAircraft;
 			centreLatLngRadioButton.Checked = !_settingsManagerService.Settings.CentreMapOnAircraft;
@@ -139,6 +140,7 @@ namespace PlaneAlerter.Forms {
 			_settingsManagerService.Settings.RefreshRate = Convert.ToInt32(refreshTextBox.Value);
 			_settingsManagerService.Settings.StartOnStart = startOnStartCheckBox.Checked;
 			_settingsManagerService.Settings.SoundAlerts = soundAlertsCheckBox.Checked;
+			_settingsManagerService.Settings.FlashWindow = flashWindowCheckBox.Checked;
 			_settingsManagerService.Settings.ShowNotifications = notificationsCheckBox.Checked;
 			_settingsManagerService.Settings.CentreMapOnAircraft = centreAircraftRadioButton.Checked;
 			_settingsManagerService.Settings.SMTPHost = smtpHostComboBox.Text;

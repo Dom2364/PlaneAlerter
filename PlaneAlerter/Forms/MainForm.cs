@@ -10,6 +10,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Media;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -55,6 +56,44 @@ namespace PlaneAlerter.Forms
 		public static void ResumeDrawing(Control parent) {
 			SendMessage(parent.Handle, 11, true, 0);
 			parent.Refresh();
+		}
+
+		/// <summary>
+		/// Flash a window
+		/// </summary>
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		private static extern bool FlashWindowEx(ref FLASHWINFO pwfi);
+
+		private const uint FLASHW_ALL = 3;
+		private const uint FLASHW_TIMERNOFG = 12;
+
+		[StructLayout(LayoutKind.Sequential)]
+		private struct FLASHWINFO
+		{
+			public uint cbSize;
+			public IntPtr hwnd;
+			public uint dwFlags;
+			public uint uCount;
+			public uint dwTimeout;
+		}
+
+		/// <summary>
+		/// Flash a window
+		/// </summary>
+		/// <param name="form">The form to flash</param>
+		public static bool FlashWindowEx(Form form)
+		{
+			var hWnd = form.Handle;
+			var fInfo = new FLASHWINFO();
+
+			fInfo.cbSize = Convert.ToUInt32(Marshal.SizeOf(fInfo));
+			fInfo.hwnd = hWnd;
+			fInfo.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
+			fInfo.uCount = uint.MaxValue;
+			fInfo.dwTimeout = 0;
+
+			return FlashWindowEx(ref fInfo);
 		}
 
 		/// <summary>
@@ -137,10 +176,19 @@ namespace PlaneAlerter.Forms
 
 		private void CheckerServiceOnSendingAlert(Condition condition, Aircraft aircraft, string receiver, bool isFirst)
 		{
+			//Make a ding noise
+			if (_settingsManagerService.Settings.SoundAlerts)
+				SystemSounds.Exclamation.Play();
+
+			//Show a notification
 			if (_settingsManagerService.Settings.ShowNotifications)
 				notifyIcon.ShowBalloonTip(5000, "Plane Alert!",
 					$"Condition: {condition.Name}\nAircraft: {aircraft.GetProperty("Icao")} | {aircraft.GetProperty("Reg")} | {aircraft.GetProperty("Type")} | {aircraft.GetProperty("Call")}",
 					ToolTipIcon.Info);
+
+			//Flash the window
+			if (_settingsManagerService.Settings.FlashWindow)
+				FlashWindowEx(this);
 		}
 
 		/// <summary>
