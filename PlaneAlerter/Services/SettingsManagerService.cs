@@ -173,13 +173,14 @@ namespace PlaneAlerter.Services {
 			}
 
 			//Copy settings from parsed json
+			//Don't use RequiredValue here as creating a new file due to it missing will not have any values
 			try {
-				Settings.SenderEmail = settingsJson.RequiredValue<string>("senderEmail");
-				Settings.AircraftListUrl = settingsJson.RequiredValue<string>("acListUrl");
-				Settings.VRSUser = settingsJson.RequiredValue<string>("VRSUsr");
-				Settings.VRSPassword = settingsJson.RequiredValue<string>("VRSPwd");
-				Settings.Lat = settingsJson.RequiredValueStruct<decimal>("Lat");
-				Settings.Long = settingsJson.RequiredValueStruct<decimal>("Long");
+				Settings.SenderEmail = settingsJson.OptionalValue<string>("senderEmail") ?? "";
+				Settings.AircraftListUrl = settingsJson.OptionalValue<string>("acListUrl") ?? "";
+				Settings.VRSUser = settingsJson.OptionalValue<string>("VRSUsr") ?? "";
+				Settings.VRSPassword = settingsJson.OptionalValue<string>("VRSPwd") ?? "";
+				Settings.Lat = settingsJson.OptionalValueStruct<decimal>("Lat") ?? 0;
+				Settings.Long = settingsJson.OptionalValueStruct<decimal>("Long") ?? 0;
 				Settings.FilterDistance = settingsJson.OptionalValueStruct<bool>("filterDistance") ?? false;
 				Settings.FilterAltitude = settingsJson.OptionalValueStruct<bool>("filterAltitude") ?? false;
 				Settings.IgnoreModeS = settingsJson.OptionalValueStruct<bool>("ignoreModeS") ?? true;
@@ -196,12 +197,12 @@ namespace PlaneAlerter.Services {
 				Settings.FlashWindow = settingsJson.OptionalValueStruct<bool>("flashWindow") ?? false;
 				Settings.SoundAlerts = settingsJson.OptionalValueStruct<bool>("soundAlerts") ?? true;
 				Settings.CentreMapOnAircraft = settingsJson.OptionalValueStruct<bool>("centreMapOnAircraft") ?? true;
-				Settings.RadarUrl = settingsJson.RequiredValue<string>("radarURL");
-				Settings.SMTPHost = settingsJson.RequiredValue<string>("SMTPHost");
+				Settings.RadarUrl = settingsJson.OptionalValue<string>("radarURL") ?? "";
+				Settings.SMTPHost = settingsJson.OptionalValue<string>("SMTPHost") ?? "";
 				Settings.SMTPPort = settingsJson.OptionalValueStruct<int>("SMTPPort") ?? 21;
-				Settings.SMTPUser = settingsJson.RequiredValue<string>("SMTPUsr");
-				Settings.SMTPPassword = settingsJson.RequiredValue<string>("SMTPPwd");
-				Settings.SMTPSSL = settingsJson.RequiredValueStruct<bool>("SMTPSSL");
+				Settings.SMTPUser = settingsJson.OptionalValue<string>("SMTPUsr") ?? "";
+				Settings.SMTPPassword = settingsJson.OptionalValue<string>("SMTPPwd") ?? "";
+				Settings.SMTPSSL = settingsJson.OptionalValueStruct<bool>("SMTPSSL") ?? true;
 				Settings.TwitterUsers = settingsJson.OptionalValue<Dictionary<string, string[]>>("TwitterUsers") ?? new Dictionary<string, string[]>();
 			}
 			catch (Exception e)
