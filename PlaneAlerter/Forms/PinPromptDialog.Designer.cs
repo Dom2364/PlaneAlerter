@@ -30,29 +30,32 @@
 			// 
 			// pinTextBox
 			// 
-			this.pinTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.pinTextBox.Location = new System.Drawing.Point(12, 50);
+			this.pinTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.pinTextBox.Location = new System.Drawing.Point(14, 45);
+			this.pinTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.pinTextBox.MaxLength = 8;
 			this.pinTextBox.Name = "pinTextBox";
-			this.pinTextBox.Size = new System.Drawing.Size(140, 44);
+			this.pinTextBox.Size = new System.Drawing.Size(163, 44);
 			this.pinTextBox.TabIndex = 0;
 			this.pinTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			// 
 			// label1
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label1.Location = new System.Drawing.Point(25, 9);
+			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.label1.Location = new System.Drawing.Point(14, 9);
+			this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(116, 29);
+			this.label1.Size = new System.Drawing.Size(163, 33);
 			this.label1.TabIndex = 1;
 			this.label1.Text = "Enter PIN";
+			this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 			// 
 			// submitButton
 			// 
-			this.submitButton.Location = new System.Drawing.Point(12, 116);
+			this.submitButton.Location = new System.Drawing.Point(13, 95);
+			this.submitButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.submitButton.Name = "submitButton";
-			this.submitButton.Size = new System.Drawing.Size(140, 23);
+			this.submitButton.Size = new System.Drawing.Size(163, 27);
 			this.submitButton.TabIndex = 2;
 			this.submitButton.Text = "Submit";
 			this.submitButton.UseVisualStyleBackColor = true;
@@ -60,13 +63,14 @@
 			// 
 			// PinPromptDialog
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(164, 151);
+			this.ClientSize = new System.Drawing.Size(191, 135);
 			this.Controls.Add(this.submitButton);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.pinTextBox);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "PinPromptDialog";

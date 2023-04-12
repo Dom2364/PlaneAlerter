@@ -89,11 +89,12 @@
 			// console
 			// 
 			this.console.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.console.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.console.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
 			this.console.Location = new System.Drawing.Point(0, 0);
+			this.console.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.console.Name = "console";
 			this.console.ReadOnly = true;
-			this.console.Size = new System.Drawing.Size(634, 368);
+			this.console.Size = new System.Drawing.Size(554, 315);
 			this.console.TabIndex = 0;
 			this.console.Text = "";
 			this.console.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.ConsoleLinkClicked);
@@ -102,6 +103,7 @@
 			// 
 			this.conditionTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.conditionTreeView.Location = new System.Drawing.Point(0, 0);
+			this.conditionTreeView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.conditionTreeView.Name = "conditionTreeView";
 			treeNode1.Name = "conditionsNode";
 			treeNode1.Text = "Conditions";
@@ -125,7 +127,7 @@
             treeNode1,
             treeNode5,
             treeNode9});
-			this.conditionTreeView.Size = new System.Drawing.Size(260, 163);
+			this.conditionTreeView.Size = new System.Drawing.Size(225, 138);
 			this.conditionTreeView.TabIndex = 1;
 			// 
 			// menuStrip1
@@ -139,7 +141,8 @@
             this.donateToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(898, 24);
+			this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
+			this.menuStrip1.Size = new System.Drawing.Size(784, 24);
 			this.menuStrip1.TabIndex = 2;
 			this.menuStrip1.Text = "menuStrip";
 			// 
@@ -245,9 +248,10 @@
 			// 
 			this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel});
-			this.statusStrip1.Location = new System.Drawing.Point(0, 392);
+			this.statusStrip1.Location = new System.Drawing.Point(0, 339);
 			this.statusStrip1.Name = "statusStrip1";
-			this.statusStrip1.Size = new System.Drawing.Size(898, 22);
+			this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
+			this.statusStrip1.Size = new System.Drawing.Size(784, 22);
 			this.statusStrip1.TabIndex = 3;
 			this.statusStrip1.Text = "statusStrip1";
 			// 
@@ -268,6 +272,7 @@
 			// 
 			this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.splitContainer1.Location = new System.Drawing.Point(0, 24);
+			this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.splitContainer1.Name = "splitContainer1";
 			// 
 			// splitContainer1.Panel1
@@ -277,14 +282,16 @@
 			// splitContainer1.Panel2
 			// 
 			this.splitContainer1.Panel2.Controls.Add(this.console);
-			this.splitContainer1.Size = new System.Drawing.Size(898, 368);
-			this.splitContainer1.SplitterDistance = 260;
+			this.splitContainer1.Size = new System.Drawing.Size(784, 315);
+			this.splitContainer1.SplitterDistance = 225;
+			this.splitContainer1.SplitterWidth = 5;
 			this.splitContainer1.TabIndex = 5;
 			// 
 			// splitContainer2
 			// 
 			this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+			this.splitContainer2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.splitContainer2.Name = "splitContainer2";
 			this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
 			// 
@@ -296,16 +303,18 @@
 			// 
 			this.splitContainer2.Panel2.Controls.Add(this.activeAlertsLabel);
 			this.splitContainer2.Panel2.Controls.Add(this.activeMatchesDataGridView);
-			this.splitContainer2.Size = new System.Drawing.Size(260, 368);
-			this.splitContainer2.SplitterDistance = 163;
+			this.splitContainer2.Size = new System.Drawing.Size(225, 315);
+			this.splitContainer2.SplitterDistance = 138;
+			this.splitContainer2.SplitterWidth = 5;
 			this.splitContainer2.TabIndex = 0;
 			// 
 			// activeAlertsLabel
 			// 
 			this.activeAlertsLabel.AutoSize = true;
-			this.activeAlertsLabel.Location = new System.Drawing.Point(3, 0);
+			this.activeAlertsLabel.Location = new System.Drawing.Point(4, 0);
+			this.activeAlertsLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.activeAlertsLabel.Name = "activeAlertsLabel";
-			this.activeAlertsLabel.Size = new System.Drawing.Size(68, 13);
+			this.activeAlertsLabel.Size = new System.Drawing.Size(74, 15);
 			this.activeAlertsLabel.TabIndex = 5;
 			this.activeAlertsLabel.Text = "Active alerts:";
 			// 
@@ -318,9 +327,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.activeMatchesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+			this.activeMatchesDataGridView.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
 			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
 			dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
 			dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
 			dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
 			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -335,17 +345,18 @@
             this.Column5});
 			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
 			dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-			dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
 			dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
 			dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
 			dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
 			dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
 			this.activeMatchesDataGridView.DefaultCellStyle = dataGridViewCellStyle2;
-			this.activeMatchesDataGridView.Location = new System.Drawing.Point(0, 16);
+			this.activeMatchesDataGridView.Location = new System.Drawing.Point(0, 18);
+			this.activeMatchesDataGridView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.activeMatchesDataGridView.Name = "activeMatchesDataGridView";
 			this.activeMatchesDataGridView.ReadOnly = true;
 			this.activeMatchesDataGridView.RowHeadersVisible = false;
-			this.activeMatchesDataGridView.Size = new System.Drawing.Size(260, 185);
+			this.activeMatchesDataGridView.Size = new System.Drawing.Size(225, 153);
 			this.activeMatchesDataGridView.TabIndex = 1;
 			// 
 			// Column1
@@ -387,16 +398,18 @@
 			this.Column5.Name = "Column5";
 			this.Column5.ReadOnly = true;
 			// 
-			// PlaneAlerter
+			// MainForm
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(898, 414);
+			this.ClientSize = new System.Drawing.Size(784, 361);
 			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.statusStrip1);
 			this.Controls.Add(this.menuStrip1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip1;
+			this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.MinimumSize = new System.Drawing.Size(450, 200);
 			this.Name = "MainForm";
 			this.Text = "PlaneAlerter";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PlaneAlerterFormClosing);
