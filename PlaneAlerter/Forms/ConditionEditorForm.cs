@@ -121,7 +121,7 @@ namespace PlaneAlerter.Forms {
 
 			var selectedPropertyKey = triggerDataGridView.Rows[e.RowIndex].Cells[0].Value?.ToString();
 			var selectedProperty = !string.IsNullOrEmpty(selectedPropertyKey)
-				? (VrsProperty?)Enum.Parse(typeof(VrsProperty?), selectedPropertyKey.Replace(' ', '_'))
+				? (VrsProperty?)Enum.Parse(typeof(VrsProperty), selectedPropertyKey.Replace(' ', '_'))
 				: null;
 
 			//Check if cell changed is in the value column and value isn't empty
@@ -350,7 +350,7 @@ namespace PlaneAlerter.Forms {
 
 					var selectedPropertyKey = row.Cells[0].Value?.ToString();
 					var selectedProperty = !string.IsNullOrEmpty(selectedPropertyKey)
-						? (VrsProperty?)Enum.Parse(typeof(VrsProperty?), selectedPropertyKey.Replace(' ', '_'))
+						? (VrsProperty?)Enum.Parse(typeof(VrsProperty), selectedPropertyKey.Replace(' ', '_'))
 						: null;
 
 					var comparisonType = row.Cells[1].Value.ToString();

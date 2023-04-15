@@ -35,14 +35,14 @@ namespace PlaneAlerter.Forms {
 				var conditionNode = conditionEditorTreeView.Nodes.Add(conditionId + ": " + condition.Name);
 				conditionNode.Tag = conditionId;
 				conditionNode.Nodes.Add("Id: " + conditionId);
-				conditionNode.Nodes.Add("Alert Type: " + condition.AlertType);
+				conditionNode.Nodes.Add("Alert Type: " + condition.AlertType.ToString().Replace("_", " "));
 				conditionNode.Nodes.Add("Email Enabled: " + condition.EmailEnabled);
 				conditionNode.Nodes.Add("Twitter Enabled: " + condition.TwitterEnabled);
 				conditionNode.Nodes.Add("Twitter Account: " + condition.TwitterAccount);
 
 				var triggersNode = conditionNode.Nodes.Add("Condition Triggers");
 				foreach (var trigger in condition.Triggers.Values)
-					triggersNode.Nodes.Add(trigger.Property.ToString() + " " + trigger.ComparisonType + " " + trigger.Value);
+					triggersNode.Nodes.Add(trigger.Property + " " + trigger.ComparisonType + " " + trigger.Value);
 			}
 			
 			if (conditionEditorTreeView.Nodes.Count != 0)
