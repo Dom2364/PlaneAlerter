@@ -66,9 +66,6 @@
 	<DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
-	<Reference Include="System.Security" />
-  </ItemGroup>
-  <ItemGroup>
 	<BootstrapperPackage Include=".NETFramework,Version=v4.0">
 	  <Visible>False</Visible>
 	  <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
@@ -86,24 +83,22 @@
 	</BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-	<PackageReference Include="Autofac" Version="6.3.0" />
-	<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+	<PackageReference Include="Autofac" Version="7.0.0" />
 	<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-	<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 	<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-	<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-	<PackageReference Include="NitoAsyncEx.Context.StrongName" Version="1.1.0" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-	<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+	<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
 	<PackageReference Include="System.Reflection" Version="4.3.0" />
 	<PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
 	<PackageReference Include="System.Runtime" Version="4.3.1" />
 	<PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
 	<PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
 	<PackageReference Include="TweetinviAPI" Version="5.0.4" />
-	<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
+	<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.410601">
 	  <PrivateAssets>all</PrivateAssets>
 	</PackageReference>
-	<PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.1" />
   </ItemGroup>
 </Project>
