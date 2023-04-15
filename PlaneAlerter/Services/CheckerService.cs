@@ -260,28 +260,25 @@ namespace PlaneAlerter.Services {
 			//Iterate active matches
 			foreach (var match in ActiveMatches.Values.ToList())
 			{
-				//Iterate match conditions
-				foreach (var c in match.Conditions)
+				var timeoutDateTime = DateTime.Now.AddSeconds(_settingsManagerService.Settings.RemovalTimeout -
+				                                               _settingsManagerService.Settings.RemovalTimeout * 2);
+
+				//Check if timed out
+				if (match.SignalLost && DateTime.Compare(match.SignalLostTime, timeoutDateTime) < 0)
 				{
-					var timeoutDateTime = DateTime.Now.AddSeconds((_settingsManagerService.Settings.RemovalTimeout -
-																   (_settingsManagerService.Settings.RemovalTimeout * 2)));
-
-					//Continue if not timed out
-					if (!match.SignalLost ||
-						DateTime.Compare(match.SignalLostTime, timeoutDateTime) >= 0)
-						continue;
-
 					//Remove from active matches
 					ActiveMatches.Remove(match.Icao);
 
-					//Update aircraft info
-					var aircraft = c.AircraftInfo;
+					//Get aircraft info
+					var aircraft = match.Conditions[0].AircraftInfo;
 
 					//Log to console
-					_logger.LogWithTimeAndAircraft(aircraft, "REMOVING", c.Condition.Name, Color.Orange);
+					_logger.LogWithTimeAndAircraft(aircraft, "REMOVING", match.Conditions[0].Condition.Name,
+						Color.Orange);
 
 					//Alert if alert type is both or last
-					if (c.Condition.AlertType is AlertType.First_and_Last_Contact or AlertType.Last_Contact)
+					if (match.Conditions[0].Condition.AlertType is AlertType.First_and_Last_Contact
+					    or AlertType.Last_Contact)
 					{
 						//Get receiver name
 						var receiverName = "";
@@ -292,30 +289,32 @@ namespace PlaneAlerter.Services {
 							receiverName = _vrsService.Receivers[receiverId];
 
 						//Send Alert
-						await SendAlert(c.Condition, aircraft, receiverName, false);
+						await SendAlert(match.Conditions[0].Condition, aircraft, receiverName, false);
+					}
+				}
+				else
+				{
+					//Check if signal has been lost/returned
+					var stillActive = _vrsService.AircraftList.Any(aircraft => aircraft.Icao == match.Icao);
+
+					//Active > Not active
+					if (!stillActive && match.SignalLost == false)
+					{
+						ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
+						ActiveMatches[match.Icao].SignalLost = true;
+
+						_logger.LogWithTimeAndAircraft(match.Conditions[0].AircraftInfo, "LOST SGNL",
+							match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 					}
 
-					break;
-				}
+					//Not active > Active
+					if (stillActive && match.SignalLost)
+					{
+						ActiveMatches[match.Icao].SignalLost = false;
 
-				//Check if signal has been lost/returned
-				var stillActive = _vrsService.AircraftList.Any(aircraft => aircraft.Icao == match.Icao);
-
-				//Active > Not active
-				if (!stillActive && match.SignalLost == false)
-				{
-					ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
-					ActiveMatches[match.Icao].SignalLost = true;
-
-					_logger.LogWithTimeAndAircraft(match.Conditions[0].AircraftInfo, "LOST SGNL", match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
-				}
-
-				//Not active > Active
-				if (stillActive && match.SignalLost)
-				{
-					ActiveMatches[match.Icao].SignalLost = false;
-					
-					_logger.LogWithTimeAndAircraft(match.Conditions[0].AircraftInfo, "RETND SGNL", match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+						_logger.LogWithTimeAndAircraft(match.Conditions[0].AircraftInfo, "RETND SGNL",
+							match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
+					}
 				}
 			}
 		}
