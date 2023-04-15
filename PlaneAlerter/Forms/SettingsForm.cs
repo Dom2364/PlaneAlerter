@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using PlaneAlerter.Models;
 using PlaneAlerter.Services;
 
 namespace PlaneAlerter.Forms {
@@ -129,34 +130,37 @@ namespace PlaneAlerter.Forms {
 		/// <param name="e">Event Args</param>
 		private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
 			//Set settings to form element values
-			_settingsManagerService.Settings.SenderEmail = senderEmailTextBox.Text;
-			_settingsManagerService.Settings.AircraftListUrl = aircraftListTextBox.Text;
-			_settingsManagerService.Settings.RadarUrl = radarURLTextBox.Text;
-			_settingsManagerService.Settings.VRSUser = VRSUsrTextBox.Text;
-			_settingsManagerService.Settings.VRSPassword = VRSPwdTextBox.Text;
-			_settingsManagerService.Settings.Lat = latTextBox.Value;
-			_settingsManagerService.Settings.Long = longTextBox.Value;
-			_settingsManagerService.Settings.RemovalTimeout = Convert.ToInt32(removalTimeoutTextBox.Value);
-			_settingsManagerService.Settings.RefreshRate = Convert.ToInt32(refreshTextBox.Value);
-			_settingsManagerService.Settings.StartOnStart = startOnStartCheckBox.Checked;
-			_settingsManagerService.Settings.SoundAlerts = soundAlertsCheckBox.Checked;
-			_settingsManagerService.Settings.FlashWindow = flashWindowCheckBox.Checked;
-			_settingsManagerService.Settings.ShowNotifications = notificationsCheckBox.Checked;
-			_settingsManagerService.Settings.CentreMapOnAircraft = centreAircraftRadioButton.Checked;
-			_settingsManagerService.Settings.SMTPHost = smtpHostComboBox.Text;
-			_settingsManagerService.Settings.SMTPPort = Convert.ToInt32(smtpHostPortTextBox.Value);
-			_settingsManagerService.Settings.SMTPUser = smtpUsrTextBox.Text;
-			_settingsManagerService.Settings.SMTPPassword = smtpPwdTextBox.Text;
-			_settingsManagerService.Settings.SMTPSSL = smtpSSLCheckBox.Checked;
-			_settingsManagerService.Settings.Timeout = Convert.ToInt32(timeoutTextBox.Value);
-			_settingsManagerService.Settings.FilterDistance = filterDstCheckBox.Checked;
-			_settingsManagerService.Settings.FilterAltitude = filterAltCheckBox.Checked;
-			_settingsManagerService.Settings.IgnoreModeS = ignoreModeSCheckBox.Checked;
-			_settingsManagerService.Settings.IgnoreAltitude = Convert.ToInt32(ignoreAltTextBox.Value);
-			_settingsManagerService.Settings.IgnoreDistance = Convert.ToDouble(ignoreDistTextBox.Value);
-			_settingsManagerService.Settings.FilterReceiver = filterReceiverCheckBox.Checked;
-			_settingsManagerService.Settings.FilterReceiverId = Convert.ToInt32(receiverComboBox.SelectedValue);
-			_settingsManagerService.Settings.TrailsUpdateFrequency = Convert.ToInt32(trailsAgeNumericUpDown.Value);
+			_settingsManagerService.Settings = new Settings(
+				senderEmailTextBox.Text,
+				aircraftListTextBox.Text,
+				VRSUsrTextBox.Text,
+				VRSPwdTextBox.Text,
+				latTextBox.Value,
+				longTextBox.Value,
+				radarURLTextBox.Text,
+				centreAircraftRadioButton.Checked,
+				Convert.ToInt32(removalTimeoutTextBox.Value),
+				Convert.ToInt32(refreshTextBox.Value),
+				startOnStartCheckBox.Checked,
+				Convert.ToInt32(timeoutTextBox.Value),
+				notificationsCheckBox.Checked,
+				soundAlertsCheckBox.Checked,
+				flashWindowCheckBox.Checked,
+				filterDstCheckBox.Checked,
+				filterAltCheckBox.Checked,
+				ignoreModeSCheckBox.Checked,
+				Convert.ToDouble(ignoreDistTextBox.Value),
+				Convert.ToInt32(ignoreAltTextBox.Value),
+				filterReceiverCheckBox.Checked,
+				Convert.ToInt32(receiverComboBox.SelectedValue),
+				Convert.ToInt32(trailsAgeNumericUpDown.Value),
+				smtpHostComboBox.Text,
+				Convert.ToInt32(smtpHostPortTextBox.Value),
+				smtpUsrTextBox.Text,
+				smtpPwdTextBox.Text,
+				smtpSSLCheckBox.Checked,
+				_settingsManagerService.Settings.TwitterUsers);
+			
 			_settingsManagerService.Save();
 		}
 

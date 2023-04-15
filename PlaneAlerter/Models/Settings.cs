@@ -152,6 +152,68 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// List of Twitter user credentials
 		/// </summary>
-		public Dictionary<string, string[]> TwitterUsers { get; set; } = new();
+		public Dictionary<string, string[]> TwitterUsers { get; set; }
+
+		public Settings(
+			string senderEmail,
+			string aircraftListUrl,
+			string vrsUser,
+			string vrsPassword,
+			decimal lat,
+			decimal @long,
+			string radarUrl,
+			bool centreMapOnAircraft,
+			int removalTimeout,
+			int refreshRate,
+			bool startOnStart,
+			int timeout,
+			bool showNotifications,
+			bool soundAlerts,
+			bool flashWindow,
+			bool filterDistance,
+			bool filterAltitude,
+			bool ignoreModeS,
+			double ignoreDistance,
+			int ignoreAltitude,
+			bool filterReceiver,
+			int filterReceiverId,
+			int trailsUpdateFrequency,
+			string smtpHost,
+			int smtpPort,
+			string smtpUser,
+			string smtpPassword,
+			bool smtpSSL,
+			Dictionary<string, string[]> twitterUsers)
+		{
+			SenderEmail = senderEmail;
+			AircraftListUrl = aircraftListUrl;
+			VRSUser = vrsUser;
+			VRSPassword = vrsPassword;
+			Lat = lat;
+			Long = @long;
+			RadarUrl = radarUrl;
+			CentreMapOnAircraft = centreMapOnAircraft;
+			RemovalTimeout = removalTimeout;
+			RefreshRate = refreshRate;
+			StartOnStart = startOnStart;
+			Timeout = timeout;
+			ShowNotifications = showNotifications;
+			SoundAlerts = soundAlerts;
+			FlashWindow = flashWindow;
+			FilterDistance = filterDistance;
+			FilterAltitude = filterAltitude;
+			IgnoreModeS = ignoreModeS;
+			IgnoreDistance = ignoreDistance;
+			IgnoreAltitude = ignoreAltitude;
+			FilterReceiver = filterReceiver;
+			FilterReceiverId = filterReceiverId;
+			TrailsUpdateFrequency = trailsUpdateFrequency;
+			SMTPHost = smtpHost;
+			SMTPPort = smtpPort;
+			SMTPUser = smtpUser;
+			SMTPPassword = smtpPassword;
+			SMTPSSL = smtpSSL;
+			TwitterUsers = twitterUsers;
+		}
 	}
 }

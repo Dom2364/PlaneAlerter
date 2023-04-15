@@ -12,12 +12,12 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Name of condition
 		/// </summary>
-		public string Name { get; set; }
+		public string Name { get; }
 
 		/// <summary>
 		/// Ignore following conditions
 		/// </summary>
-		public bool IgnoreFollowing { get; set; }
+		public bool IgnoreFollowing { get; }
 
 		/// <summary>
 		/// Alerts sent for this condition
@@ -28,12 +28,12 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Send emails?
 		/// </summary>
-		public bool EmailEnabled { get; set; }
+		public bool EmailEnabled { get; }
 
 		/// <summary>
 		/// Emails to send alert to
 		/// </summary>
-		public List<string> RecieverEmails { get; set; } = new();
+		public List<string> RecieverEmails { get; }
 
 		/// <summary>
 		/// Email first contact alert format
@@ -48,49 +48,71 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Send tweets?
 		/// </summary>
-		public bool TwitterEnabled { get; set; }
+		public bool TwitterEnabled { get; }
 
 		/// <summary>
 		/// Twitter account to send from
 		/// </summary>
-		public string TwitterAccount { get; set; }
+		public string TwitterAccount { get; }
 
 		/// <summary>
 		/// Tweet first contact alert format
 		/// </summary>
-		public string TweetFirstFormat { get; set; }
+		public string TweetFirstFormat { get; }
 
 		/// <summary>
 		/// Tweet last contact alert format
 		/// </summary>
-		public string TweetLastFormat { get; set; }
+		public string TweetLastFormat { get; }
 
 		/// <summary>
 		/// Link to be attached in tweets
 		/// </summary>
-		public TweetLink TweetLink { get; set; }
+		public TweetLink TweetLink { get; }
 
 		/// <summary>
 		/// Attach map?
 		/// </summary>
-		public bool TweetMap { get; set; }
+		public bool TweetMap { get; }
 
 		/// <summary>
 		/// Type of alert
 		/// </summary>
-		public AlertType AlertType { get; set; }
+		public AlertType AlertType { get; }
 
 		/// <summary>
 		/// List of triggers
 		/// </summary>
-		public Dictionary<int, Trigger> Triggers = new();
+		public Dictionary<int, Trigger> Triggers { get; init; } = new();
 
-		/// <summary>
-		/// Creates a new condition
-		/// </summary>
-		public Condition()
+		public Condition(
+			string name,
+			AlertType alertType,
+			bool ignoreFollowing,
+			bool emailEnabled,
+			string emailFirstFormat,
+			string emailLastFormat,
+			List<string> recieverEmails,
+			bool twitterEnabled,
+			string twitterAccount,
+			string tweetFirstFormat,
+			string tweetLastFormat,
+			bool tweetMap,
+			TweetLink tweetLink)
 		{
-
+			Name = name;
+			AlertType = alertType;
+			IgnoreFollowing = ignoreFollowing;
+			EmailEnabled = emailEnabled;
+			EmailFirstFormat = emailFirstFormat;
+			EmailLastFormat = emailLastFormat;
+			RecieverEmails = recieverEmails;
+			TwitterEnabled = twitterEnabled;
+			TwitterAccount = twitterAccount;
+			TweetFirstFormat = tweetFirstFormat;
+			TweetLastFormat = tweetLastFormat;
+			TweetMap = tweetMap;
+			TweetLink = tweetLink;
 		}
 	}
 }

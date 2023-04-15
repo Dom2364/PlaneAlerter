@@ -33,8 +33,8 @@ namespace PlaneAlerter.Services {
 	{
 		private readonly ILoggerWithQueue _logger;
 
-		public Settings Settings { get; set; } = new();
-		public EmailContentConfig EmailContentConfig { get; set; } = new();
+		public Settings Settings { get; set; } = null!;
+		public EmailContentConfig EmailContentConfig { get; set; } = null!;
 		public bool LoadedSuccessfully { get; set; }
 
 		//Constructor
@@ -107,19 +107,17 @@ namespace PlaneAlerter.Services {
         /// </summary>
         private void LoadEccDefaults()
         {
-	        EmailContentConfig = new EmailContentConfig
-	        {
-		        AfLookup = true,
-		        AircraftPhotos = true,
-		        Map = true,
-		        KMLfile = true,
-		        PropertyList = PropertyListType.All,
-		        RadarLink = true,
-		        ReportLink = true,
-		        ReceiverName = true,
-		        TransponderType = true,
-		        TwitterOptimised = false
-	        };
+	        EmailContentConfig = new EmailContentConfig(
+		        afLookup: true,
+		        aircraftPhotos: true,
+		        map: true,
+		        kmLfile: true,
+		        propertyList: PropertyListType.All,
+		        radarLink: true,
+		        reportLink: true,
+		        receiverName: true,
+		        transponderType: true,
+		        twitterOptimised: false);
             
             File.WriteAllText("emailconfig.json", JsonConvert.SerializeObject(GetECCDictionary(), Formatting.Indented));
         }
@@ -174,36 +172,38 @@ namespace PlaneAlerter.Services {
 
 			//Copy settings from parsed json
 			//Don't use RequiredValue here as creating a new file due to it missing will not have any values
-			try {
-				Settings.SenderEmail = settingsJson.OptionalValue<string>("senderEmail") ?? "";
-				Settings.AircraftListUrl = settingsJson.OptionalValue<string>("acListUrl") ?? "";
-				Settings.VRSUser = settingsJson.OptionalValue<string>("VRSUsr") ?? "";
-				Settings.VRSPassword = settingsJson.OptionalValue<string>("VRSPwd") ?? "";
-				Settings.Lat = settingsJson.OptionalValueStruct<decimal>("Lat") ?? 0;
-				Settings.Long = settingsJson.OptionalValueStruct<decimal>("Long") ?? 0;
-				Settings.FilterDistance = settingsJson.OptionalValueStruct<bool>("filterDistance") ?? false;
-				Settings.FilterAltitude = settingsJson.OptionalValueStruct<bool>("filterAltitude") ?? false;
-				Settings.IgnoreModeS = settingsJson.OptionalValueStruct<bool>("ignoreModeS") ?? true;
-				Settings.IgnoreDistance = settingsJson.OptionalValueStruct<double>("ignoreDistance") ?? 30000;
-				Settings.IgnoreAltitude = settingsJson.OptionalValueStruct<int>("ignoreAltitude") ?? 100000;
-				Settings.FilterReceiver = settingsJson.OptionalValueStruct<bool>("filterReceiver") ?? false;
-				Settings.FilterReceiverId = settingsJson.OptionalValueStruct<int>("filterReceiverId") ?? 1;
-				Settings.TrailsUpdateFrequency = settingsJson.OptionalValueStruct<int>("trailsUpdateFrequency") ?? 1;
-				Settings.RemovalTimeout = settingsJson.OptionalValueStruct<int>("timeoutLength") ?? 60;
-				Settings.RefreshRate = settingsJson.OptionalValueStruct<int>("refreshRate") ?? 60;
-				Settings.StartOnStart = settingsJson.OptionalValueStruct<bool>("startOnStart") ?? true;
-				Settings.Timeout = settingsJson.OptionalValueStruct<int>("timeout") ?? 5;
-				Settings.ShowNotifications = settingsJson.OptionalValueStruct<bool>("showNotifications") ?? true;
-				Settings.FlashWindow = settingsJson.OptionalValueStruct<bool>("flashWindow") ?? false;
-				Settings.SoundAlerts = settingsJson.OptionalValueStruct<bool>("soundAlerts") ?? true;
-				Settings.CentreMapOnAircraft = settingsJson.OptionalValueStruct<bool>("centreMapOnAircraft") ?? true;
-				Settings.RadarUrl = settingsJson.OptionalValue<string>("radarURL") ?? "";
-				Settings.SMTPHost = settingsJson.OptionalValue<string>("SMTPHost") ?? "";
-				Settings.SMTPPort = settingsJson.OptionalValueStruct<int>("SMTPPort") ?? 21;
-				Settings.SMTPUser = settingsJson.OptionalValue<string>("SMTPUsr") ?? "";
-				Settings.SMTPPassword = settingsJson.OptionalValue<string>("SMTPPwd") ?? "";
-				Settings.SMTPSSL = settingsJson.OptionalValueStruct<bool>("SMTPSSL") ?? true;
-				Settings.TwitterUsers = settingsJson.OptionalValue<Dictionary<string, string[]>>("TwitterUsers") ?? new Dictionary<string, string[]>();
+			try
+			{
+				Settings = new Settings(
+					settingsJson.OptionalValue<string>("senderEmail") ?? "",
+					settingsJson.OptionalValue<string>("acListUrl") ?? "",
+					settingsJson.OptionalValue<string>("VRSUsr") ?? "",
+					settingsJson.OptionalValue<string>("VRSPwd") ?? "",
+					settingsJson.OptionalValueStruct<decimal>("Lat") ?? 0,
+					settingsJson.OptionalValueStruct<decimal>("Long") ?? 0,
+					settingsJson.OptionalValue<string>("radarURL") ?? "",
+					settingsJson.OptionalValueStruct<bool>("centreMapOnAircraft") ?? true,
+					settingsJson.OptionalValueStruct<int>("timeoutLength") ?? 60,
+					settingsJson.OptionalValueStruct<int>("refreshRate") ?? 60,
+					settingsJson.OptionalValueStruct<bool>("startOnStart") ?? true,
+					settingsJson.OptionalValueStruct<int>("timeout") ?? 5,
+					settingsJson.OptionalValueStruct<bool>("showNotifications") ?? true,
+					settingsJson.OptionalValueStruct<bool>("soundAlerts") ?? true,
+					settingsJson.OptionalValueStruct<bool>("flashWindow") ?? false,
+					settingsJson.OptionalValueStruct<bool>("filterDistance") ?? false,
+					settingsJson.OptionalValueStruct<bool>("filterAltitude") ?? false,
+					settingsJson.OptionalValueStruct<bool>("ignoreModeS") ?? true,
+					settingsJson.OptionalValueStruct<double>("ignoreDistance") ?? 30000,
+					settingsJson.OptionalValueStruct<int>("ignoreAltitude") ?? 100000,
+					settingsJson.OptionalValueStruct<bool>("filterReceiver") ?? false,
+					settingsJson.OptionalValueStruct<int>("filterReceiverId") ?? 1,
+					settingsJson.OptionalValueStruct<int>("trailsUpdateFrequency") ?? 1,
+					settingsJson.OptionalValue<string>("SMTPHost") ?? "",
+					settingsJson.OptionalValueStruct<int>("SMTPPort") ?? 21,
+					settingsJson.OptionalValue<string>("SMTPUsr") ?? "",
+					settingsJson.OptionalValue<string>("SMTPPwd") ?? "",
+					settingsJson.OptionalValueStruct<bool>("SMTPSSL") ?? true,
+					settingsJson.OptionalValue<Dictionary<string, string[]>>("TwitterUsers") ?? new Dictionary<string, string[]>());
 			}
 			catch (Exception e)
 			{
@@ -257,16 +257,18 @@ namespace PlaneAlerter.Services {
 			try
 			{
 				//Copy ecc from parsed json
-				EmailContentConfig.ReceiverName = eccJson.RequiredValueStruct<bool>("ReceiverName");
-				EmailContentConfig.TransponderType = eccJson.RequiredValueStruct<bool>("TransponderType");
-				EmailContentConfig.RadarLink = eccJson.RequiredValueStruct<bool>("RadarLink");
-				EmailContentConfig.ReportLink = eccJson.RequiredValueStruct<bool>("ReportLink");
-				EmailContentConfig.AfLookup = eccJson.RequiredValueStruct<bool>("AfLookup");
-				EmailContentConfig.AircraftPhotos = eccJson.RequiredValueStruct<bool>("AircraftPhotos");
-				EmailContentConfig.Map = eccJson.RequiredValueStruct<bool>("Map");
-				EmailContentConfig.TwitterOptimised = eccJson.RequiredValueStruct<bool>("TwitterOptimised");
-				EmailContentConfig.PropertyList = eccJson.RequiredValueStruct<PropertyListType>("PropertyList");
-				EmailContentConfig.KMLfile = eccJson.OptionalValueStruct<bool>("KMLfile") ?? false;
+				EmailContentConfig = new EmailContentConfig(
+					eccJson.RequiredValueStruct<bool>("AfLookup"),
+					eccJson.RequiredValueStruct<bool>("AircraftPhotos"),
+					eccJson.RequiredValueStruct<bool>("Map"),
+					eccJson.OptionalValueStruct<bool>("KMLfile") ?? false,
+					eccJson.RequiredValueStruct<PropertyListType>("PropertyList"),
+					eccJson.RequiredValueStruct<bool>("RadarLink"),
+					eccJson.RequiredValueStruct<bool>("ReportLink"),
+					eccJson.RequiredValueStruct<bool>("ReceiverName"),
+					eccJson.RequiredValueStruct<bool>("TransponderType"),
+					eccJson.RequiredValueStruct<bool>("TwitterOptimised")
+				);
 			}
 			catch (Exception e)
 			{

@@ -325,21 +325,20 @@ namespace PlaneAlerter.Forms {
 			_conditionManagerService.EditorConditions = sortedConditions;
 
 			//Create new condition
-			var newCondition = new Condition {
-				Name = conditionNameTextBox.Text,
-				AlertType = (AlertType)Enum.Parse(typeof(AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
-				IgnoreFollowing = ignoreFollowingCheckbox.Checked,
-				EmailEnabled = emailCheckBox.Checked,
-				EmailFirstFormat = emailFirstFormatTextBox.Text,
-				EmailLastFormat = emailLastFormatTextBox.Text,
-				RecieverEmails = receiverEmailTextBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
-				TwitterEnabled = twitterCheckBox.Checked,
-				TwitterAccount = twitterAccountComboBox.Text,
-				TweetFirstFormat = tweetFirstFormatTextBox.Text,
-				TweetLastFormat = tweetLastFormatTextBox.Text,
-				TweetMap = tweetMapCheckBox.Checked,
-				TweetLink = (TweetLink)Enum.Parse(typeof(TweetLink), tweetLinkComboBox.Text.Replace(' ', '_'))
-			};
+			var newCondition = new Condition(
+				conditionNameTextBox.Text,
+				(AlertType)Enum.Parse(typeof(AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
+				ignoreFollowingCheckbox.Checked,
+				emailCheckBox.Checked,
+				emailFirstFormatTextBox.Text,
+				emailLastFormatTextBox.Text,
+				receiverEmailTextBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None).ToList(),
+				twitterCheckBox.Checked,
+				twitterAccountComboBox.Text,
+				tweetFirstFormatTextBox.Text,
+				tweetLastFormatTextBox.Text,
+				tweetMapCheckBox.Checked,
+				(TweetLink)Enum.Parse(typeof(TweetLink), tweetLinkComboBox.Text.Replace(' ', '_')));
 
 			if (triggerDataGridView.Rows.Count != 0)
 			{

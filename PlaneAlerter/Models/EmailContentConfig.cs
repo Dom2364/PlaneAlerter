@@ -7,15 +7,29 @@ namespace PlaneAlerter.Models
 	/// </summary>
 	internal class EmailContentConfig
 	{
-		public bool ReceiverName { get; set; }
-		public bool TransponderType { get; set; }
-		public bool RadarLink { get; set; }
-		public bool ReportLink { get; set; }
-		public bool AfLookup { get; set; }
-		public bool AircraftPhotos { get; set; }
-		public bool Map { get; set; }
-		public bool TwitterOptimised { get; set; }
-		public bool KMLfile { get; set; }
-		public PropertyListType PropertyList { get; set; }
+		public EmailContentConfig(bool afLookup, bool aircraftPhotos, bool map, bool kmLfile, PropertyListType propertyList, bool radarLink, bool reportLink, bool receiverName, bool transponderType, bool twitterOptimised)
+		{
+			AfLookup = afLookup;
+			AircraftPhotos = aircraftPhotos;
+			Map = map;
+			KMLfile = kmLfile;
+			PropertyList = propertyList;
+			RadarLink = radarLink;
+			ReportLink = reportLink;
+			ReceiverName = receiverName;
+			TransponderType = transponderType;
+			TwitterOptimised = twitterOptimised;
+		}
+
+		public bool ReceiverName { get; }
+		public bool TransponderType { get; }
+		public bool RadarLink { get; }
+		public bool ReportLink { get; }
+		public bool AfLookup { get; }
+		public bool AircraftPhotos { get; }
+		public bool Map { get; }
+		public bool TwitterOptimised { get; }
+		public bool KMLfile { get; }
+		public PropertyListType PropertyList { get; }
 	}
 }

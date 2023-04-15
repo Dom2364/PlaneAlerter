@@ -10,7 +10,7 @@ using PlaneAlerter.Services;
 
 namespace PlaneAlerter {
 	static class Program {
-		public static IServiceProvider ServiceProvider { get; private set; }
+		public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
 		/// <summary>
 		/// The main entry point for the application.

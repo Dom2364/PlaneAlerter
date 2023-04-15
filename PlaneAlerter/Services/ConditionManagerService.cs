@@ -104,21 +104,21 @@ namespace PlaneAlerter.Services
 						throw new Exception($"Condition with id {conditionId} not found in conditions.json.\nConditions should have sequential ids.");
 
 					//Create condition and copy values
-					var newCondition = new Condition
+					var newCondition = new Condition(
+						condition.RequiredValue<string>("conditionName", "Name"),
+						condition.RequiredValueStruct<AlertType>("alertType", "AlertType"),
+						condition.RequiredValueStruct<bool>("ignoreFollowing", "IgnoreFollowing"),
+						condition.OptionalValueStruct<bool>("emailEnabled", "EmailEnabled") ?? true,
+						condition.OptionalValue<string>("emailFirstFormat", "EmailFirstFormat") ?? string.Empty,
+						condition.OptionalValue<string>("emailLastFormat", "EmailLastFormat") ?? string.Empty,
+						condition.RequiredValue<List<string>>("recieverEmails", "RecieverEmails"),
+						condition.OptionalValueStruct<bool>("twitterEnabled", "TwitterEnabled") ?? true,
+						condition.OptionalValue<string>("twitterAccount", "TwitterAccount") ?? string.Empty,
+						condition.OptionalValue<string>("tweetFirstFormat", "TweetFirstFormat") ?? string.Empty,
+						condition.OptionalValue<string>("tweetLastFormat", "TweetLastFormat") ?? string.Empty,
+						condition.OptionalValueStruct<bool>("tweetMap", "TweetMap") ?? true,
+						condition.OptionalValueStruct<TweetLink>("tweetLink", "TweetLink") ?? TweetLink.None)
 					{
-						Name = condition.RequiredValue<string>("conditionName", "Name"),
-						AlertType = condition.RequiredValueStruct<AlertType>("alertType", "AlertType"),
-						IgnoreFollowing = condition.RequiredValueStruct<bool>("ignoreFollowing", "IgnoreFollowing"),
-						EmailEnabled = condition.OptionalValueStruct<bool>("emailEnabled", "EmailEnabled") ?? true,
-						EmailFirstFormat = condition.OptionalValue<string>("emailFirstFormat", "EmailFirstFormat") ?? string.Empty,
-						EmailLastFormat = condition.OptionalValue<string>("emailLastFormat", "EmailLastFormat") ?? string.Empty,
-						TwitterEnabled = condition.OptionalValueStruct<bool>("twitterEnabled", "TwitterEnabled") ?? true,
-						TwitterAccount = condition.OptionalValue<string>("twitterAccount", "TwitterAccount") ?? string.Empty,
-						TweetFirstFormat = condition.OptionalValue<string>("tweetFirstFormat", "TweetFirstFormat") ?? string.Empty,
-						TweetLastFormat = condition.OptionalValue<string>("tweetLastFormat", "TweetLastFormat") ?? string.Empty,
-						TweetMap = condition.OptionalValueStruct<bool>("tweetMap", "TweetMap") ?? true,
-						TweetLink = condition.OptionalValueStruct<TweetLink>("tweetLink", "TweetLink") ?? TweetLink.None,
-						RecieverEmails = condition.RequiredValue<List<string>>("recieverEmails", "RecieverEmails"),
 						Triggers = condition.RequiredValue<Dictionary<int, Trigger>>("triggers", "Triggers")
 					};
 
