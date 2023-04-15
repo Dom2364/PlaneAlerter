@@ -51,7 +51,7 @@ namespace PlaneAlerter.Services
 				message.Body = await BuildBody(condition, aircraft, receiverName, isDetection);
 
 			//Attach KML
-			if (_settingsManagerService.EmailContentConfig.KMLfile && aircraft.GetProperty("Lat") != null)
+			if (_settingsManagerService.EmailContentConfig.KmlFile && aircraft.GetProperty("Lat") != null)
 			{
 				var kml = _kmlService.GenerateTrailKml(aircraft);
 

@@ -7,12 +7,22 @@ namespace PlaneAlerter.Models
 	/// </summary>
 	internal class EmailContentConfig
 	{
-		public EmailContentConfig(bool afLookup, bool aircraftPhotos, bool map, bool kmLfile, PropertyListType propertyList, bool radarLink, bool reportLink, bool receiverName, bool transponderType, bool twitterOptimised)
+		public EmailContentConfig(
+			bool afLookup,
+			bool aircraftPhotos,
+			bool map,
+			bool kmlFile,
+			PropertyListType propertyList,
+			bool radarLink,
+			bool reportLink,
+			bool receiverName,
+			bool transponderType,
+			bool twitterOptimised)
 		{
 			AfLookup = afLookup;
 			AircraftPhotos = aircraftPhotos;
 			Map = map;
-			KMLfile = kmLfile;
+			KmlFile = kmlFile;
 			PropertyList = propertyList;
 			RadarLink = radarLink;
 			ReportLink = reportLink;
@@ -29,7 +39,7 @@ namespace PlaneAlerter.Models
 		public bool AircraftPhotos { get; }
 		public bool Map { get; }
 		public bool TwitterOptimised { get; }
-		public bool KMLfile { get; }
+		public bool KmlFile { get; }
 		public PropertyListType PropertyList { get; }
 	}
 }

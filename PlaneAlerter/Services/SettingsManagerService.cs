@@ -83,7 +83,7 @@ namespace PlaneAlerter.Services {
 		}
 
 		/// <summary>
-		/// Get a dictonary of email content config data
+		/// Get a dictionary of email content config data
 		/// </summary>
 		/// <returns>A dictionary of email content config data</returns>
 		private Dictionary<string, object> GetECCDictionary() {
@@ -98,7 +98,7 @@ namespace PlaneAlerter.Services {
 				{ "Map", EmailContentConfig.Map },
 				{ "TwitterOptimised", EmailContentConfig.TwitterOptimised },
 				{ "PropertyList", EmailContentConfig.PropertyList.ToString() },
-				{ "KMLfile", EmailContentConfig.KMLfile }
+				{ "KMLfile", EmailContentConfig.KmlFile }
 			};
 		}
 
@@ -111,7 +111,7 @@ namespace PlaneAlerter.Services {
 		        afLookup: true,
 		        aircraftPhotos: true,
 		        map: true,
-		        kmLfile: true,
+		        kmlFile: true,
 		        propertyList: PropertyListType.All,
 		        radarLink: true,
 		        reportLink: true,
