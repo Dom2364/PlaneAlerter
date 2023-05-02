@@ -173,7 +173,7 @@ namespace PlaneAlerter.Services
 				//Get list of receivers
 				Receivers.Clear();
 				foreach (var f in responseJson.RequiredValue<JToken>("feeds"))
-					Receivers.Add(f.RequiredValue<string>("id"), f.RequiredValue<string>("name"));
+					Receivers[f.RequiredValue<string>("id")] = f.RequiredValue<string>("name");
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();
@@ -256,7 +256,7 @@ namespace PlaneAlerter.Services
 				//Get list of receivers
 				Receivers.Clear();
 				foreach (var f in responseJson.RequiredValue<JToken>("feeds"))
-					Receivers.Add(f.RequiredValue<string>("id"), f.RequiredValue<string>("name"));
+					Receivers[f.RequiredValue<string>("id")] = f.RequiredValue<string>("name");
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();
