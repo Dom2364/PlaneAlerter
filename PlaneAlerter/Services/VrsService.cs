@@ -263,6 +263,11 @@ namespace PlaneAlerter.Services
 
 				GC.Collect(2, GCCollectionMode.Forced);
 			}
+			catch (TaskCanceledException)
+			{
+				_logger.Log($"ERROR: Request for AircraftList.json exceeded timeout of {_settingsManagerService.Settings.Timeout} seconds", Color.Red);
+				return null;
+			}
 			catch (UriFormatException)
 			{
 				_logger.Log("ERROR: AircraftList.json url invalid (" + _settingsManagerService.Settings.AircraftListUrl + ")", Color.Red);
@@ -289,9 +294,6 @@ namespace PlaneAlerter.Services
 
 		public async Task<string[]> GetAircraftThumbnails(string icao)
 		{
-			//Aircraft image urls
-			var imageLinks = new List<string>();
-
 			var url =
 				$"{_settingsManagerService.Settings.AircraftListUrl.Substring(0, _settingsManagerService.Settings.AircraftListUrl.LastIndexOf("/", StringComparison.Ordinal) + 1)}AirportDataThumbnails.json?icao={icao}&numThumbs=2";
 
@@ -305,12 +307,11 @@ namespace PlaneAlerter.Services
 				request.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoded);
 			}
 
-			using var tokenSource = new CancellationTokenSource();
-			tokenSource.CancelAfter(TimeSpan.FromSeconds(5));
-
 			//Send request and parse response
 			try
 			{
+				using var tokenSource = new CancellationTokenSource(_settingsManagerService.Settings.Timeout * 1000);
+
 				var response = await _httpClient.SendAsync(request, tokenSource.Token);
 
 				var responseContent = await response.Content.ReadAsStringAsync(tokenSource.Token);
@@ -321,13 +322,27 @@ namespace PlaneAlerter.Services
 				if (responseJson == null)
 					return Array.Empty<string>();
 
-				//If status is not 404, add images to result
-				if (responseJson.Value<string>("status") != "404" && responseJson.TryGetValue("data", out var data))
-					imageLinks.AddRange(data.Select(image => image.Value<string>("image"))
-							.Where(x => x != null)
-							.Select(x => x!));
+				var status = responseJson.Value<int>("status");
 
-				return imageLinks.ToArray();
+				if (status == 500)
+				{
+					_logger.Log(
+						$"WARNING: Error getting aircraft images from VRS: {responseJson.Value<string>("error")}",
+						Color.Orange);
+					return Array.Empty<string>();
+				}
+
+				if (status == 404 || !responseJson.TryGetValue("data", out var data))
+					return Array.Empty<string>();
+				
+				return data.Select(image => image.Value<string>("image"))
+					.Where(x => x != null)
+					.Select(x => x!).ToArray();
+			}
+			catch (TaskCanceledException)
+			{
+				_logger.Log($"ERROR: Request for aircraft images from VRS exceeded timeout of {_settingsManagerService.Settings.Timeout} seconds", Color.Red);
+				return Array.Empty<string>();
 			}
 			catch (Exception e)
 			{
