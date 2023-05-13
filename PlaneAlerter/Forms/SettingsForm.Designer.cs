@@ -108,7 +108,7 @@
 			this.aircraftListTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.aircraftListTextBox.Name = "aircraftListTextBox";
 			this.aircraftListTextBox.Size = new System.Drawing.Size(207, 23);
-			this.aircraftListTextBox.TabIndex = 1;
+			this.aircraftListTextBox.TabIndex = 0;
 			// 
 			// VRSUsrTextBox
 			// 
@@ -129,7 +129,7 @@
             0});
 			this.removalTimeoutTextBox.Name = "removalTimeoutTextBox";
 			this.removalTimeoutTextBox.Size = new System.Drawing.Size(91, 23);
-			this.removalTimeoutTextBox.TabIndex = 4;
+			this.removalTimeoutTextBox.TabIndex = 1;
 			// 
 			// smtpHostComboBox
 			// 
@@ -138,7 +138,7 @@
 			this.smtpHostComboBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.smtpHostComboBox.Name = "smtpHostComboBox";
 			this.smtpHostComboBox.Size = new System.Drawing.Size(207, 23);
-			this.smtpHostComboBox.TabIndex = 5;
+			this.smtpHostComboBox.TabIndex = 1;
 			this.smtpHostComboBox.SelectedValueChanged += new System.EventHandler(this.smtpHostComboBox_SelectedValueChanged);
 			// 
 			// smtpHostPortTextBox
@@ -152,7 +152,7 @@
             0});
 			this.smtpHostPortTextBox.Name = "smtpHostPortTextBox";
 			this.smtpHostPortTextBox.Size = new System.Drawing.Size(88, 23);
-			this.smtpHostPortTextBox.TabIndex = 6;
+			this.smtpHostPortTextBox.TabIndex = 2;
 			// 
 			// smtpUsrTextBox
 			// 
@@ -160,7 +160,7 @@
 			this.smtpUsrTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.smtpUsrTextBox.Name = "smtpUsrTextBox";
 			this.smtpUsrTextBox.Size = new System.Drawing.Size(207, 23);
-			this.smtpUsrTextBox.TabIndex = 7;
+			this.smtpUsrTextBox.TabIndex = 3;
 			// 
 			// VRSPwdTextBox
 			// 
@@ -169,7 +169,7 @@
 			this.VRSPwdTextBox.Name = "VRSPwdTextBox";
 			this.VRSPwdTextBox.PasswordChar = '*';
 			this.VRSPwdTextBox.Size = new System.Drawing.Size(207, 23);
-			this.VRSPwdTextBox.TabIndex = 8;
+			this.VRSPwdTextBox.TabIndex = 4;
 			// 
 			// smtpPwdTextBox
 			// 
@@ -178,7 +178,7 @@
 			this.smtpPwdTextBox.Name = "smtpPwdTextBox";
 			this.smtpPwdTextBox.PasswordChar = '*';
 			this.smtpPwdTextBox.Size = new System.Drawing.Size(207, 23);
-			this.smtpPwdTextBox.TabIndex = 9;
+			this.smtpPwdTextBox.TabIndex = 4;
 			// 
 			// smtpSSLCheckBox
 			// 
@@ -188,7 +188,7 @@
 			this.smtpSSLCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.smtpSSLCheckBox.Name = "smtpSSLCheckBox";
 			this.smtpSSLCheckBox.Size = new System.Drawing.Size(77, 19);
-			this.smtpSSLCheckBox.TabIndex = 10;
+			this.smtpSSLCheckBox.TabIndex = 5;
 			this.smtpSSLCheckBox.Text = "SMTP SSL";
 			this.toolTip.SetToolTip(this.smtpSSLCheckBox, "Use SSL for the SMTP server. This is usually enabled for gmail and popular server" +
         "s");
@@ -310,7 +310,7 @@
 			this.runOnStartupCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.runOnStartupCheckBox.Name = "runOnStartupCheckBox";
 			this.runOnStartupCheckBox.Size = new System.Drawing.Size(107, 19);
-			this.runOnStartupCheckBox.TabIndex = 21;
+			this.runOnStartupCheckBox.TabIndex = 2;
 			this.runOnStartupCheckBox.Text = "Run On Startup";
 			this.toolTip.SetToolTip(this.runOnStartupCheckBox, "Run PlaneAlerter when this user logs in");
 			this.runOnStartupCheckBox.UseVisualStyleBackColor = true;
@@ -380,7 +380,7 @@
 			this.soundAlertsCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.soundAlertsCheckBox.Name = "soundAlertsCheckBox";
 			this.soundAlertsCheckBox.Size = new System.Drawing.Size(85, 19);
-			this.soundAlertsCheckBox.TabIndex = 26;
+			this.soundAlertsCheckBox.TabIndex = 0;
 			this.soundAlertsCheckBox.Text = "Play Sound";
 			this.toolTip.SetToolTip(this.soundAlertsCheckBox, "Play a sound on alert");
 			this.soundAlertsCheckBox.UseVisualStyleBackColor = true;
@@ -393,7 +393,7 @@
 			this.notificationsCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.notificationsCheckBox.Name = "notificationsCheckBox";
 			this.notificationsCheckBox.Size = new System.Drawing.Size(121, 19);
-			this.notificationsCheckBox.TabIndex = 27;
+			this.notificationsCheckBox.TabIndex = 1;
 			this.notificationsCheckBox.Text = "Show Notification";
 			this.toolTip.SetToolTip(this.notificationsCheckBox, "Show a notification on alert");
 			this.notificationsCheckBox.UseVisualStyleBackColor = true;
@@ -406,7 +406,7 @@
 			this.startOnStartCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.startOnStartCheckBox.Name = "startOnStartCheckBox";
 			this.startOnStartCheckBox.Size = new System.Drawing.Size(189, 19);
-			this.startOnStartCheckBox.TabIndex = 28;
+			this.startOnStartCheckBox.TabIndex = 3;
 			this.startOnStartCheckBox.Text = "Start Checker on Program Start";
 			this.toolTip.SetToolTip(this.startOnStartCheckBox, "Start checking for condition matches as soon as PlaneAlerter starts");
 			this.startOnStartCheckBox.UseVisualStyleBackColor = true;
@@ -418,7 +418,7 @@
 			this.gmailLink.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.gmailLink.Name = "gmailLink";
 			this.gmailLink.Size = new System.Drawing.Size(210, 15);
-			this.gmailLink.TabIndex = 20;
+			this.gmailLink.TabIndex = 6;
 			this.gmailLink.TabStop = true;
 			this.gmailLink.Text = "Enable this thing if sending with Gmail";
 			this.toolTip.SetToolTip(this.gmailLink, resources.GetString("gmailLink.ToolTip"));
@@ -443,7 +443,7 @@
 			this.filterDstCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.filterDstCheckBox.Name = "filterDstCheckBox";
 			this.filterDstCheckBox.Size = new System.Drawing.Size(194, 19);
-			this.filterDstCheckBox.TabIndex = 30;
+			this.filterDstCheckBox.TabIndex = 9;
 			this.filterDstCheckBox.Text = "Ignore aircraft further than (km)";
 			this.toolTip.SetToolTip(this.filterDstCheckBox, "Aircraft further than this distance will not be returned by VRS, this can be usef" +
         "ul for reducing bandwidth. Enabling this and altitude filtering at the same time" +
@@ -459,7 +459,7 @@
 			this.filterAltCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.filterAltCheckBox.Name = "filterAltCheckBox";
 			this.filterAltCheckBox.Size = new System.Drawing.Size(183, 19);
-			this.filterAltCheckBox.TabIndex = 31;
+			this.filterAltCheckBox.TabIndex = 7;
 			this.filterAltCheckBox.Text = "Ignore aircraft higher than (ft)";
 			this.toolTip.SetToolTip(this.filterAltCheckBox, "Aircraft higher than this altitude will not be returned by VRS, this can be usefu" +
         "l for reducing bandwidth. Enabling this and distance filtering at the same time " +
@@ -475,7 +475,7 @@
 			this.ignoreModeSCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.ignoreModeSCheckBox.Name = "ignoreModeSCheckBox";
 			this.ignoreModeSCheckBox.Size = new System.Drawing.Size(190, 19);
-			this.ignoreModeSCheckBox.TabIndex = 32;
+			this.ignoreModeSCheckBox.TabIndex = 11;
 			this.ignoreModeSCheckBox.Text = "Ignore aircraft without position";
 			this.toolTip.SetToolTip(this.ignoreModeSCheckBox, "VRS ignores aircraft without positions when filtering by distance. Disabling this" +
         " requests aircraft without position separately.");
@@ -491,7 +491,7 @@
 			this.filterReceiverCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.filterReceiverCheckBox.Name = "filterReceiverCheckBox";
 			this.filterReceiverCheckBox.Size = new System.Drawing.Size(112, 19);
-			this.filterReceiverCheckBox.TabIndex = 34;
+			this.filterReceiverCheckBox.TabIndex = 12;
 			this.filterReceiverCheckBox.Text = "Filter by receiver";
 			this.toolTip.SetToolTip(this.filterReceiverCheckBox, "Filter to only check aircraft from a specific receiver, this can be useful for re" +
         "ducing bandwidth");
@@ -517,7 +517,7 @@
 			this.flashWindowCheckBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.flashWindowCheckBox.Name = "flashWindowCheckBox";
 			this.flashWindowCheckBox.Size = new System.Drawing.Size(100, 19);
-			this.flashWindowCheckBox.TabIndex = 28;
+			this.flashWindowCheckBox.TabIndex = 2;
 			this.flashWindowCheckBox.Text = "Flash Window";
 			this.toolTip.SetToolTip(this.flashWindowCheckBox, "Flash the window on alert");
 			this.flashWindowCheckBox.UseVisualStyleBackColor = true;
@@ -529,7 +529,7 @@
 			this.saveSettingsButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.saveSettingsButton.Name = "saveSettingsButton";
 			this.saveSettingsButton.Size = new System.Drawing.Size(120, 27);
-			this.saveSettingsButton.TabIndex = 20;
+			this.saveSettingsButton.TabIndex = 4;
 			this.saveSettingsButton.Text = "Save Settings";
 			this.saveSettingsButton.UseVisualStyleBackColor = true;
 			this.saveSettingsButton.Click += new System.EventHandler(this.saveSettingsButton_Click);
@@ -553,7 +553,7 @@
 			this.emailGroupBox.Name = "emailGroupBox";
 			this.emailGroupBox.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.emailGroupBox.Size = new System.Drawing.Size(384, 207);
-			this.emailGroupBox.TabIndex = 22;
+			this.emailGroupBox.TabIndex = 2;
 			this.emailGroupBox.TabStop = false;
 			this.emailGroupBox.Text = "Email";
 			// 
@@ -588,7 +588,7 @@
 			this.radarGroupBox.Name = "radarGroupBox";
 			this.radarGroupBox.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.radarGroupBox.Size = new System.Drawing.Size(384, 360);
-			this.radarGroupBox.TabIndex = 23;
+			this.radarGroupBox.TabIndex = 3;
 			this.radarGroupBox.TabStop = false;
 			this.radarGroupBox.Text = "Radar";
 			// 
@@ -603,7 +603,7 @@
             0});
 			this.trailsAgeNumericUpDown.Name = "trailsAgeNumericUpDown";
 			this.trailsAgeNumericUpDown.Size = new System.Drawing.Size(88, 23);
-			this.trailsAgeNumericUpDown.TabIndex = 36;
+			this.trailsAgeNumericUpDown.TabIndex = 15;
 			this.trailsAgeNumericUpDown.Value = new decimal(new int[] {
             1,
             0,
@@ -616,7 +616,7 @@
 			this.refreshReceiversButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.refreshReceiversButton.Name = "refreshReceiversButton";
 			this.refreshReceiversButton.Size = new System.Drawing.Size(65, 27);
-			this.refreshReceiversButton.TabIndex = 35;
+			this.refreshReceiversButton.TabIndex = 13;
 			this.refreshReceiversButton.Text = "Refresh";
 			this.refreshReceiversButton.UseVisualStyleBackColor = true;
 			this.refreshReceiversButton.Click += new System.EventHandler(this.refreshReceiversButton_Click);
@@ -629,7 +629,7 @@
 			this.receiverComboBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.receiverComboBox.Name = "receiverComboBox";
 			this.receiverComboBox.Size = new System.Drawing.Size(153, 23);
-			this.receiverComboBox.TabIndex = 33;
+			this.receiverComboBox.TabIndex = 14;
 			// 
 			// ignoreDistTextBox
 			// 
@@ -643,7 +643,7 @@
             0});
 			this.ignoreDistTextBox.Name = "ignoreDistTextBox";
 			this.ignoreDistTextBox.Size = new System.Drawing.Size(88, 23);
-			this.ignoreDistTextBox.TabIndex = 28;
+			this.ignoreDistTextBox.TabIndex = 10;
 			// 
 			// longTextBox
 			// 
@@ -662,7 +662,7 @@
             -2147483648});
 			this.longTextBox.Name = "longTextBox";
 			this.longTextBox.Size = new System.Drawing.Size(88, 23);
-			this.longTextBox.TabIndex = 23;
+			this.longTextBox.TabIndex = 6;
 			// 
 			// ignoreAltTextBox
 			// 
@@ -680,7 +680,7 @@
             0});
 			this.ignoreAltTextBox.Name = "ignoreAltTextBox";
 			this.ignoreAltTextBox.Size = new System.Drawing.Size(88, 23);
-			this.ignoreAltTextBox.TabIndex = 29;
+			this.ignoreAltTextBox.TabIndex = 8;
 			this.ignoreAltTextBox.Value = new decimal(new int[] {
             100000,
             0,
@@ -704,7 +704,7 @@
             -2147483648});
 			this.latTextBox.Name = "latTextBox";
 			this.latTextBox.Size = new System.Drawing.Size(88, 23);
-			this.latTextBox.TabIndex = 21;
+			this.latTextBox.TabIndex = 5;
 			// 
 			// timeoutTextBox
 			// 
@@ -722,7 +722,7 @@
             0});
 			this.timeoutTextBox.Name = "timeoutTextBox";
 			this.timeoutTextBox.Size = new System.Drawing.Size(88, 23);
-			this.timeoutTextBox.TabIndex = 24;
+			this.timeoutTextBox.TabIndex = 1;
 			this.timeoutTextBox.Value = new decimal(new int[] {
             5,
             0,
@@ -735,7 +735,7 @@
 			this.radarURLTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.radarURLTextBox.Name = "radarURLTextBox";
 			this.radarURLTextBox.Size = new System.Drawing.Size(207, 23);
-			this.radarURLTextBox.TabIndex = 15;
+			this.radarURLTextBox.TabIndex = 2;
 			// 
 			// programGroupBox
 			// 
@@ -753,7 +753,7 @@
 			this.programGroupBox.Name = "programGroupBox";
 			this.programGroupBox.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.programGroupBox.Size = new System.Drawing.Size(384, 141);
-			this.programGroupBox.TabIndex = 24;
+			this.programGroupBox.TabIndex = 0;
 			this.programGroupBox.TabStop = false;
 			this.programGroupBox.Text = "General";
 			// 
@@ -764,7 +764,7 @@
 			this.centreLatLngRadioButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.centreLatLngRadioButton.Name = "centreLatLngRadioButton";
 			this.centreLatLngRadioButton.Size = new System.Drawing.Size(116, 19);
-			this.centreLatLngRadioButton.TabIndex = 31;
+			this.centreLatLngRadioButton.TabIndex = 5;
 			this.centreLatLngRadioButton.Text = "Provided Lat/Lng";
 			this.centreLatLngRadioButton.UseVisualStyleBackColor = true;
 			// 
@@ -776,7 +776,7 @@
 			this.centreAircraftRadioButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.centreAircraftRadioButton.Name = "centreAircraftRadioButton";
 			this.centreAircraftRadioButton.Size = new System.Drawing.Size(64, 19);
-			this.centreAircraftRadioButton.TabIndex = 30;
+			this.centreAircraftRadioButton.TabIndex = 4;
 			this.centreAircraftRadioButton.TabStop = true;
 			this.centreAircraftRadioButton.Text = "Aircraft";
 			this.centreAircraftRadioButton.UseVisualStyleBackColor = true;
@@ -797,7 +797,7 @@
             0});
 			this.refreshTextBox.Name = "refreshTextBox";
 			this.refreshTextBox.Size = new System.Drawing.Size(91, 23);
-			this.refreshTextBox.TabIndex = 22;
+			this.refreshTextBox.TabIndex = 0;
 			this.refreshTextBox.Value = new decimal(new int[] {
             1,
             0,
@@ -814,7 +814,7 @@
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.groupBox1.Size = new System.Drawing.Size(384, 51);
-			this.groupBox1.TabIndex = 25;
+			this.groupBox1.TabIndex = 1;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Alert Actions";
 			// 
