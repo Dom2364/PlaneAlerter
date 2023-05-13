@@ -214,6 +214,8 @@ namespace PlaneAlerter.Services
 
 			var response = await _httpClient.SendAsync(request, tokenSource.Token);
 
+			response.EnsureSuccessStatusCode();
+
 			var responseContent = await response.Content.ReadAsStringAsync(tokenSource.Token);
 
 			return (JObject?)JsonConvert.DeserializeObject(responseContent);
@@ -313,6 +315,8 @@ namespace PlaneAlerter.Services
 				using var tokenSource = new CancellationTokenSource(_settingsManagerService.Settings.Timeout * 1000);
 
 				var response = await _httpClient.SendAsync(request, tokenSource.Token);
+
+				response.EnsureSuccessStatusCode();
 
 				var responseContent = await response.Content.ReadAsStringAsync(tokenSource.Token);
 
