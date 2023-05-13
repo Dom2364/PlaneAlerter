@@ -386,7 +386,7 @@ namespace PlaneAlerter.Services {
 					
 					_logger.LogWithTimeAndAircraft(aircraft, "SENDING", email.Subject, Color.LightBlue);
 
-					_emailService.SendEmail(email, emailAddress);
+					await _emailService.SendEmail(email, emailAddress);
 					
 					_logger.LogWithTimeAndAircraft(aircraft, "SENT", email.Subject, Color.LightBlue);
 				}

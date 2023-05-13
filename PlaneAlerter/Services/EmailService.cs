@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Net;
 using System.Net.Mail;
+using System.Threading.Tasks;
 
 namespace PlaneAlerter.Services {
 	internal interface IEmailService
@@ -11,7 +12,7 @@ namespace PlaneAlerter.Services {
 		/// </summary>
 		/// <param name="message">Message to send</param>
 		/// <param name="emailAddress">Email address to send to</param>
-		void SendEmail(MailMessage message, string emailAddress);
+		Task SendEmail(MailMessage message, string emailAddress);
 	}
 
 	/// <summary>
@@ -33,7 +34,7 @@ namespace PlaneAlerter.Services {
 		/// </summary>
 		/// <param name="message">Message to send</param>
 		/// <param name="emailAddress">Email address to send to</param>
-		public void SendEmail(MailMessage message, string emailAddress) {
+		public async Task SendEmail(MailMessage message, string emailAddress) {
             using var mailClient = new SmtpClient(_settingsManagerService.Settings.SMTPHost)
             {
 	            Port = _settingsManagerService.Settings.SMTPPort,
@@ -70,7 +71,7 @@ namespace PlaneAlerter.Services {
 
 			//Send the alert
 			try {
-				mailClient.SendAsync(message, null);
+				await mailClient.SendMailAsync(message);
 			}
 			catch (SmtpException e) {
 				if (e.InnerException != null) {
