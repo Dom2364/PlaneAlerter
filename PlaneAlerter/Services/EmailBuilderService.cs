@@ -99,7 +99,7 @@ namespace PlaneAlerter.Services
 				body +=
 					$"<h3><a style='text-decoration: none;' href='{_urlBuilderService.GenerateAirframesOrgUrl(aircraft.GetProperty("Reg")!)}'>Airframes.org Lookup</a></h3>";
 
-			body += "<table><tr><td>";
+			body += "<table><tr><td style='vertical-align: top;'>";
 
 			//Property list
 			if (_settingsManagerService.EmailContentConfig.PropertyList != PropertyListType.Hidden)

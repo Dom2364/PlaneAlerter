@@ -188,7 +188,7 @@ namespace PlaneAlerter.Services {
 					settingsJson.OptionalValueStruct<bool>("startOnStart") ?? true,
 					settingsJson.OptionalValueStruct<int>("timeout") ?? 5,
 					settingsJson.OptionalValueStruct<bool>("showNotifications") ?? true,
-					settingsJson.OptionalValueStruct<bool>("soundAlerts") ?? true,
+					settingsJson.OptionalValueStruct<bool>("soundAlerts") ?? false,
 					settingsJson.OptionalValueStruct<bool>("flashWindow") ?? false,
 					settingsJson.OptionalValueStruct<bool>("filterDistance") ?? false,
 					settingsJson.OptionalValueStruct<bool>("filterAltitude") ?? false,
