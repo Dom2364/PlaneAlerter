@@ -474,8 +474,8 @@ namespace PlaneAlerter.Forms
 			});
 		}
 
-		private void addAccountToolStripMenuItem_Click(object sender, EventArgs e) {
-			_twitterService.AddAccount();
+		private async void addAccountToolStripMenuItem_Click(object sender, EventArgs e) {
+			await _twitterService.AddAccount();
 		}
 
 		private void startToolStripMenuItem_Click(object sender, EventArgs e) {

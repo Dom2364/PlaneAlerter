@@ -835,6 +835,7 @@
 			this.Name = "SettingsForm";
 			this.Text = "Configure Settings";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SettingsForm_FormClosing);
+			this.Load += new System.EventHandler(this.SettingsForm_Load);
 			((System.ComponentModel.ISupportInitialize)(this.removalTimeoutTextBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.smtpHostPortTextBox)).EndInit();
 			this.emailGroupBox.ResumeLayout(false);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using PlaneAlerter.Enums;
@@ -398,13 +399,13 @@ namespace PlaneAlerter.Forms {
 		}
 		
 		//Show add account dialog if add account is selected
-		private void twitterAccountComboBox_SelectedIndexChanged(object sender, EventArgs e)
+		private async void twitterAccountComboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			if (twitterAccountComboBox.Text != "Add Account")
 				return;
 
 			//Show add account dialog
-			_twitterService.AddAccount();
+			await _twitterService.AddAccount();
 				
 			//Update accounts
 			twitterAccountComboBox.Items.Clear();

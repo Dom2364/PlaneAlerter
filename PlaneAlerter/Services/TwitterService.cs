@@ -26,7 +26,7 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// Authenticate account and add to accounts list
 		/// </summary>
-		void AddAccount();
+		Task AddAccount();
 
 		/// <summary>
 		/// Remove a specific account
@@ -153,7 +153,7 @@ namespace PlaneAlerter.Services {
 		/// <summary>
 		/// Authenticate account and add to accounts list
 		/// </summary>
-		public async void AddAccount() {
+		public async Task AddAccount() {
 			var appClient = new TwitterClient(ConsumerKey, ConsumerSecretKey);
 
 			//Authenticate PlaneAlerter

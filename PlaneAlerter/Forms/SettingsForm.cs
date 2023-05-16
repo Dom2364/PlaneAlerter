@@ -43,12 +43,15 @@ namespace PlaneAlerter.Forms {
 			HostInfo.Add("smtp.comcast.net", new object[] { 587, false });
 			HostInfo.Add("outgoing.verizon.net", new object[] { 465, true });
 			HostInfo.Add("smtp.mail.com", new object[] { 465, true });
+		}
 
+		private async void SettingsForm_Load(object sender, EventArgs e)
+		{
 			//Add smtp host info to combobox
 			foreach (var smtpHost in HostInfo.Keys)
 				smtpHostComboBox.Items.Add(smtpHost);
 
-			UpdateReceivers();
+			await UpdateReceivers();
 
 			//Set settings from current settings
 			senderEmailTextBox.Text = _settingsManagerService.Settings.SenderEmail;
@@ -84,7 +87,7 @@ namespace PlaneAlerter.Forms {
 			trailsAgeNumericUpDown.Value = _settingsManagerService.Settings.TrailsUpdateFrequency;
 		}
 
-		private async void UpdateReceivers() {
+		private async Task UpdateReceivers() {
 			if (string.IsNullOrWhiteSpace(_settingsManagerService.Settings.AircraftListUrl)) {
 				receiverComboBox.DataSource = null;
 				receiverComboBox.Items.Clear();
@@ -201,9 +204,9 @@ namespace PlaneAlerter.Forms {
 			receiverComboBox.Enabled = filterReceiverCheckBox.Checked;
 		}
 
-		private void refreshReceiversButton_Click(object sender, EventArgs e) {
+		private async void refreshReceiversButton_Click(object sender, EventArgs e) {
 			_settingsManagerService.Settings.AircraftListUrl = aircraftListTextBox.Text;
-			UpdateReceivers();
+			await UpdateReceivers();
 		}
 	}
 }
