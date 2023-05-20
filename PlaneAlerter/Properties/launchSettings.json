@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PlaneAlerter": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
