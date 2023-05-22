@@ -55,7 +55,7 @@
 			this.addAccountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.removeAccountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.emailContentConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.openLogFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.showLogFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.clearConsoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -153,7 +153,7 @@
             this.settingsToolStripMenuItem,
             this.twitterToolStripMenuItem,
             this.emailContentConfigToolStripMenuItem,
-            this.openLogFileToolStripMenuItem});
+            this.showLogFileToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
 			this.optionsToolStripMenuItem.Text = "Options";
@@ -161,14 +161,14 @@
 			// startConditionEditorToolStripMenuItem
 			// 
 			this.startConditionEditorToolStripMenuItem.Name = "startConditionEditorToolStripMenuItem";
-			this.startConditionEditorToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.startConditionEditorToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
 			this.startConditionEditorToolStripMenuItem.Text = "Open Condition Editor";
 			this.startConditionEditorToolStripMenuItem.Click += new System.EventHandler(this.startConditionEditorToolStripMenuItem_Click);
 			// 
 			// settingsToolStripMenuItem
 			// 
 			this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-			this.settingsToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.settingsToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
 			this.settingsToolStripMenuItem.Text = "Settings";
 			this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
 			// 
@@ -178,35 +178,35 @@
             this.addAccountToolStripMenuItem,
             this.removeAccountToolStripMenuItem});
 			this.twitterToolStripMenuItem.Name = "twitterToolStripMenuItem";
-			this.twitterToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.twitterToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
 			this.twitterToolStripMenuItem.Text = "Twitter";
 			// 
 			// addAccountToolStripMenuItem
 			// 
 			this.addAccountToolStripMenuItem.Name = "addAccountToolStripMenuItem";
-			this.addAccountToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+			this.addAccountToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.addAccountToolStripMenuItem.Text = "Add Account";
 			this.addAccountToolStripMenuItem.Click += new System.EventHandler(this.addAccountToolStripMenuItem_Click);
 			// 
 			// removeAccountToolStripMenuItem
 			// 
 			this.removeAccountToolStripMenuItem.Name = "removeAccountToolStripMenuItem";
-			this.removeAccountToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+			this.removeAccountToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.removeAccountToolStripMenuItem.Text = "Remove Account";
 			// 
 			// emailContentConfigToolStripMenuItem
 			// 
 			this.emailContentConfigToolStripMenuItem.Name = "emailContentConfigToolStripMenuItem";
-			this.emailContentConfigToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.emailContentConfigToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
 			this.emailContentConfigToolStripMenuItem.Text = "Email Content Config";
 			this.emailContentConfigToolStripMenuItem.Click += new System.EventHandler(this.emailContentConfigToolStripMenuItem_Click);
 			// 
-			// openLogFileToolStripMenuItem
+			// showLogFileToolStripMenuItem
 			// 
-			this.openLogFileToolStripMenuItem.Name = "openLogFileToolStripMenuItem";
-			this.openLogFileToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
-			this.openLogFileToolStripMenuItem.Text = "Open log file";
-			this.openLogFileToolStripMenuItem.Click += new System.EventHandler(this.openLogFileToolStripMenuItem_Click);
+			this.showLogFileToolStripMenuItem.Name = "showLogFileToolStripMenuItem";
+			this.showLogFileToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
+			this.showLogFileToolStripMenuItem.Text = "Show Log File in Explorer";
+			this.showLogFileToolStripMenuItem.Click += new System.EventHandler(this.showLogFileToolStripMenuItem_Click);
 			// 
 			// startToolStripMenuItem
 			// 
@@ -356,7 +356,7 @@
 			this.activeMatchesDataGridView.Name = "activeMatchesDataGridView";
 			this.activeMatchesDataGridView.ReadOnly = true;
 			this.activeMatchesDataGridView.RowHeadersVisible = false;
-			this.activeMatchesDataGridView.Size = new System.Drawing.Size(225, 153);
+			this.activeMatchesDataGridView.Size = new System.Drawing.Size(225, 151);
 			this.activeMatchesDataGridView.TabIndex = 1;
 			// 
 			// Column1
@@ -437,7 +437,7 @@
 		private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem startConditionEditorToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem openLogFileToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem showLogFileToolStripMenuItem;
 		private System.Windows.Forms.StatusStrip statusStrip1;
 		private System.Windows.Forms.ToolStripMenuItem clearConsoleToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem propertyInfoToolStripMenuItem;

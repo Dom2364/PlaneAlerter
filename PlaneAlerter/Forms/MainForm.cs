@@ -10,6 +10,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Media;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -357,13 +358,16 @@ namespace PlaneAlerter.Forms
 		}
 
 		/// <summary>
-		/// Open log file button click
+		/// Show log file button click
 		/// </summary>
 		/// <param name="sender">Sender</param>
 		/// <param name="e">Event Args</param>
-		private void openLogFileToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void showLogFileToolStripMenuItem_Click(object sender, EventArgs e) {
+			if (!File.Exists("alerts.log"))
+				return;
+
 			//Open log file
-			Process.Start("alerts.log");
+			Process.Start("explorer.exe", "/select, \"alerts.log\"");
 		}
 		
 		/// <summary>
