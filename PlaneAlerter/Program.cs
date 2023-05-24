@@ -67,7 +67,7 @@ namespace PlaneAlerter {
 					services.AddSingleton<IVrsEnumService, VrsEnumService>();
 
 					//HttpClients
-					services.AddHttpClient<VrsService>(client =>
+					services.AddHttpClient<IVrsService, VrsService>(client =>
 					{
 						client.Timeout = Timeout.InfiniteTimeSpan;
 					}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
