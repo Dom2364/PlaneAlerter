@@ -148,14 +148,26 @@ namespace PlaneAlerter.Services {
 			var aircraftCount = 1;
 			foreach (var aircraft in _vrsService.AircraftList.ToList())
 			{
+				//Cancel if thread is supposed to stop
+				if (_stopping)
+					return;
+
 				//Update UI with aircraft being checked
 				StatusChanged?.Invoke(this,
 					$"Checking conditions for aircraft {aircraftCount} of {_vrsService.AircraftList.Count}");
 				aircraftCount++;
 
-				//Ignore if already matched and ignore following is enabled
-				if (ActiveMatches.TryGetValue(aircraft.Icao, out var value) && value.IgnoreFollowing)
-					continue;
+				//Check if aircraft already matched
+				if (ActiveMatches.TryGetValue(aircraft.Icao, out var activeMatch))
+				{
+					//Update aircraft info
+					foreach (var c in ActiveMatches[aircraft.Icao].Conditions)
+						c.AircraftInfo = aircraft;
+
+					//Ignore if already matched and ignore following is enabled
+					if (activeMatch.IgnoreFollowing)
+						continue;
+				}
 
 				//Ignore if VRS database info looks missing
 				if (aircraft.GetProperty("Reg") == null && aircraft.GetProperty("Type") == null &&
@@ -241,15 +253,6 @@ namespace PlaneAlerter.Services {
 
 					if (ignoreFollowing) break;
 				}
-
-				//If active matches contains this aircraft, update aircraft info
-				if (ActiveMatches.ContainsKey(aircraft.Icao))
-					foreach (var c in ActiveMatches[aircraft.Icao].Conditions)
-						c.AircraftInfo = aircraft;
-
-				//Cancel if thread is supposed to stop
-				if (_stopping)
-					return;
 			}
 		}
 
