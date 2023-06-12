@@ -301,9 +301,9 @@ namespace PlaneAlerter.Forms
 					foreach (var match in _checkerService.ActiveMatches.Values)
 					{
 						activeMatchesDataGridView.Rows.Add(match.Icao,
-							match.Conditions[0].AircraftInfo.GetProperty("Reg"),
-							match.Conditions[0].AircraftInfo.GetProperty("Type"),
-							match.Conditions[0].AircraftInfo.GetProperty("Call"), match.Conditions[0].Condition.Name);
+							match.AircraftInfo.GetProperty("Reg"),
+							match.AircraftInfo.GetProperty("Type"),
+							match.AircraftInfo.GetProperty("Call"), match.Conditions[0].Condition.Name);
 					}
 
 					activeAlertsLabel.Text = $"Active Alerts ({_checkerService.ActiveMatches.Count}):";

@@ -161,8 +161,7 @@ namespace PlaneAlerter.Services {
 				if (ActiveMatches.TryGetValue(aircraft.Icao, out var activeMatch))
 				{
 					//Update aircraft info
-					foreach (var c in ActiveMatches[aircraft.Icao].Conditions)
-						c.AircraftInfo = aircraft;
+					activeMatch.AircraftInfo = aircraft;
 
 					//Ignore if already matched and ignore following is enabled
 					if (activeMatch.IgnoreFollowing)
@@ -221,15 +220,15 @@ namespace PlaneAlerter.Services {
 						}
 
 						//If active matches contains aircraft, add condition to the match
-						if (ActiveMatches.ContainsKey(aircraft.Icao))
+						if (ActiveMatches.TryGetValue(aircraft.Icao, out activeMatch))
 						{
-							ActiveMatches[aircraft.Icao].AddCondition(conditionId, condition, aircraft);
+							activeMatch.AddCondition(conditionId, condition);
 						}
 						//Else add to active matches
 						else
 						{
-							var m = new Match(aircraft.Icao);
-							m.AddCondition(conditionId, condition, aircraft);
+							var m = new Match(aircraft.Icao, aircraft);
+							m.AddCondition(conditionId, condition);
 							ActiveMatches.Add(aircraft.Icao, m);
 						}
 
@@ -272,11 +271,8 @@ namespace PlaneAlerter.Services {
 					//Remove from active matches
 					ActiveMatches.Remove(match.Icao);
 
-					//Get aircraft info
-					var aircraft = match.Conditions[0].AircraftInfo;
-
 					//Log to console
-					_logger.LogWithTimeAndAircraft(aircraft, "REMOVING", match.Conditions[0].Condition.Name,
+					_logger.LogWithTimeAndAircraft(match.AircraftInfo, "REMOVING", match.Conditions[0].Condition.Name,
 						Color.Orange);
 
 					//Alert if alert type is both or last
@@ -286,13 +282,13 @@ namespace PlaneAlerter.Services {
 						//Get receiver name
 						var receiverName = "";
 
-						var receiverId = aircraft.GetProperty("Rcvr");
+						var receiverId = match.AircraftInfo.GetProperty("Rcvr");
 
 						if (receiverId != null && _vrsService.Receivers.ContainsKey(receiverId))
 							receiverName = _vrsService.Receivers[receiverId];
 
 						//Send Alert
-						await SendAlert(match.Conditions[0].Condition, aircraft, receiverName, false);
+						await SendAlert(match.Conditions[0].Condition, match.AircraftInfo, receiverName, false);
 					}
 				}
 				else
@@ -306,7 +302,7 @@ namespace PlaneAlerter.Services {
 						ActiveMatches[match.Icao].SignalLostTime = DateTime.Now;
 						ActiveMatches[match.Icao].SignalLost = true;
 
-						_logger.LogWithTimeAndAircraft(match.Conditions[0].AircraftInfo, "LOST SGNL",
+						_logger.LogWithTimeAndAircraft(match.AircraftInfo, "LOST SGNL",
 							match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 					}
 
@@ -315,7 +311,7 @@ namespace PlaneAlerter.Services {
 					{
 						ActiveMatches[match.Icao].SignalLost = false;
 
-						_logger.LogWithTimeAndAircraft(match.Conditions[0].AircraftInfo, "RETND SGNL",
+						_logger.LogWithTimeAndAircraft(match.AircraftInfo, "RETND SGNL",
 							match.Conditions[0].Condition.Name, Color.LightGoldenrodYellow);
 					}
 				}
