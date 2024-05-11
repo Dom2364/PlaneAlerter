@@ -115,11 +115,17 @@ namespace PlaneAlerter.Services
 				}
 
 				//Save old trails if not requesting new ones
-				Dictionary<string, double?[]>? oldTrails = null;
-				if (!requestTrails)
-					oldTrails = _aircraftList.ToDictionary(x => x.Icao, x => x.Trail);
+				var oldTrails = !requestTrails
+					? _aircraftList.ToDictionary(x => x.Icao, x => x.Trail)
+					: null;
+				
+				//Increment trails age
+				if (requestTrails)
+					_trailsAge++;
 
-				if (clearExisting) _aircraftList.Clear();
+				//Clear aircraft list if required
+				if (clearExisting)
+					_aircraftList.Clear();
 
 				//Parse aircraft data
 				foreach (var a in responseJson.RequiredValue<List<JObject?>>("acList"))
@@ -131,7 +137,7 @@ namespace PlaneAlerter.Services
 					//Create new aircraft
 					var aircraft = new Aircraft(a.RequiredValue<string>("Icao"));
 
-					//Parse aircraft trail
+					//Parse aircraft trail from acList if requested, else use old trail
 					if (requestTrails)
 					{
 						aircraft.Trail = a.OptionalValue<double?[]>("Cot") ?? Array.Empty<double?>();
@@ -152,10 +158,6 @@ namespace PlaneAlerter.Services
 					//Add aircraft to list
 					_aircraftList.Add(aircraft);
 				}
-				
-				//If we are keeping track of trails age increment it
-				if (_trailsAge >= _settingsManagerService.Settings.TrailsUpdateFrequency)
-					_trailsAge++;
 				
 				//Get list of receivers
 				_receivers.Clear();
