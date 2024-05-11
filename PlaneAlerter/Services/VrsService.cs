@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using PlaneAlerter.Extensions;
+using PlaneAlerter.Infrastructure;
 
 namespace PlaneAlerter.Services
 {
@@ -21,19 +22,19 @@ namespace PlaneAlerter.Services
 		/// <summary>
 		/// List of current aircraft
 		/// </summary>
-		public List<Aircraft> AircraftList { get; set; }
+		public IReadOnlyCollection<Aircraft> GetAircraftList();
 
 		/// <summary>
 		/// List of receivers from the last aircraftlist.json response
 		/// </summary>
-		public Dictionary<string, string> Receivers { get; set; }
+		public IReadOnlyDictionary<string, string> GetReceivers();
 
 		/// <summary>
 		/// Get latest aircraftlist.json
 		/// </summary>
-		Task GetAircraft(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false);
+		Task UpdateAircraftList(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false);
 
-		Task<Dictionary<string, string>?> GetReceivers();
+		Task<IReadOnlyDictionary<string, string>?> UpdateReceivers();
 
 		Task<string[]> GetAircraftThumbnails(string icao);
 	}
@@ -43,16 +44,17 @@ namespace PlaneAlerter.Services
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly ILoggerWithQueue _logger;
 		private readonly HttpClient _httpClient;
+		private readonly SemaphoreLocker _aircraftListLock = new();
 
 		/// <summary>
 		/// List of current aircraft
 		/// </summary>
-		public List<Aircraft> AircraftList { get; set; } = new();
+		private readonly List<Aircraft> _aircraftList = new();
 
 		/// <summary>
 		/// List of receivers from the last aircraftlist.json response
 		/// </summary>
-		public Dictionary<string, string> Receivers { get; set; } = new();
+		private readonly Dictionary<string, string> _receivers = new();
 
 		/// <summary>
 		/// How many checks ago were the trails requested
@@ -65,47 +67,28 @@ namespace PlaneAlerter.Services
 			_logger = logger;
 			_httpClient = httpClient;
 		}
+		
+		public IReadOnlyCollection<Aircraft> GetAircraftList() => _aircraftList.ToList();
+		public IReadOnlyDictionary<string, string> GetReceivers() => _receivers.ToDictionary(k => k.Key, v => v.Value);
 
+		public async Task UpdateAircraftList(bool modeSOnly, bool clearExisting, bool noActiveMatches,
+			bool forceRequestTrails = false)
+		{
+			await _aircraftListLock.LockAsync(async () =>
+				await UpdateAircraftListLocked(modeSOnly, clearExisting, noActiveMatches, forceRequestTrails));
+		}
+		
 		/// <summary>
 		/// Get latest aircraftlist.json
 		/// </summary>
-		public async Task GetAircraft(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false)
+		private async Task UpdateAircraftListLocked(bool modeSOnly, bool clearExisting, bool noActiveMatches, bool forceRequestTrails = false)
 		{
-			var requestTrails = _settingsManagerService.Settings.TrailsUpdateFrequency == 1;
-
-			//Force request trails
-			if (forceRequestTrails)
-			{
-				requestTrails = true;
-			}
-			//No matches so we don't need trails
-			else if (noActiveMatches)
-			{
-				requestTrails = false;
-			}
-			//Threshold enabled
-			else if (_settingsManagerService.Settings.TrailsUpdateFrequency >= 2)
-			{
-				if (_trailsAge >= _settingsManagerService.Settings.TrailsUpdateFrequency)
-				{
-					requestTrails = true;
-					_trailsAge = 0;
-				}
-				_trailsAge++;
-			}
-
-			//Generate aircraftlist.json url
-			var url = _settingsManagerService.Settings.AircraftListUrl;
-			url += _settingsManagerService.Settings.AircraftListUrl.Contains("?") ? "&" : "?";
-			url += "lat=" + _settingsManagerService.Settings.Lat + "&lng=" + _settingsManagerService.Settings.Long;
-			if (_settingsManagerService.Settings.FilterDistance && !modeSOnly) url += "&fDstU=" + _settingsManagerService.Settings.IgnoreDistance.ToString("#.##");
-			if (_settingsManagerService.Settings.FilterAltitude) url += "&fAltU=" + _settingsManagerService.Settings.IgnoreAltitude;
-			if (_settingsManagerService.Settings.FilterReceiver) url += "&feed=" + _settingsManagerService.Settings.FilterReceiverId;
-			if (modeSOnly) url += "&fNoPosQN=1";
-			if (requestTrails) url += "&trFmt=fa&refreshTrails=1";
+			var requestTrails = forceRequestTrails || ShouldRequestTrails(noActiveMatches);
 
 			try
 			{
+				var url = GenerateAircraftListUrl(modeSOnly, requestTrails);
+				
 				JObject? responseJson;
 				try
 				{
@@ -134,9 +117,9 @@ namespace PlaneAlerter.Services
 				//Save old trails if not requesting new ones
 				Dictionary<string, double?[]>? oldTrails = null;
 				if (!requestTrails)
-					oldTrails = AircraftList.ToDictionary(x => x.Icao, x => x.Trail);
+					oldTrails = _aircraftList.ToDictionary(x => x.Icao, x => x.Trail);
 
-				if (clearExisting) AircraftList.Clear();
+				if (clearExisting) _aircraftList.Clear();
 
 				//Parse aircraft data
 				foreach (var a in responseJson.RequiredValue<List<JObject?>>("acList"))
@@ -153,9 +136,9 @@ namespace PlaneAlerter.Services
 					{
 						aircraft.Trail = a.OptionalValue<double?[]>("Cot") ?? Array.Empty<double?>();
 					}
-					else
+					else if (oldTrails != null && oldTrails.TryGetValue(aircraft.Icao, out var trail))
 					{
-						if (oldTrails != null && oldTrails.ContainsKey(aircraft.Icao)) aircraft.Trail = oldTrails[aircraft.Icao];
+						aircraft.Trail = trail;
 					}
 
 					//Parse aircraft properties
@@ -164,20 +147,23 @@ namespace PlaneAlerter.Services
 						aircraft.AddProperty(property.Name, property.Value.ToString());
 
 					//Remove the existing aircraft if it exists
-					AircraftList.RemoveAll(x => x.Icao == aircraft.Icao);
+					_aircraftList.RemoveAll(x => x.Icao == aircraft.Icao);
 
 					//Add aircraft to list
-					AircraftList.Add(aircraft);
+					_aircraftList.Add(aircraft);
 				}
-
+				
+				//If we are keeping track of trails age increment it
+				if (_trailsAge >= _settingsManagerService.Settings.TrailsUpdateFrequency)
+					_trailsAge++;
+				
 				//Get list of receivers
-				Receivers.Clear();
+				_receivers.Clear();
 				foreach (var f in responseJson.RequiredValue<JToken>("feeds"))
-					Receivers[f.RequiredValue<string>("id")] = f.RequiredValue<string>("name");
+					_receivers[f.RequiredValue<string>("id")] = f.RequiredValue<string>("name");
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();
-				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (UriFormatException)
 			{
@@ -195,6 +181,53 @@ namespace PlaneAlerter.Services
 			{
 				_logger.Log("ERROR: Error parsing JSON response (" + e.Message + ")", Color.Red);
 			}
+		}
+
+		private bool ShouldRequestTrails(bool noActiveMatches)
+		{
+			//No matches so we don't need trails
+			if (noActiveMatches)
+				return false;
+			
+			//Request every x checks, decide if we need to request trails based on age
+			if (_settingsManagerService.Settings.TrailsUpdateFrequency >= 2)
+			{
+				if (_trailsAge >= _settingsManagerService.Settings.TrailsUpdateFrequency)
+				{
+					_trailsAge = 0;
+					return true;
+				}
+
+				return false;
+			}
+			
+			//Request every check or never
+			return _settingsManagerService.Settings.TrailsUpdateFrequency == 1;
+		}
+
+		private string GenerateAircraftListUrl(bool modeSOnly, bool requestTrails)
+		{
+			var url = _settingsManagerService.Settings.AircraftListUrl;
+			
+			url += url.Contains('?') ? "&" : "?";
+			url += "lat=" + _settingsManagerService.Settings.Lat + "&lng=" + _settingsManagerService.Settings.Long;
+			
+			if (_settingsManagerService.Settings.FilterDistance && !modeSOnly)
+				url += "&fDstU=" + _settingsManagerService.Settings.IgnoreDistance.ToString("#.##");
+			
+			if (_settingsManagerService.Settings.FilterAltitude)
+				url += "&fAltU=" + _settingsManagerService.Settings.IgnoreAltitude;
+			
+			if (_settingsManagerService.Settings.FilterReceiver)
+				url += "&feed=" + _settingsManagerService.Settings.FilterReceiverId;
+			
+			if (modeSOnly)
+				url += "&fNoPosQN=1";
+			
+			if (requestTrails)
+				url += "&trFmt=fa&refreshTrails=1";
+			
+			return url;
 		}
 
 		private async Task<JObject?> RequestAircraftListAsync(string url)
@@ -221,11 +254,11 @@ namespace PlaneAlerter.Services
 			return (JObject?)JsonConvert.DeserializeObject(responseContent);
 		}
 
-		public async Task<Dictionary<string, string>?> GetReceivers()
+		public async Task<IReadOnlyDictionary<string, string>?> UpdateReceivers()
 		{
 			//Generate aircraftlist.json url
 			var url = _settingsManagerService.Settings.AircraftListUrl;
-			url += _settingsManagerService.Settings.AircraftListUrl.Contains("?") ? "&" : "?";
+			url += _settingsManagerService.Settings.AircraftListUrl.Contains('?') ? "&" : "?";
 			url += "fUtQ=abc";
 
 			try
@@ -256,14 +289,12 @@ namespace PlaneAlerter.Services
 				}
 
 				//Get list of receivers
-				Receivers.Clear();
+				_receivers.Clear();
 				foreach (var f in responseJson.RequiredValue<JToken>("feeds"))
-					Receivers[f.RequiredValue<string>("id")] = f.RequiredValue<string>("name");
+					_receivers[f.RequiredValue<string>("id")] = f.RequiredValue<string>("name");
 
 				//Try to clean up json parsing
 				responseJson.RemoveAll();
-
-				GC.Collect(2, GCCollectionMode.Forced);
 			}
 			catch (TaskCanceledException)
 			{
@@ -291,7 +322,7 @@ namespace PlaneAlerter.Services
 				return null;
 			}
 
-			return Receivers;
+			return GetReceivers();
 		}
 
 		public async Task<string[]> GetAircraftThumbnails(string icao)

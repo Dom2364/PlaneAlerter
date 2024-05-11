@@ -124,29 +124,32 @@ namespace PlaneAlerter.Services {
 			StatusChanged?.Invoke(this, "Downloading Aircraft Info...");
 
 			//Get latest aircraft information
-			await _vrsService.GetAircraft(false, true, ActiveMatches.Count == 0);
+			await _vrsService.UpdateAircraftList(false, true, ActiveMatches.Count == 0);
 			if (_settingsManagerService.Settings.FilterDistance && !_settingsManagerService.Settings.IgnoreModeS)
-				await _vrsService.GetAircraft(true, false, ActiveMatches.Count == 0);
+				await _vrsService.UpdateAircraftList(true, false, ActiveMatches.Count == 0);
 
+			var aircraftList = _vrsService.GetAircraftList();
+			var receivers = _vrsService.GetReceivers();
+			
 			//Check if there are aircraft to check
-			if (_vrsService.AircraftList.Count == 0)
+			if (aircraftList.Count == 0)
 				return;
 
 			//Check if aircraft match conditions
-			await CheckForFirstContactAlerts();
+			await CheckForFirstContactAlerts(aircraftList, receivers);
 			
 			//Check if aircraft have lost signal and remove aircraft that have timed out
-			await CheckForLastContactAlerts();
+			await CheckForLastContactAlerts(aircraftList, receivers);
 		}
 
-		private async Task CheckForFirstContactAlerts()
+		private async Task CheckForFirstContactAlerts(IReadOnlyCollection<Aircraft> aircraftList, IReadOnlyDictionary<string, string> receivers)
 		{
-			//Updated trails are available, this check contains the first match in a while
-			var updatedTrailsAvailable = false;
+			//AircraftList with trails if trails were retrieved during this check 
+			IReadOnlyCollection<Aircraft>? aircraftListWithTrails = null;
 
 			//Aircraft number to be shown on UI
 			var aircraftCount = 1;
-			foreach (var aircraft in _vrsService.AircraftList.ToList())
+			foreach (var aircraft in aircraftList)
 			{
 				//Cancel if thread is supposed to stop
 				if (_stopping)
@@ -154,7 +157,7 @@ namespace PlaneAlerter.Services {
 
 				//Update UI with aircraft being checked
 				StatusChanged?.Invoke(this,
-					$"Checking conditions for aircraft {aircraftCount} of {_vrsService.AircraftList.Count}");
+					$"Checking conditions for aircraft {aircraftCount} of {aircraftList.Count}");
 				aircraftCount++;
 
 				//Check if aircraft already matched
@@ -195,20 +198,20 @@ namespace PlaneAlerter.Services {
 						//Cancel checking for conditions for this aircraft
 						ignoreFollowing = condition.IgnoreFollowing;
 
-						//Get trails if they haven't been requested due to no matches
-						if (ActiveMatches.Count == 1 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0)
+						//Get trails if they haven't been requested due to no matches, and they haven't been retrieved yet
+						if (aircraftListWithTrails == null && ActiveMatches.Count == 1 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0)
 						{
-							await _vrsService.GetAircraft(false, true, false, true);
+							await _vrsService.UpdateAircraftList(false, true, false, true);
 							if (_settingsManagerService.Settings.FilterDistance &&
 								!_settingsManagerService.Settings.IgnoreModeS)
-								await _vrsService.GetAircraft(true, false, false, true);
-							updatedTrailsAvailable = true;
+								await _vrsService.UpdateAircraftList(true, false, false, true);
+							aircraftListWithTrails = _vrsService.GetAircraftList();
 						}
 
-						//If updated trails are available, update trail and position
-						if (updatedTrailsAvailable)
+						//If updated trails were retrieved, update this aircraft
+						if (aircraftListWithTrails != null)
 						{
-							foreach (var updatedAircraft in _vrsService.AircraftList
+							foreach (var updatedAircraft in aircraftList
 										 .Where(updatedAircraft => updatedAircraft.Icao == aircraft.Icao)
 										 .ToList())
 							{
@@ -242,7 +245,7 @@ namespace PlaneAlerter.Services {
 							//Get receiver name
 							var receiverId = aircraft.GetProperty("Rcvr");
 							var receiverName = !string.IsNullOrEmpty(receiverId) && 
-							                   _vrsService.Receivers.TryGetValue(receiverId, out var receiverNameNullable)
+							                   receivers.TryGetValue(receiverId, out var receiverNameNullable)
 								? receiverNameNullable
 								: "";
 
@@ -255,7 +258,7 @@ namespace PlaneAlerter.Services {
 			}
 		}
 
-		private async Task CheckForLastContactAlerts()
+		private async Task CheckForLastContactAlerts(IReadOnlyCollection<Aircraft> aircraftList, IReadOnlyDictionary<string, string> receivers)
 		{
 			StatusChanged?.Invoke(this, "Checking aircraft are still on radar...");
 
@@ -280,12 +283,9 @@ namespace PlaneAlerter.Services {
 					    or AlertType.Last_Contact)
 					{
 						//Get receiver name
-						var receiverName = "";
-
 						var receiverId = match.AircraftInfo.GetProperty("Rcvr");
 
-						if (receiverId != null && _vrsService.Receivers.ContainsKey(receiverId))
-							receiverName = _vrsService.Receivers[receiverId];
+						if (receiverId != null && receivers.TryGetValue(receiverId, out var receiverName))
 
 						//Send Alert
 						await SendAlert(match.Conditions[0].Condition, match.AircraftInfo, receiverName, false);
@@ -294,7 +294,7 @@ namespace PlaneAlerter.Services {
 				else
 				{
 					//Check if signal has been lost/returned
-					var stillActive = _vrsService.AircraftList.Any(aircraft => aircraft.Icao == match.Icao);
+					var stillActive = aircraftList.Any(aircraft => aircraft.Icao == match.Icao);
 
 					//Active > Not active
 					if (!stillActive && match.SignalLost == false)

@@ -121,6 +121,7 @@ namespace PlaneAlerter.Models
 
 		/// <summary>
 		/// Number of checks between trail updates
+		/// 0 = Never request trails, 1 = Request every check, >=2 = Request every x checks
 		/// </summary>
 		public int TrailsUpdateFrequency { get; set; }
 

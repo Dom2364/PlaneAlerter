@@ -33,12 +33,14 @@ namespace PlaneAlerter.Services
 		{
 			var receiverId = aircraft.GetProperty("Rcvr");
 
+			var receivers = _vrsService.GetReceivers();
+
 			var variables = new Dictionary<string, string>
 			{
 				{ "ConditionName", condition.Name },
 				{
 					"RcvrName",
-					!string.IsNullOrEmpty(receiverId) && _vrsService.Receivers.TryGetValue(receiverId, out var receiverName)
+					!string.IsNullOrEmpty(receiverId) && receivers.TryGetValue(receiverId, out var receiverName)
 						? receiverName
 						: ""
 				},

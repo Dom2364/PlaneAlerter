@@ -95,7 +95,7 @@ namespace PlaneAlerter.Forms {
 				return;
 			}
 
-			var receivers = await Task.Run(_vrsService.GetReceivers);
+			var receivers = await Task.Run(_vrsService.UpdateReceivers);
 			if (receivers != null) {
 				receivers = receivers.OrderBy(x => x.Value, StringComparer.Ordinal).ToDictionary(x => x.Key, x => x.Value);
 
