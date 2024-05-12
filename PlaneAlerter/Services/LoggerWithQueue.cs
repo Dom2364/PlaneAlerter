@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services
@@ -15,12 +16,7 @@ namespace PlaneAlerter.Services
 
 	internal class LoggerWithQueue : ILoggerWithQueue
 	{
-		private readonly Queue<LogMessage> _queuedLogs;
-
-		public LoggerWithQueue()
-		{
-			_queuedLogs = new Queue<LogMessage>();
-		}
+		private readonly Queue<LogMessage> _queuedLogs = new();
 
 		public event EventHandler? NewLogMessage;
 
@@ -34,13 +30,15 @@ namespace PlaneAlerter.Services
 
 		public void Log(string message, Color? color = null)
 		{
-			_queuedLogs.Enqueue(new LogMessage(message, color));
+			var messageWithTimestamp = $"{DateTime.Now.ToString("d", CultureInfo.InstalledUICulture)} {DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InstalledUICulture)} | {message}";
+            
+			_queuedLogs.Enqueue(new LogMessage(messageWithTimestamp, color));
 			NewLogMessage?.Invoke(this, EventArgs.Empty);
 		}
 
 		public void LogWithTimeAndAircraft(Aircraft aircraft, string action, string message, Color? color = null)
 		{
-			Log(DateTime.Now.ToLongTimeString() + $" | {action.PadRight(10)} | {aircraft.Icao} - {aircraft.GetProperty("Reg")} - {aircraft.GetProperty("Call")} | " + message, color);
+			Log($"{action.PadRight(10)} | {aircraft.Icao} - {aircraft.GetProperty("Reg")} - {aircraft.GetProperty("Call")} | " + message, color);
 		}
 	}
 }
