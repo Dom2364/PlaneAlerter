@@ -356,7 +356,7 @@
 			this.activeMatchesDataGridView.Name = "activeMatchesDataGridView";
 			this.activeMatchesDataGridView.ReadOnly = true;
 			this.activeMatchesDataGridView.RowHeadersVisible = false;
-			this.activeMatchesDataGridView.Size = new System.Drawing.Size(225, 151);
+			this.activeMatchesDataGridView.Size = new System.Drawing.Size(225, 154);
 			this.activeMatchesDataGridView.TabIndex = 1;
 			// 
 			// Column1
