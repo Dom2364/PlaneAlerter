@@ -9,7 +9,12 @@ namespace PlaneAlerter.Forms {
 			//Add vrs property info to form
 			foreach (var property in VrsProperties.VrsPropertyData.Keys) {
 				var propertyData = VrsProperties.VrsPropertyData[property];
-                propertyDataGridView.Rows.Add(property.ToString(), propertyData[0], propertyData[2], propertyData[3]);
+				
+                propertyDataGridView.Rows.Add(
+	                property.ToString().Replace('_', ' '),
+	                propertyData[0],
+	                propertyData[2],
+	                propertyData[3]);
 			}
 		}
 	}
