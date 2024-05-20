@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using PlaneAlerter.Enums;
@@ -43,9 +42,7 @@ namespace PlaneAlerter.Forms {
 			var rows = triggerDataGridView.Rows.Cast<DataGridViewRow>();
 			foreach (var row in rows)
 			{
-				var comboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
-				foreach (VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
-					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
+				InitNewRow(row);
 			}
 
 			//Add alert types to combobox
@@ -56,7 +53,7 @@ namespace PlaneAlerter.Forms {
 			foreach (TweetLink linkType in Enum.GetValues(typeof(TweetLink)))
 				tweetLinkComboBox.Items.Add(linkType.ToString().Replace('_', ' '));
 
-			//Add twitter accounts to combobox
+			//Add Twitter accounts to combobox
 			twitterAccountComboBox.Items.Add("Add Account");
 			twitterAccountComboBox.Items.AddRange(_settingsManagerService.Settings.TwitterUsers.Keys.ToArray());
 
@@ -72,6 +69,8 @@ namespace PlaneAlerter.Forms {
 			tweetFirstFormatTextBox.Text = "Alert! Registration: [Reg], Callsign: [Call]";
 			tweetLastFormatTextBox.Text = "Aircraft out of range, Registration: [Reg], Callsign: [Call]";
 			alertTypeComboBox.SelectedIndex = 1;
+			triggersLogicAnyRadioButton.Checked = false;
+			triggersLogicAllRadioButton.Checked = true;
 		}
 
 		public void LoadCondition(int conditionId)
@@ -83,10 +82,11 @@ namespace PlaneAlerter.Forms {
 			var c = _conditionManagerService.EditorConditions[_conditionToUpdate];
 			conditionNameTextBox.Text = c.Name;
 			ignoreFollowingCheckbox.Checked = c.IgnoreFollowing;
+			triggersLogicAnyRadioButton.Checked = c.TriggersUseOrLogic;
 			emailCheckBox.Checked = c.EmailEnabled;
 			emailFirstFormatTextBox.Text = c.EmailFirstFormat;
 			emailLastFormatTextBox.Text = c.EmailLastFormat;
-			receiverEmailTextBox.Text = string.Join(Environment.NewLine, c.RecieverEmails.ToArray());
+			receiverEmailTextBox.Text = string.Join(Environment.NewLine, c.ReceiverEmails.ToArray());
 			twitterCheckBox.Checked = c.TwitterEnabled;
 			twitterAccountComboBox.Text = c.TwitterAccount;
 			tweetFirstFormatTextBox.Text = c.TweetFirstFormat;
@@ -100,9 +100,7 @@ namespace PlaneAlerter.Forms {
 				triggerDataGridView.Rows.Add();
 				var newRow = triggerDataGridView.Rows[triggerDataGridView.Rows.Count - 2];
 
-				var comboBoxCell = (DataGridViewComboBoxCell)(newRow.Cells[0]);
-				foreach (VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
-					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
+				InitNewRow(newRow);
 
 				newRow.Cells[0].Value = trigger.Property.ToString().Replace('_', ' ');
 				newRow.Cells[1].Value = trigger.ComparisonType;
@@ -125,63 +123,75 @@ namespace PlaneAlerter.Forms {
 				? (VrsProperty?)Enum.Parse(typeof(VrsProperty), selectedPropertyKey.Replace(' ', '_'))
 				: null;
 
-			//Check if cell changed is in the value column and value isn't empty
-			if (e.ColumnIndex == 2 &&
-			    selectedProperty != null)
+			var comparisonTypeComboBoxCell = (DataGridViewComboBoxCell)(triggerDataGridView.Rows[e.RowIndex].Cells[1]);
+			var valueCell = triggerDataGridView.Rows[e.RowIndex].Cells[2];
+
+			if (selectedProperty == null)
+			{
+				comparisonTypeComboBoxCell.Items.Clear();
+				comparisonTypeComboBoxCell.Value = "";
+				valueCell.Value = "";
+				return;
+			}
+
+			var selectedPropertyData = VrsProperties.VrsPropertyData[selectedProperty.Value];
+
+			//Value changed
+			if (e.ColumnIndex == 2)
 			{
 				//Clear value if property is number and value is not a number
-				if (VrsProperties.VrsPropertyData[selectedProperty.Value][0] == "Number" &&
-				    !string.IsNullOrEmpty(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value?.ToString()) &&
-				    !double.TryParse(triggerDataGridView.Rows[e.RowIndex].Cells[2].Value.ToString(), out _))
+				if (selectedPropertyData[0] == "Number" &&
+				    !string.IsNullOrEmpty(valueCell.Value?.ToString()) &&
+				    !double.TryParse(valueCell.Value.ToString(), out _))
 				{
-					triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
+					valueCell.Value = "";
 				}
 			}
 
-			//Change comparison type combo box based on property selected
-			if (e.ColumnIndex == 0 && selectedProperty != null) {
+			//Property changed
+			if (e.ColumnIndex == 0) {
 				//Clear combobox
-				var comparisonTypeComboBox = (DataGridViewComboBoxCell)(triggerDataGridView.Rows[e.RowIndex].Cells[1]);
-				comparisonTypeComboBox.Items.Clear();
-				comparisonTypeComboBox.Value = "";
+				comparisonTypeComboBoxCell.Items.Clear();
+				comparisonTypeComboBoxCell.Value = "";
+				comparisonTypeComboBoxCell.ReadOnly = false;
+
+				//Clear value
+				valueCell.Value = "";
+				valueCell.ReadOnly = false;
 
 				//Get comparison types supported by property
-				var supportedComparisonTypes = VrsProperties.VrsPropertyData[selectedProperty.Value][1];
+				var supportedComparisonTypes = selectedPropertyData[1];
 
 				//Add comparison types to combobox from supported comparison types
 				if (supportedComparisonTypes.Contains("A")) {
 					foreach (var comparisonType in VrsProperties.ComparisonTypes["A"])
-						comparisonTypeComboBox.Items.Add(comparisonType);
+						comparisonTypeComboBoxCell.Items.Add(comparisonType);
 				}
 
 				if (supportedComparisonTypes.Contains("B")) {
 					foreach (var comparisonType in VrsProperties.ComparisonTypes["B"])
-						comparisonTypeComboBox.Items.Add(comparisonType);
+						comparisonTypeComboBoxCell.Items.Add(comparisonType);
 				}
 
 				if (supportedComparisonTypes.Contains("C")) {
 					foreach (var comparisonType in VrsProperties.ComparisonTypes["C"])
-						comparisonTypeComboBox.Items.Add(comparisonType);
+						comparisonTypeComboBoxCell.Items.Add(comparisonType);
 
-					triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "True";
-					triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = true;
-				}
-				else {
-					triggerDataGridView.Rows[e.RowIndex].Cells[2].Value = "";
-					triggerDataGridView.Rows[e.RowIndex].Cells[2].ReadOnly = false;
+					valueCell.Value = "True";
+					valueCell.ReadOnly = true;
 				}
 
 				if (supportedComparisonTypes.Contains("D")) {
 					foreach (var comparisonType in VrsProperties.ComparisonTypes["D"])
-						comparisonTypeComboBox.Items.Add(comparisonType);
+						comparisonTypeComboBoxCell.Items.Add(comparisonType);
 				}
 
 				if (supportedComparisonTypes.Contains("E")) {
 					foreach (var comparisonType in VrsProperties.ComparisonTypes["E"])
-						comparisonTypeComboBox.Items.Add(comparisonType);
+						comparisonTypeComboBoxCell.Items.Add(comparisonType);
 				}
 
-				comparisonTypeComboBox.Value = comparisonTypeComboBox.Items[0].ToString();
+				comparisonTypeComboBoxCell.Value = comparisonTypeComboBoxCell.Items[0].ToString();
 			}
 		}
 		
@@ -192,15 +202,22 @@ namespace PlaneAlerter.Forms {
 		/// <param name="e">Event Args</param>
 		private void TriggerDataGridViewUserAddedRow(object sender, DataGridViewRowEventArgs e)
 		{
-			//Iterate rows in table
-			foreach (DataGridViewRow row in triggerDataGridView.Rows) {
-				var comboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
+			InitNewRow(e.Row);
+		}
 
-				//Add vrs properties to combobox
-				comboBoxCell.Items.Clear();
-				foreach (VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
-					comboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
-			}
+		private void InitNewRow(DataGridViewRow row)
+		{
+			var propertyComboBoxCell = (DataGridViewComboBoxCell)(row.Cells[0]);
+			var comparisonComboBoxCell = (DataGridViewComboBoxCell)(row.Cells[1]);
+			var valueCell = row.Cells[2];
+
+			//Add vrs properties to combobox
+			propertyComboBoxCell.Items.Clear();
+			foreach (VrsProperty property in Enum.GetValues(typeof(VrsProperty)))
+				propertyComboBoxCell.Items.Add(property.ToString().Replace('_', ' '));
+
+			comparisonComboBoxCell.ReadOnly = true;
+			valueCell.ReadOnly = true;
 		}
 		
 		/// <summary>
@@ -221,7 +238,7 @@ namespace PlaneAlerter.Forms {
 			}
 
 			if (emailCheckBox.Checked) {
-				if (emailFirstFormatTextBox.Text == "") {
+				if (string.IsNullOrWhiteSpace(emailFirstFormatTextBox.Text)) {
 					emailFirstFormatTextBox.ForeColor = Color.Red;
 					cancelSave = true;
 				}
@@ -229,7 +246,7 @@ namespace PlaneAlerter.Forms {
 					emailFirstFormatTextBox.ForeColor = SystemColors.ControlText;
 				}
 
-				if (emailLastFormatTextBox.Text == "") {
+				if (string.IsNullOrWhiteSpace(emailLastFormatTextBox.Text)) {
 					emailLastFormatTextBox.ForeColor = Color.Red;
 					cancelSave = true;
 				}
@@ -237,7 +254,7 @@ namespace PlaneAlerter.Forms {
 					emailLastFormatTextBox.ForeColor = SystemColors.ControlText;
 				}
 
-				if (receiverEmailTextBox.Text == "") {
+				if (string.IsNullOrWhiteSpace(receiverEmailTextBox.Text)) {
 					emailToSendToLabel.ForeColor = Color.Red;
 					cancelSave = true;
 				}
@@ -247,7 +264,7 @@ namespace PlaneAlerter.Forms {
 			}
 
 			if (twitterCheckBox.Checked) {
-				if (twitterAccountComboBox.Text == "") {
+				if (string.IsNullOrWhiteSpace(twitterAccountComboBox.Text)) {
 					twitterAccountLabel.ForeColor = Color.Red;
 					cancelSave = true;
 				}
@@ -255,12 +272,12 @@ namespace PlaneAlerter.Forms {
 					twitterAccountLabel.ForeColor = SystemColors.ControlText;
 				}
 
-				if (tweetFirstFormatTextBox.Text == "") {
+				if (string.IsNullOrWhiteSpace(tweetFirstFormatTextBox.Text)) {
 					tweetFirstFormatLabel.ForeColor = Color.Red;
 					cancelSave = true;
 				}
 				else {
-					if (tweetFirstFormatTextBox.Text.Contains("@")) {
+					if (tweetFirstFormatTextBox.Text.Contains('@')) {
 						tweetFirstFormatLabel.ForeColor = Color.Red;
 						cancelSave = true;
 						MessageBox.Show("Mentions are not allowed in automated tweets as per Twitter rules", "Mentions not permitted");
@@ -268,12 +285,12 @@ namespace PlaneAlerter.Forms {
 					else tweetFirstFormatLabel.ForeColor = SystemColors.ControlText;
 				}
 
-				if (tweetLastFormatTextBox.Text == "") {
+				if (string.IsNullOrWhiteSpace(tweetLastFormatTextBox.Text)) {
 					tweetLastFormatLabel.ForeColor = Color.Red;
 					cancelSave = true;
 				}
 				else {
-					if (tweetLastFormatTextBox.Text.Contains("@")) {
+					if (tweetLastFormatTextBox.Text.Contains('@')) {
 						tweetLastFormatLabel.ForeColor = Color.Red;
 						cancelSave = true;
 						MessageBox.Show("Mentions are not allowed in automated tweets as per Twitter rules", "Mentions not permitted");
@@ -281,19 +298,20 @@ namespace PlaneAlerter.Forms {
 					else tweetLastFormatLabel.ForeColor = SystemColors.ControlText;
 				}
 			}
-			if (alertTypeComboBox.Text == "") {
+			if (string.IsNullOrWhiteSpace(alertTypeComboBox.Text)) {
 				alertTypeLabel.ForeColor = Color.Red;
 				cancelSave = true;
 			}
 			else {
 				alertTypeLabel.ForeColor = SystemColors.ControlText;
 			}
+			
 			if (triggerDataGridView.Rows.Count == 1) {
 				triggerDataGridView.BackgroundColor = Color.Red;
 				cancelSave = true;
 			}
 			else {
-				triggerDataGridView.BackgroundColor = SystemColors.AppWorkspace;
+				triggerDataGridView.BackgroundColor = SystemColors.ControlLight;
 			}
 			//Trim empty lines from email textbox
 			receiverEmailTextBox.Text = receiverEmailTextBox.Text.TrimEnd('\r', '\n');
@@ -330,6 +348,7 @@ namespace PlaneAlerter.Forms {
 				conditionNameTextBox.Text,
 				(AlertType)Enum.Parse(typeof(AlertType), alertTypeComboBox.Text.Replace(' ', '_')),
 				ignoreFollowingCheckbox.Checked,
+				triggersLogicAnyRadioButton.Checked,
 				emailCheckBox.Checked,
 				emailFirstFormatTextBox.Text,
 				emailLastFormatTextBox.Text,
@@ -430,7 +449,8 @@ namespace PlaneAlerter.Forms {
 				triggerDataGridView.BeginEdit(true);
 
 				var editingControl = (DataGridViewComboBoxEditingControl)triggerDataGridView.EditingControl;
-				editingControl.DroppedDown = true;
+				if (editingControl != null)
+					editingControl.DroppedDown = true;
 			}
 		}
 
@@ -451,10 +471,26 @@ namespace PlaneAlerter.Forms {
 			twitterAccountComboBox.Enabled = twitterCheckBox.Checked;
 			tweetFirstFormatTextBox.Enabled = twitterCheckBox.Checked && (alertType != AlertType.Last_Contact);
 			tweetLastFormatTextBox.Enabled = twitterCheckBox.Checked && (alertType != AlertType.First_Contact);
+			tweetLinkComboBox.Enabled = twitterCheckBox.Checked;
+			tweetMapCheckBox.Enabled = twitterCheckBox.Checked;
 		}
 
 		private void alertTypeComboBox_SelectedIndexChanged(object sender, EventArgs e) {
 			UpdateUiState();
+		}
+
+		private void triggerDataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+		{
+			var dataGridView = (DataGridView)sender;
+
+			//Delete row on delete button cell click
+			if (dataGridView.Columns[e.ColumnIndex] is DataGridViewButtonColumn &&
+				e.ColumnIndex == 3 &&
+				e.RowIndex >= 0 &&
+				!dataGridView.Rows[e.RowIndex].IsNewRow)
+			{
+				dataGridView.Rows.RemoveAt(e.RowIndex);
+			}
 		}
 	}
 }

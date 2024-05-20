@@ -366,6 +366,9 @@ namespace PlaneAlerter.Services {
 							break;
 					}
 				}
+
+				if (condition.TriggersUseOrLogic && triggersMatching > 0)
+					return true;
 			}
 
 			return triggersMatching == condition.Triggers.Count;
@@ -379,7 +382,7 @@ namespace PlaneAlerter.Services {
 
 			if (condition.EmailEnabled) {
 				//Send emails
-				foreach (var emailAddress in condition.RecieverEmails)
+				foreach (var emailAddress in condition.ReceiverEmails)
 				{
 					var email = await _emailBuilderService.Build(condition, aircraft, receiver, isFirst);
 					

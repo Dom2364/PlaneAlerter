@@ -33,7 +33,7 @@ namespace PlaneAlerter.Models
 		/// <summary>
 		/// Emails to send alert to
 		/// </summary>
-		public List<string> RecieverEmails { get; }
+		public List<string> ReceiverEmails { get; }
 
 		/// <summary>
 		/// Email first contact alert format
@@ -81,6 +81,11 @@ namespace PlaneAlerter.Models
 		public AlertType AlertType { get; }
 
 		/// <summary>
+		/// Use OR logic instead of AND logic for triggers, only one trigger needs to match instead of all
+		/// </summary>
+		public bool TriggersUseOrLogic { get; set; }
+
+		/// <summary>
 		/// List of triggers
 		/// </summary>
 		public Dictionary<int, Trigger> Triggers { get; init; } = new();
@@ -89,10 +94,11 @@ namespace PlaneAlerter.Models
 			string name,
 			AlertType alertType,
 			bool ignoreFollowing,
+			bool triggersUseOrLogic,
 			bool emailEnabled,
 			string emailFirstFormat,
 			string emailLastFormat,
-			List<string> recieverEmails,
+			List<string> receiverEmails,
 			bool twitterEnabled,
 			string twitterAccount,
 			string tweetFirstFormat,
@@ -103,10 +109,11 @@ namespace PlaneAlerter.Models
 			Name = name;
 			AlertType = alertType;
 			IgnoreFollowing = ignoreFollowing;
+			TriggersUseOrLogic = triggersUseOrLogic;
 			EmailEnabled = emailEnabled;
 			EmailFirstFormat = emailFirstFormat;
 			EmailLastFormat = emailLastFormat;
-			RecieverEmails = recieverEmails;
+			ReceiverEmails = receiverEmails;
 			TwitterEnabled = twitterEnabled;
 			TwitterAccount = twitterAccount;
 			TweetFirstFormat = tweetFirstFormat;

@@ -69,6 +69,9 @@
   <metadata name="valueColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <metadata name="deleteColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <data name="emailFirstFormatTextBox.ToolTip" xml:space="preserve">
     <value>To add property values, add square brackets around the internal name of a property in the property info window.
 For example you could add [alt] to add the aircraft's altitude at the time of the alert.
