@@ -116,12 +116,12 @@ namespace PlaneAlerter.Services {
 
 			try
 			{
-				//Download the map image from google
+				//Download the map image
 				imageBytes = await _httpClient.GetByteArrayAsync(mediaUrl);
 			}
 			catch (Exception e)
 			{
-				_logger.Log($"ERROR: {e.GetType()} error downloading map image from Google: {e.Message}",
+				_logger.Log($"ERROR: {e.GetType()} error downloading map image: {e.Message}",
 					System.Drawing.Color.Red);
 				return null;
 			}

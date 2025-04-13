@@ -1,4 +1,7 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Net;
+using PlaneAlerter.Helpers;
 using PlaneAlerter.Models;
 
 namespace PlaneAlerter.Services
@@ -9,11 +12,7 @@ namespace PlaneAlerter.Services
 		/// Generate the report url for a specific icao
 		/// </summary>
 		string GenerateReportUrl(string icao, bool mobile);
-
-		/// <summary>
-		/// Generate a map
-		/// </summary>
-		string GenerateGoogleStaticMapUrl(Aircraft aircraft);
+		string GenerateMapboxStaticMapUrl(Aircraft aircraft);
 
 		/// <summary>
 		/// Generate a link to airframes.org
@@ -26,6 +25,8 @@ namespace PlaneAlerter.Services
 	{
 		private readonly ISettingsManagerService _settingsManagerService;
 		private readonly ILoggerWithQueue _logger;
+		
+		private const string MapboxAccessToken = "pk.eyJ1IjoiZG9tMjM2NCIsImEiOiJjbTllNHMwdzAxOGI4MmtvZTZhMGpmMnp2In0.jmjmGSwa0p9bM4YCG_xewQ";
 
 		public UrlBuilderService(ISettingsManagerService settingsManagerService, ILoggerWithQueue logger)
 		{
@@ -60,52 +61,70 @@ namespace PlaneAlerter.Services
 			return reportUrl;
 		}
 
-		/// <summary>
-		/// Generate a map
-		/// </summary>
-		public string GenerateGoogleStaticMapUrl(Aircraft aircraft)
+		public string GenerateMapboxStaticMapUrl(Aircraft aircraft)
 		{
-			var staticMapUrl = "";
-			//If aircraft has a position, generate a google map url
-			if (aircraft.GetProperty("Lat") != null)
-				if (_settingsManagerService.Settings.CentreMapOnAircraft)
-				{
-					if (aircraft.Trail.Length != 4)
-						staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
-					else
-						staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&size=800x800&zoom=8&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
-				}
-				else
-				{
-					if (aircraft.Trail.Length != 4)
-						staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" +
-						               _settingsManagerService.Settings.Lat + "," + _settingsManagerService.Settings.Long + "&size=800x800&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
-					else
-						staticMapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" +
-						               _settingsManagerService.Settings.Lat + "," + _settingsManagerService.Settings.Long + "&size=800x800&zoom=8&markers=" + aircraft.GetProperty("Lat") + "," + aircraft.GetProperty("Long") + "&key=AIzaSyCJxiyiDWBHiYSMm7sjSTJkQubuo3XuR7s&path=color:0x000000|";
-				}
-			//Process aircraft trail
-			for (var i = (aircraft.Trail.Length / 4) - 1; i >= 0; i--)
+			var aircraftLat = aircraft.GetProperty("Lat");
+			var aircraftLong = aircraft.GetProperty("Long");
+            
+			if (aircraftLat == null || aircraftLong == null)
+				return string.Empty;
+            
+			var showTrail = aircraft.Trail.Length > 4;
+			
+			var centreLat = _settingsManagerService.Settings.CentreMapOnAircraft
+				? aircraftLat
+				: _settingsManagerService.Settings.Lat.ToString("#.####");
+			
+			var centreLong = _settingsManagerService.Settings.CentreMapOnAircraft
+				? aircraftLong
+				: _settingsManagerService.Settings.Long.ToString("#.####");
+			
+			var bounds = showTrail || !_settingsManagerService.Settings.CentreMapOnAircraft
+				? "auto"
+				: $"{centreLong},{centreLat},8,0";
+
+			var overlays = new List<string>
 			{
-				//Get coordinate
-				var coordinate = new[] {
-						aircraft.Trail[i * 4]?.ToString("#.####") ?? "0",
-						aircraft.Trail[i * 4 + 1]?.ToString("#.####") ?? "0"
-					};
+				//pin-s marker
+				//#555555 fill colour
+				$"pin-s+555555({aircraftLong},{aircraftLat})"
+			};
 
-				var coordinateString = coordinate[0] + "," + coordinate[1] + "|";
-
-				//Check if adding another coordinate will make the url too long
-				if (staticMapUrl.Length + coordinateString.Length > 8000) break; //Limit is 8192, using 8000 to give some headroom. Allows for about 440 points
-
-				//Add coordinate to google map url
-				staticMapUrl += coordinateString;
+			if (!_settingsManagerService.Settings.CentreMapOnAircraft)
+			{
+				//pin-s marker
+				//#4275f5 fill colour
+				overlays.Add($"pin-s+4275f5({centreLong},{centreLat})");
 			}
+			
+			if (showTrail)
+			{
+				var trailPoints = new List<double[]>();
+				
+				//Process aircraft trail
+				for (var i = (aircraft.Trail.Length / 4) - 1; i >= 0; i--)
+				{
+					var lat = aircraft.Trail[i * 4] ?? 0;
+					var lon = aircraft.Trail[i * 4 + 1] ?? 0;
+					
+					trailPoints.Add(new[]{lat,lon});
 
-			//Return empty string if no positions
-			if (staticMapUrl == "" || staticMapUrl.Length == 0) return "";
+					//Limit the number of points so that we don't run out of URL, limit is 8100 bytes or about 1700 points
+					if (trailPoints.Count == 1000)
+						break;
+				}
+				
+				var encodedPolyline = WebUtility.UrlEncode(GooglePolylineEncodingHelper.Encode(trailPoints));
+				
+				overlays.Add($"path({encodedPolyline})");
+			}
+            
+			var staticMapUrl = $"https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/{string.Join(',', overlays)}/{bounds}/800x800?access_token={MapboxAccessToken}";
 
-			return staticMapUrl.Substring(0, staticMapUrl.Length - 1);
+			if (bounds == "auto")
+				staticMapUrl += "&padding=100";
+			
+			return staticMapUrl;
 		}
 
 		public string GenerateAirframesOrgUrl(string reg)

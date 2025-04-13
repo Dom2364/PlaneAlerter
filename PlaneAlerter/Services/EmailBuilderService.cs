@@ -125,8 +125,10 @@ namespace PlaneAlerter.Services
 				var googleMapsUrl =
 					$"https://www.google.com.au/maps/search/{aircraft.GetProperty("Lat")},{aircraft.GetProperty("Long")}";
 
+				var mapUrl = _urlBuilderService.GenerateMapboxStaticMapUrl(aircraft);
+				
 				body += "<h3 style='margin: 0px'><a style='text-decoration: none' href=" + googleMapsUrl + ">Open in Google Maps</a></h3><br />" +
-					"<img style='border: 2px solid #444;' alt='Loading Map...' src='" + _urlBuilderService.GenerateGoogleStaticMapUrl(aircraft).Replace("&", "&amp;") + "' />";
+					"<img style='border: 2px solid #444;' alt='Loading Map...' src='" + mapUrl + "' />";
 			}
 
 			body += "</td></tr></table></body></html>";

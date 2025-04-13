@@ -199,7 +199,7 @@ namespace PlaneAlerter.Services {
 						ignoreFollowing = condition.IgnoreFollowing;
 
 						//Get trails if they haven't been requested due to no matches, and they haven't been retrieved yet
-						if (aircraftListWithTrails == null && ActiveMatches.Count == 1 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0)
+						if (aircraftListWithTrails == null && ActiveMatches.Count == 0 && _settingsManagerService.Settings.TrailsUpdateFrequency != 0)
 						{
 							await _vrsService.UpdateAircraftList(false, true, false, true);
 							if (_settingsManagerService.Settings.FilterDistance &&
@@ -211,14 +211,13 @@ namespace PlaneAlerter.Services {
 						//If updated trails were retrieved, update this aircraft
 						if (aircraftListWithTrails != null)
 						{
-							foreach (var updatedAircraft in aircraftList
-										 .Where(updatedAircraft => updatedAircraft.Icao == aircraft.Icao)
-										 .ToList())
+							var updatedAircraft = aircraftListWithTrails.FirstOrDefault(updatedAircraft => updatedAircraft.Icao == aircraft.Icao);
+
+							if (updatedAircraft != null)
 							{
 								aircraft.Trail = updatedAircraft.Trail;
 								aircraft.SetProperty("Lat", updatedAircraft.GetProperty("Lat"));
-								aircraft.SetProperty("Long", updatedAircraft.GetProperty("Long"));
-								break;
+								aircraft.SetProperty("Long", updatedAircraft.GetProperty("Long"));	
 							}
 						}
 
@@ -438,7 +437,7 @@ namespace PlaneAlerter.Services {
 				}
 
 				//Get map URL if enabled
-				var mapUrl = condition.TweetMap ? _urlBuilderService.GenerateGoogleStaticMapUrl(aircraft) : "";
+				var mapUrl = condition.TweetMap ? _urlBuilderService.GenerateMapboxStaticMapUrl(aircraft) : "";
 
 				//Send tweet
 				var success = await _twitterService.Tweet(credentials[0], credentials[1], content, mapUrl);
