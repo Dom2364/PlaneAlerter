@@ -243,10 +243,9 @@ namespace PlaneAlerter.Services {
 						{
 							//Get receiver name
 							var receiverId = aircraft.GetProperty("Rcvr");
-							var receiverName = !string.IsNullOrEmpty(receiverId) && 
-							                   receivers.TryGetValue(receiverId, out var receiverNameNullable)
+							var receiverName = !string.IsNullOrEmpty(receiverId) && receivers.TryGetValue(receiverId, out var receiverNameNullable)
 								? receiverNameNullable
-								: "";
+								: "Unknown Receiver";
 
 							await SendAlert(condition, aircraft, receiverName, true);
 						}
@@ -283,8 +282,9 @@ namespace PlaneAlerter.Services {
 					{
 						//Get receiver name
 						var receiverId = match.AircraftInfo.GetProperty("Rcvr");
-
-						if (receiverId != null && receivers.TryGetValue(receiverId, out var receiverName))
+						var receiverName = !string.IsNullOrEmpty(receiverId) && receivers.TryGetValue(receiverId, out var receiverNameNullable)
+								? receiverNameNullable
+								: "Unknown Receiver";
 
 						//Send Alert
 						await SendAlert(match.Conditions[0].Condition, match.AircraftInfo, receiverName, false);
